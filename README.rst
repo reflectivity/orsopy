@@ -2,12 +2,11 @@
 orsopy
 ======
 
-
 .. image:: https://img.shields.io/pypi/v/orsopy.svg
         :target: https://pypi.python.org/pypi/orsopy
 
-.. image:: https://img.shields.io/travis/reflectivity/orsopy.svg
-        :target: https://travis-ci.com/reflectivity/orsopy
+.. image:: https://github.com/reflectivity/orsopy/actions/workflows/pytest.yml/badge.svg
+        :target: https://github.com/reflectivity/orsopy/actions/workflows/pytest.yml
 
 .. image:: https://readthedocs.org/projects/orsopy/badge/?version=latest
         :target: https://orsopy.readthedocs.io/en/latest/?version=latest
