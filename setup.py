@@ -38,7 +38,7 @@ setup(
     packages=find_packages(include=['orsopy', 'orsopy.*']),
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/arm61/orsopy',
+    url='https://github.com/reflectivity/orsopy',
     version='0.0.1',
     zip_safe=False,
 )
