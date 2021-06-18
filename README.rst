@@ -18,7 +18,7 @@ orsopy
 orsopy is a python implementation of ORSO functionality, such as file format phasing
 
 
-* Free software: MIT license
+* Free software: TDB
 * Documentation: https://orsopy.readthedocs.io.
 
 
