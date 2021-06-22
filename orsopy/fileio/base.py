@@ -25,7 +25,11 @@ def _repr(class_to_represent):
     Returns:
         (:py:attr:`str`): A string representation.
     """
-    return yaml.dump(class_to_represent, sort_keys=False)
+    cleaned_data = dict(
+        (k, v) for (k, v) in class_to_represent.__dict__.items(
+        ) if v is not None
+    )
+    return yaml.dump(cleaned_data, sort_keys=False)
 
 
 class Header:
@@ -50,7 +54,7 @@ class ValueScalar(Header):
             defaults to :code:`'dimensionless'`.
     """
 
-    def __init__(self, magnitude, unit='dimensionless'):
+    def __init__(self, magnitude, unit="dimensionless"):
         _check_unit(unit)
         self.magnitude = magnitude
         self.unit = unit
@@ -66,7 +70,8 @@ class ValueVector(ValueScalar):
         unit (:py:attr:`str`, optional): The unit. Optional,
             defaults to :code:`'dimensionless'`.
     """
-    def __init__(self, magnitude, direction, unit='dimensionless'):
+
+    def __init__(self, magnitude, direction, unit="dimensionless"):
         super().__init__(magnitude, unit=unit)
         self.direction = direction
 
@@ -81,7 +86,8 @@ class ValueRange(Header):
         unit (:py:attr:`str`, optional): The unit. Optional,
             defaults to :code:`'dimensionless'`.
     """
-    def __init__(self, min, max, unit='dimensionless'):
+
+    def __init__(self, min, max, unit="dimensionless"):
         _check_unit(unit)
         self.min = min
         self.max = max
@@ -95,6 +101,7 @@ class Comment(Header):
     Args:
         comment (:py:attr:`str`): The comment.
     """
+
     def __init__(self, comment):
         self.comment = comment
 
@@ -109,6 +116,7 @@ class Person(Header):
         email (:py:attr:`str`, optional): A contact email for the person.
             Defaults to :py:attr:`None`.
     """
+
     def __init__(self, name, affiliation, email=None):
         self.name = name
         self.affiliation = affiliation
@@ -127,7 +135,7 @@ class Column(Header):
             Optional, defaults to :code:`'None'`.
     """
 
-    def __init__(self, quantity, unit='dimensionless', description=None):
+    def __init__(self, quantity, unit="dimensionless", description=None):
         _check_unit(unit)
         self.quantity = quantity
         self.unit = unit

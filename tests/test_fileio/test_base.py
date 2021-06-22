@@ -70,7 +70,7 @@ class TestHeader(unittest.TestCase):
 
     def test_person_repr(self):
         c = fileio.Person('Joe A. User', 'Ivy League University')
-        assert_equal(c.__repr__(), 'name: Joe A. User\naffiliation: Ivy League University\nemail: null\n')
+        assert_equal(c.__repr__(), 'name: Joe A. User\naffiliation: Ivy League University\n')
     
     def test_person_email_repr(self):
         c = fileio.Person(
