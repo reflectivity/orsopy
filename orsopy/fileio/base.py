@@ -52,7 +52,19 @@ class MagnetizationVector(Header):
         pass
 
 
-class ValueScalar(Header):
+class Unit(Header):
+    """
+    A unit for a value.
+
+    Args:
+        unit (:py:attr:`str`): The unit.
+    """
+    def __init__(self, unit):
+        _check_unit(unit)
+        self.unit = unit
+
+
+class ValueScalar(Unit):
     """
     A single value with an unit.
 
@@ -63,9 +75,8 @@ class ValueScalar(Header):
     """
 
     def __init__(self, magnitude, unit="dimensionless"):
-        _check_unit(unit)
+        super().__init__(unit)
         self.magnitude = magnitude
-        self.unit = unit
 
 
 class ValueVector(ValueScalar):
@@ -84,7 +95,7 @@ class ValueVector(ValueScalar):
         self.direction = direction
 
 
-class ValueRange(Header):
+class ValueRange(Unit):
     """
     A range of value with a min, a max, and a unit.
 
@@ -96,10 +107,9 @@ class ValueRange(Header):
     """
 
     def __init__(self, min, max, unit="dimensionless"):
-        _check_unit(unit)
+        super().__init__(unit)
         self.min = min
         self.max = max
-        self.unit = unit
 
 
 class Comment(Header):

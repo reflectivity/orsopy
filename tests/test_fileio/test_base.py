@@ -22,7 +22,7 @@ class TestHeader(unittest.TestCase):
 
     def test_value_scalar_repr(self):
         c = fileio.ValueScalar(1., 'm')
-        assert_equal(c.__repr__(), 'magnitude: 1.0\nunit: m\n')
+        assert_equal(c.__repr__(), 'unit: m\nmagnitude: 1.0\n')
 
     def test_value_vector(self):
         c = fileio.ValueVector(1., (1, 2, 3), 'm')
@@ -33,7 +33,7 @@ class TestHeader(unittest.TestCase):
     def test_value_vector_repr(self):
         c = fileio.ValueVector(1., (1, 2, 3), 'm')
         assert_equal(
-            c.__repr__(), 'magnitude: 1.0\nunit: m\ndirection:\n- 1\n- 2\n- 3\n')
+            c.__repr__(), 'unit: m\nmagnitude: 1.0\ndirection:\n- 1\n- 2\n- 3\n')
 
     def test_value_range(self):
         c = fileio.ValueRange(1., 2., 'm')
@@ -47,7 +47,7 @@ class TestHeader(unittest.TestCase):
 
     def test_value_range_repr(self):
         c = fileio.ValueRange(1., 2., 'm')
-        assert_equal(c.__repr__(), 'min: 1.0\nmax: 2.0\nunit: m\n')
+        assert_equal(c.__repr__(), 'unit: m\nmin: 1.0\nmax: 2.0\n')
 
     def test_comment(self):
         c = fileio.Comment('Hello World')
