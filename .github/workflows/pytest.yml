@@ -25,7 +25,7 @@ jobs:
 
       - name: Lint
         run: |
-          flake8 --ignore=F401,E501,W504,W503,E203,E231 --count --show-source --statistics orsopy
+          flake8 --count --show-source --statistics orsopy
       - name: Test with pytest
         run: |
           pytest
