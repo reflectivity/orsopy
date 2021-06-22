@@ -25,15 +25,15 @@ class TestHeader(unittest.TestCase):
         assert_equal(c.__repr__(), 'magnitude: 1.0\nunit: m\n')
 
     def test_value_vector(self):
-        c = fileio.ValueVector(1., 'perpendicular to sample', 'm')
+        c = fileio.ValueVector(1., (1, 2, 3), 'm')
         assert_almost_equal(c.magnitude, 1)
-        assert_equal(c.direction, 'perpendicular to sample')
+        assert_equal(c.direction, (1, 2, 3))
         assert_equal(c.unit, 'm')
 
     def test_value_vector_repr(self):
-        c = fileio.ValueVector(1., 'perpendicular to sample', 'm')
+        c = fileio.ValueVector(1., (1, 2, 3), 'm')
         assert_equal(
-            c.__repr__(), 'magnitude: 1.0\nunit: m\ndirection: perpendicular to sample\n')
+            c.__repr__(), 'magnitude: 1.0\nunit: m\ndirection:\n- 1\n- 2\n- 3\n')
 
     def test_value_range(self):
         c = fileio.ValueRange(1., 2., 'm')

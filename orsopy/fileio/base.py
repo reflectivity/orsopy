@@ -44,6 +44,14 @@ class Header:
         return _repr(self)
 
 
+class MagnetisationVector(Header):
+    """
+    A descriptor for the magnetisation vector.
+    """
+    def __init__(self):
+        pass
+
+
 class ValueScalar(Header):
     """
     A single value with an unit.
@@ -66,7 +74,7 @@ class ValueVector(ValueScalar):
 
     Args:
         magnitude (:py:attr:`float`): The value.
-        direction (:py:attr:`str`): A description of the vector direction.
+        direction (:py:attr:`tuple`): A description of the vector direction.
         unit (:py:attr:`str`, optional): The unit. Optional,
             defaults to :code:`'dimensionless'`.
     """
