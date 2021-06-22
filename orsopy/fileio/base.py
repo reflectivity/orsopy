@@ -16,7 +16,8 @@ yaml.emitter.Emitter.process_tag = noop
 
 def _repr(class_to_represent):
     """
-    The representation object for all the Header sub-classes. This returns a string in a yaml format which will be ORSO compatible.
+    The representation object for all the Header sub-classes. This returns a
+    string in a yaml format which will be ORSO compatible.
 
     Args:
         class_to_represent (:py:class:`object`): The class to be represented.
@@ -45,7 +46,8 @@ class ValueScalar(Header):
 
     Args:
         magnitude (:py:attr:`float`): The value.
-        unit (:py:attr:`str`, optional): The unit. Optional, defaults to :code:`'dimensionless'`.
+        unit (:py:attr:`str`, optional): The unit. Optional,
+            defaults to :code:`'dimensionless'`.
     """
 
     def __init__(self, magnitude, unit='dimensionless'):
@@ -61,7 +63,8 @@ class ValueVector(ValueScalar):
     Args:
         magnitude (:py:attr:`float`): The value.
         direction (:py:attr:`str`): A description of the vector direction.
-        unit (:py:attr:`str`, optional): The unit. Optional, defaults to :code:`'dimensionless'`.
+        unit (:py:attr:`str`, optional): The unit. Optional,
+            defaults to :code:`'dimensionless'`.
     """
     def __init__(self, magnitude, direction, unit='dimensionless'):
         super().__init__(magnitude, unit=unit)
@@ -74,8 +77,9 @@ class ValueRange(Header):
 
     Args:
         min (:py:attr:`float`): The minimum value.
-        max (:py:attr:`float`): The maximum value. 
-        unit (:py:attr:`str`, optional): The unit. Optional, defaults to :code:`'dimensionless'`.
+        max (:py:attr:`float`): The maximum value.
+        unit (:py:attr:`str`, optional): The unit. Optional,
+            defaults to :code:`'dimensionless'`.
     """
     def __init__(self, min, max, unit='dimensionless'):
         _check_unit(unit)
@@ -86,10 +90,10 @@ class ValueRange(Header):
 
 class Comment(Header):
     """
-    A comment. 
+    A comment.
 
     Args:
-        comment (:py:attr:`str`): The comment. 
+        comment (:py:attr:`str`): The comment.
     """
     def __init__(self, comment):
         self.comment = comment
@@ -97,12 +101,13 @@ class Comment(Header):
 
 class Person(Header):
     """
-    Information about a person. 
+    Information about a person.
 
     Args:
         name (:py:attr:`str`): A name for the person
         affiliation (:py:attr:`str`): An affiliation for the person
-        email (:py:attr:`str`, optional): A contact email for the person. Defaults to :py:attr:`None`.
+        email (:py:attr:`str`, optional): A contact email for the person.
+            Defaults to :py:attr:`None`.
     """
     def __init__(self, name, affiliation, email=None):
         self.name = name
@@ -116,8 +121,10 @@ class Column(Header):
 
     Args:
         quantity (:py:attr:`str`): The name of the column.
-        unit (:py:attr:`str`, optional): The unit. Optional, defaults to :code:`'dimensionless'`.
-        description (:py:attr:`str`, optional): A description of the column. Optional, defaults to :code:`'None'`.
+        unit (:py:attr:`str`, optional): The unit. Optional, defaults
+            to :code:`'dimensionless'`.
+        description (:py:attr:`str`, optional): A description of the column.
+            Optional, defaults to :code:`'None'`.
     """
 
     def __init__(self, quantity, unit='dimensionless', description=None):
@@ -133,7 +140,7 @@ def _is_ascii(s):
 
     Args:
         s (:py:attr:`str`): Input to check
-    
+
     Returns:
         (:py:attr:`bool`): True if value is ASCII
     """
@@ -145,7 +152,7 @@ def _check_unit(unit):
     Check if the unit is valid, in future this could include recommendations.
 
     Args:
-        unit (:py:attr:`str`): Unit to be checked. 
+        unit (:py:attr:`str`): Unit to be checked.
     """
     if not _is_ascii(unit):
         raise ValueError("The unit must be in ASCII text.")
