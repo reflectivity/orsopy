@@ -44,9 +44,9 @@ class Header:
         return _repr(self)
 
 
-class MagnetisationVector(Header):
+class MagnetizationVector(Header):
     """
-    A descriptor for the magnetisation vector.
+    A descriptor for the magnetization vector.
     """
     def __init__(self):
         pass
