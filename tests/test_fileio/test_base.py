@@ -11,6 +11,14 @@ from orsopy import fileio
 
 
 class TestHeader(unittest.TestCase):
+    def test_unit(self):
+        c = fileio.Unit('angstrom')
+        assert_equal(c.unit, 'angstrom')
+
+    def test_unit_bad_unit(self):
+        with self.assertRaises(ValueError):
+            c = fileio.Unit('Å')
+
     def test_value_scalar(self):
         c = fileio.ValueScalar(1., 'm')
         assert_almost_equal(c.magnitude, 1)
