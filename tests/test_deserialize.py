@@ -21,6 +21,8 @@ def read_header(filename, parse_datetime=True):
 
 header = read_header('test_example.ort')
 
-from header_schema_deserialize import *
+from header_schema_deserialize import ORSOHeader
 
+header_obj = ORSOHeader.from_dict(header)
 
+header_obj
