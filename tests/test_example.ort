@@ -7,8 +7,8 @@
 # data_source:
 #     owner              : Jochen Stahn, PSI
 #     facility           : Paul Scherrer Institut, SINQ
-#     experiment ID      : 2019 0042
-#     experiment date    : 2020/02/02 - 2020/02/04
+#     experimentID      : 2019 0042
+#     experimentDate    : 2020/02/02 - 2020/02/04
 #     title              : Generation of input for file formatting purposes
 #     experiment:
 #         instrument     : neutron reflectometer Amor
