@@ -24,9 +24,9 @@ class TestHeader(unittest.TestCase):
         with self.assertRaises(ValueError):
             c = fileio.ValueScalar(1., 'Å')
 
-    def test_value_scalar_yaml(self):
+    def test_value_scalar_to_yaml(self):
         c = fileio.ValueScalar(1., 'm')
-        assert c.yaml() == 'magnitude: 1.0\nunit: m\n'
+        assert c.to_yaml() == 'magnitude: 1.0\nunit: m\n'
 
     def test_value_vector(self):
         c = fileio.ValueVector(1, 2, 3, 'm')
@@ -42,9 +42,9 @@ class TestHeader(unittest.TestCase):
         assert_equal(c.z, [3, 4])
         assert c.unit == 'm'
 
-    def test_value_vector_yaml(self):
+    def test_value_vector_to_yaml(self):
         c = fileio.ValueVector(1., 2., 3., 'm')
-        assert c.yaml() == 'x: 1.0\ny: 2.0\nz: 3.0\nunit: m\n'
+        assert c.to_yaml() == 'x: 1.0\ny: 2.0\nz: 3.0\nunit: m\n'
 
     def test_value_range(self):
         c = fileio.ValueRange(1., 2., 'm')
@@ -62,17 +62,17 @@ class TestHeader(unittest.TestCase):
         with self.assertRaises(ValueError):
             c = fileio.ValueRange(1., 2., 'Å')
 
-    def test_value_range_yaml(self):
+    def test_value_range_to_yaml(self):
         c = fileio.ValueRange(1., 2., 'm')
-        assert c.yaml() == 'min: 1.0\nmax: 2.0\nunit: m\n'
+        assert c.to_yaml() == 'min: 1.0\nmax: 2.0\nunit: m\n'
 
     def test_comment(self):
         c = fileio.Comment('Hello World')
         assert c.comment == 'Hello World'
 
-    def test_comment_yaml(self):
+    def test_comment_to_yaml(self):
         c = fileio.Comment('Hello World')
-        assert c.yaml() == 'comment: Hello World\n'
+        assert c.to_yaml() == 'comment: Hello World\n'
 
     def test_person(self):
         c = fileio.Person('Joe A. User', 'Ivy League University')
@@ -86,19 +86,19 @@ class TestHeader(unittest.TestCase):
         assert c.affiliation == 'Ivy League University'
         assert c.email == 'jauser@ivy.edu'
 
-    def test_person_yaml(self):
+    def test_person_to_yaml(self):
         c = fileio.Person('Joe A. User', 'Ivy League University')
-        assert c.yaml(
+        assert c.to_yaml(
         ) == 'name: Joe A. User\naffiliation: Ivy League University\n'
 
     def test_person_no_affiliation(self):
         c = fileio.Person('Joe A. User', None)
-        assert c.yaml() == 'name: Joe A. User\naffiliation: null\n'
+        assert c.to_yaml() == 'name: Joe A. User\naffiliation: null\n'
 
-    def test_person_email_yaml(self):
+    def test_person_email_to_yaml(self):
         c = fileio.Person('Joe A. User', 'Ivy League University',
                           'jauser@ivy.edu')
-        assert c.yaml(
+        assert c.to_yaml(
         ) == 'name: Joe A. User\naffiliation: Ivy League University\nemail: jauser@ivy.edu\n'
 
     def test_column(self):
@@ -113,5 +113,5 @@ class TestHeader(unittest.TestCase):
 
     def test_column_repr(self):
         c = fileio.Column('q', '1/angstrom', 'qz vector')
-        assert c.yaml(
+        assert c.to_yaml(
         ) == 'quantity: q\nunit: 1/angstrom\ndescription: qz vector\n'

@@ -60,7 +60,7 @@ class Header:
         return dict((k, v) for (k, v) in self.__dict__.items()
                     if (v is not None or k not in self._optionals()))
 
-    def yaml(self):
+    def to_yaml(self):
         """
         Return the yaml string for the Header item
 
