@@ -4,93 +4,108 @@ Tests for fileio.base module
 
 # author: Andrew R. McCluskey (arm61)
 
-from orsopy.fileio.base import ValueVector
 import unittest
 from numpy.testing import assert_almost_equal, assert_equal
 from orsopy import fileio
 
 
 class TestHeader(unittest.TestCase):
-    def test_unit(self):
-        c = fileio.Unit('angstrom')
-        assert_equal(c.unit, 'angstrom')
-
-    def test_unit_bad_unit(self):
-        with self.assertRaises(ValueError):
-            c = fileio.Unit('Å')
-
     def test_value_scalar(self):
         c = fileio.ValueScalar(1., 'm')
-        assert_almost_equal(c.magnitude, 1)
-        assert_equal(c.unit, 'm')
+        assert c.magnitude == 1.
+        assert c.unit == 'm'
+
+    def test_value_scale_list(self):
+        c = fileio.ValueScalar([1, 2, 3], 'm')
+        assert_equal(c.magnitude, [1, 2, 3])
+        assert c.unit == 'm'
 
     def test_value_scalar_bad_unit(self):
         with self.assertRaises(ValueError):
             c = fileio.ValueScalar(1., 'Å')
 
-    def test_value_scalar_repr(self):
+    def test_value_scalar_yaml(self):
         c = fileio.ValueScalar(1., 'm')
-        assert_equal(c.__repr__(), 'unit: m\nmagnitude: 1.0\n')
+        assert c.yaml() == 'magnitude: 1.0\nunit: m\n'
 
     def test_value_vector(self):
-        c = fileio.ValueVector(1., (1, 2, 3), 'm')
-        assert_almost_equal(c.magnitude, 1)
-        assert_equal(c.direction, (1, 2, 3))
-        assert_equal(c.unit, 'm')
+        c = fileio.ValueVector(1, 2, 3, 'm')
+        assert c.x == 1
+        assert c.y == 2
+        assert c.z == 3
+        assert c.unit == 'm'
 
-    def test_value_vector_repr(self):
-        c = fileio.ValueVector(1., (1, 2, 3), 'm')
-        assert_equal(
-            c.__repr__(), 'unit: m\nmagnitude: 1.0\ndirection:\n- 1\n- 2\n- 3\n')
+    def test_value_vector_list(self):
+        c = fileio.ValueVector([1, 2], [2, 3], [3, 4], 'm')
+        assert_equal(c.x, [1, 2])
+        assert_equal(c.y, [2, 3])
+        assert_equal(c.z, [3, 4])
+        assert c.unit == 'm'
+
+    def test_value_vector_yaml(self):
+        c = fileio.ValueVector(1., 2., 3., 'm')
+        assert c.yaml() == 'x: 1.0\ny: 2.0\nz: 3.0\nunit: m\n'
 
     def test_value_range(self):
         c = fileio.ValueRange(1., 2., 'm')
-        assert_almost_equal(c.min, 1)
-        assert_almost_equal(c.max, 2)
-        assert_equal(c.unit, 'm')
+        assert c.min == 1
+        assert c.max == 2
+        assert c.unit == 'm'
+
+    def test_value_range_list(self):
+        c = fileio.ValueRange([1, 2, 3], [2, 3, 4], 'm')
+        assert_equal(c.min, [1, 2, 3])
+        assert_equal(c.max, [2, 3, 4])
+        assert c.unit == 'm'
 
     def test_value_range_bad_unit(self):
         with self.assertRaises(ValueError):
             c = fileio.ValueRange(1., 2., 'Å')
 
-    def test_value_range_repr(self):
+    def test_value_range_yaml(self):
         c = fileio.ValueRange(1., 2., 'm')
-        assert_equal(c.__repr__(), 'unit: m\nmin: 1.0\nmax: 2.0\n')
+        assert c.yaml() == 'min: 1.0\nmax: 2.0\nunit: m\n'
 
     def test_comment(self):
         c = fileio.Comment('Hello World')
-        assert_equal(c.comment, 'Hello World')
+        assert c.comment == 'Hello World'
 
-    def test_comment_repr(self):
+    def test_comment_yaml(self):
         c = fileio.Comment('Hello World')
-        assert_equal(c.__repr__(), 'comment: Hello World\n')
+        assert c.yaml() == 'comment: Hello World\n'
 
     def test_person(self):
         c = fileio.Person('Joe A. User', 'Ivy League University')
-        assert_equal(c.name, 'Joe A. User')
-        assert_equal(c.affiliation, 'Ivy League University')
+        assert c.name == 'Joe A. User'
+        assert c.affiliation == 'Ivy League University'
 
     def test_person_email(self):
-        c = fileio.Person('Joe A. User', 'Ivy League University', 'jauser@ivy.edu')
-        assert_equal(c.name, 'Joe A. User')
-        assert_equal(c.affiliation, 'Ivy League University')
-        assert_equal(c.email, 'jauser@ivy.edu')
+        c = fileio.Person('Joe A. User', 'Ivy League University',
+                          'jauser@ivy.edu')
+        assert c.name == 'Joe A. User'
+        assert c.affiliation == 'Ivy League University'
+        assert c.email == 'jauser@ivy.edu'
 
-    def test_person_repr(self):
+    def test_person_yaml(self):
         c = fileio.Person('Joe A. User', 'Ivy League University')
-        assert_equal(c.__repr__(), 'name: Joe A. User\naffiliation: Ivy League University\n')
-    
-    def test_person_email_repr(self):
-        c = fileio.Person(
-            'Joe A. User', 'Ivy League University', 'jauser@ivy.edu')
-        assert_equal(
-            c.__repr__(), 'name: Joe A. User\naffiliation: Ivy League University\nemail: jauser@ivy.edu\n')
+        assert c.yaml(
+        ) == 'name: Joe A. User\naffiliation: Ivy League University\n'
+
+    def test_person_no_affiliation(self):
+        c = fileio.Person('Joe A. User', None)
+        assert c.yaml() == 'name: Joe A. User\naffiliation: null\n'
+
+    def test_person_email_yaml(self):
+        c = fileio.Person('Joe A. User', 'Ivy League University',
+                          'jauser@ivy.edu')
+        assert c.yaml(
+        ) == 'name: Joe A. User\naffiliation: Ivy League University\nemail: jauser@ivy.edu\n'
 
     def test_column(self):
         c = fileio.Column('q', '1/angstrom', 'qz vector')
-        assert_equal(c.description, 'qz vector')
-        assert_equal(c.quantity, 'q')
-        assert_equal(c.unit, '1/angstrom')
+        assert c.description == 'qz vector'
+        assert c.quantity == 'q'
+        assert c.unit == '1/angstrom'
 
     def test_column_bad_unit(self):
         with self.assertRaises(ValueError):
@@ -98,14 +113,5 @@ class TestHeader(unittest.TestCase):
 
     def test_column_repr(self):
         c = fileio.Column('q', '1/angstrom', 'qz vector')
-        assert_equal(c.__repr__(), 'quantity: q\nunit: 1/angstrom\ndescription: qz vector\n')
-
-    def test__is_ascii(self):
-        assert_equal(fileio.base._is_ascii('Some text'), True)
-
-    def test__is_ascii_false(self):
-        assert_equal(fileio.base._is_ascii('Å'), False)
-    
-    def test__check_unit(self):
-        with self.assertRaises(ValueError):
-            fileio.base._check_unit('Å')
+        assert c.yaml(
+        ) == 'quantity: q\nunit: 1/angstrom\ndescription: qz vector\n'
