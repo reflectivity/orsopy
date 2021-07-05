@@ -88,7 +88,7 @@ class Header:
 class ValueScalar(Header):
     """A value or list of values with an optional unit."""
     magnitude: Union[float, List[float]]
-    unit: Optional[str] = field(default='dimensionless',
+    unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
 
 
@@ -98,7 +98,7 @@ class ValueRange(Header):
     """A range or list of ranges with mins, maxs, and an optional unit."""
     min: Union[float, List[float]]
     max: Union[float, List[float]]
-    unit: Optional[str] = field(default='dimensionless',
+    unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
 
 
@@ -121,7 +121,7 @@ class ValueVector(Header):
     x: Union[float, List[float]]
     y: Union[float, List[float]]
     z: Union[float, List[float]]
-    unit: Optional[str] = field(default='dimensionless',
+    unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
 
 
@@ -147,8 +147,8 @@ class Person(Header):
 class Column(Header):
     """Information about a data column"""
     quantity: str
-    unit: Optional[str] = field(default='dimensionless',
+    unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
     description: Optional[str] = field(
-        default='dimensionless',
+        default=None,
         metadata={'description': 'A description of the column'})
