@@ -1,21 +1,10 @@
-orsopy.fileio package
-=====================
+orsopy.fileio
+=============
 
-Submodules
-----------
-
-orsopy.fileio.base module
--------------------------
+orsopy.fileio.base
+------------------
 
 .. automodule:: orsopy.fileio.base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: orsopy.fileio
    :members:
    :undoc-members:
    :show-inheritance:
