@@ -4,6 +4,7 @@ Implementation of the base classes for the ORSO header.
 
 # author: Andrew R. McCluskey (arm61)
 
+import orsopy
 from typing import Optional, Union, List, get_args, get_origin
 from dataclasses import field, dataclass
 from dataclasses_json import dataclass_json
@@ -38,17 +39,6 @@ class Header:
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
 
-    def _optionals(self):
-        """
-        Find the optional attributes of the Header.
-
-        :return: str for names of optional attributes
-        :rtype: List
-        """
-        return [
-            i for (i, j) in self.__annotations__.items() if _is_optional(j)
-        ]
-
     def _clean(self):
         """
         Produces a clean dictionary of the Header object, removing
@@ -58,7 +48,7 @@ class Header:
         :rtype: dict
         """
         return dict((k, v) for (k, v) in self.__dict__.items()
-                    if (v is not None or k not in self._optionals()))
+                    if (v is not None or k not in self.orso_optionals))
 
     def to_yaml(self):
         """
@@ -90,6 +80,7 @@ class ValueScalar(Header):
     magnitude: Union[float, List[float]]
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
+    orso_optionals = ['unit']
 
 
 @dataclass_json
@@ -100,6 +91,7 @@ class ValueRange(Header):
     max: Union[float, List[float]]
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
+    orso_optionals = ['unit']
 
 
 @dataclass_json
@@ -123,6 +115,7 @@ class ValueVector(Header):
     z: Union[float, List[float]]
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
+    orso_optionals = ['unit']
 
 
 @dataclass_json
@@ -130,6 +123,7 @@ class ValueVector(Header):
 class Comment(Header):
     """A comment."""
     comment: str
+    orso_optionals = []
 
 
 @dataclass_json
@@ -140,6 +134,7 @@ class Person(Header):
     affiliation: Union[str, List[str]]
     email: Optional[str] = field(
         default=None, metadata={'description': 'Contact email address'})
+    orso_optionals = ['email']
 
 
 @dataclass_json
@@ -152,3 +147,4 @@ class Column(Header):
     description: Optional[str] = field(
         default=None,
         metadata={'description': 'A description of the column'})
+    orso_optionals = ['unit', 'description']
