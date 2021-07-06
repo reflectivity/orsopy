@@ -69,8 +69,9 @@ class Header:
         :type unit: str
         :raises: ValueError is the unit is not ASCII text
         """
-        if not unit.isascii():
-            raise ValueError("The unit must be in ASCII text.")
+        if unit is not None:
+            if not unit.isascii():
+                raise ValueError("The unit must be in ASCII text.")
 
 
 @dataclass_json

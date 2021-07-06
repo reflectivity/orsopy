@@ -28,6 +28,10 @@ class TestHeader(unittest.TestCase):
         c = fileio.ValueScalar(1., 'm')
         assert c.to_yaml() == 'magnitude: 1.0\nunit: m\n'
 
+    def test_value_scalar_no_magnitude_to_yaml(self):
+        c = fileio.ValueScalar(None)
+        assert c.to_yaml() == 'magnitude: null\n'
+
     def test_value_vector(self):
         c = fileio.ValueVector(1, 2, 3, 'm')
         assert c.x == 1
@@ -45,6 +49,10 @@ class TestHeader(unittest.TestCase):
     def test_value_vector_to_yaml(self):
         c = fileio.ValueVector(1., 2., 3., 'm')
         assert c.to_yaml() == 'x: 1.0\ny: 2.0\nz: 3.0\nunit: m\n'
+
+    def test_value_vector_two_dimensional_to_yaml(self):
+        c = fileio.ValueVector(1., 2., None, 'm')
+        assert c.to_yaml() == 'x: 1.0\ny: 2.0\nz: null\nunit: m\n'
 
     def test_value_range(self):
         c = fileio.ValueRange(1., 2., 'm')
@@ -65,6 +73,10 @@ class TestHeader(unittest.TestCase):
     def test_value_range_to_yaml(self):
         c = fileio.ValueRange(1., 2., 'm')
         assert c.to_yaml() == 'min: 1.0\nmax: 2.0\nunit: m\n'
+
+    def test_value_range_no_upper_to_yaml(self):
+       c = fileio.ValueRange(1., None)
+       assert c.to_yaml() == 'min: 1.0\nmax: null\n'
 
     def test_comment(self):
         c = fileio.Comment('Hello World')
