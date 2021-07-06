@@ -4,8 +4,7 @@ Implementation of the base classes for the ORSO header.
 
 # author: Andrew R. McCluskey (arm61)
 
-import orsopy
-from typing import Optional, Union, List, get_args, get_origin
+from typing import Optional, Union, List
 from dataclasses import field, dataclass
 from dataclasses_json import dataclass_json
 import yaml
@@ -16,19 +15,6 @@ def _noop(self, *args, **kw):
 
 
 yaml.emitter.Emitter.process_tag = _noop
-
-
-def _is_optional(typ):
-    """
-    Determine if a typ is typing.Optional
-
-    :param typ: the type of a given object
-    :type typ: type
-
-    :return: if the typ is typing.Optional
-    :rtype: bool
-    """
-    return get_origin(typ) is Union and type(None) in get_args(typ)
 
 
 class Header:
