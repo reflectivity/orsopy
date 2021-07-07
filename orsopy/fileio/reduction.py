@@ -7,11 +7,9 @@ The reduction elements for the ORSO header
 from typing import Optional, List
 from dataclasses import field, dataclass
 import datetime
-from dataclasses_json import dataclass_json
 from .base import Header, Person
 
 
-@dataclass_json
 @dataclass
 class Software(Header):
     """Description of the reduction software."""
@@ -21,7 +19,6 @@ class Software(Header):
     _orso_optionals = []
 
 
-@dataclass_json
 @dataclass
 class Reduction(Header):
     """A description of the reduction that has been performed."""

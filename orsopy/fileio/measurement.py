@@ -6,11 +6,9 @@ The measurement description for the ORSO header
 
 from typing import Optional, List, Union
 from dataclasses import field, dataclass
-from dataclasses_json import dataclass_json
 from .base import File, Header, ValueRange, ValueScalar, ValueVector
 
 
-@dataclass_json
 @dataclass
 class InstrumentSettings(Header):
     """Settings associated with the instrumentation."""
@@ -30,7 +28,6 @@ class InstrumentSettings(Header):
     _orso_optionals = ['configuration']
 
 
-@dataclass_json
 @dataclass
 class Measurement(Header):
     """The measurement elements for the header."""

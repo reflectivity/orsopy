@@ -9,7 +9,6 @@ from dataclasses import field, dataclass
 import datetime
 import pathlib
 import warnings
-from dataclasses_json import dataclass_json
 import yaml
 
 
@@ -81,7 +80,6 @@ class Header:
                 raise ValueError("The unit must be in ASCII text.")
 
 
-@dataclass_json
 @dataclass
 class ValueScalar(Header):
     """A value or list of values with an optional unit."""
@@ -91,7 +89,6 @@ class ValueScalar(Header):
     _orso_optionals = ['unit']
 
 
-@dataclass_json
 @dataclass
 class ValueRange(Header):
     """A range or list of ranges with mins, maxs, and an optional unit."""
@@ -102,7 +99,6 @@ class ValueRange(Header):
     _orso_optionals = ['unit']
 
 
-@dataclass_json
 @dataclass
 class ValueVector(Header):
     """A vector or list of vectors with an optional unit.
@@ -126,7 +122,6 @@ class ValueVector(Header):
     _orso_optionals = ['unit']
 
 
-@dataclass_json
 @dataclass
 class Comment(Header):
     """A comment."""
@@ -134,7 +129,6 @@ class Comment(Header):
     _orso_optionals = []
 
 
-@dataclass_json
 @dataclass
 class Person(Header):
     """Information about a person, including name, affilation(s), and email."""
@@ -145,7 +139,6 @@ class Person(Header):
     _orso_optionals = ['email']
 
 
-@dataclass_json
 @dataclass
 class Column(Header):
     """Information about a data column"""
@@ -157,7 +150,6 @@ class Column(Header):
     _orso_optionals = ['unit', 'description']
 
 
-@dataclass_json
 @dataclass
 class File(Header):
     """A file with a last modified timestamp."""
