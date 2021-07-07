@@ -26,11 +26,4 @@ Features
 
 * TODO
 
-Credits
--------
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
-
 .. _`reduced data file formats`: https://www.reflectometry.org/working_groups/file_formats/
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
