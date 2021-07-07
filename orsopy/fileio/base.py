@@ -47,7 +47,8 @@ class Header:
         d = {}
         for i in self.__dir__():
             v = getattr(self, i)
-            if (not i.startswith('_') and not callable(v)) and (v is not None or i not in self._orso_optionals):
+            if (not i.startswith('_') and not callable(v)) and (
+                    v is not None or i not in self._orso_optionals):
                 if hasattr(v, '_orso_optionals'):
                     d[i] = v._clean()
                 else:
@@ -159,7 +160,11 @@ class Column(Header):
 class File(Header):
     """A file with a last modified timestamp."""
     file: str
-    timestamp: Optional[datetime.datetime] = field(default=None, metadata={'description': 'Last modified timestamp if not given and available'})
+    timestamp: Optional[datetime.datetime] = field(
+        default=None,
+        metadata={
+            'description': 'Last modified timestamp if not given and available'
+        })
     _orso_optionals = []
 
     def __post_init__(self):
