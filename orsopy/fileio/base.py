@@ -6,7 +6,9 @@ Implementation of the base classes for the ORSO header.
 
 from typing import Optional, Union, List
 from dataclasses import field, dataclass
-import datetime, pathlib, warnings
+import datetime
+import pathlib
+import warnings
 from dataclasses_json import dataclass_json
 import yaml
 
