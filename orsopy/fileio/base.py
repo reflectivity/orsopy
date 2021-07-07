@@ -37,7 +37,7 @@ class Header:
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
 
-    def _clean(self):
+    def to_dict(self):
         """
         Produces a clean dictionary of the Header object, removing
         any optional attributes with the value `None`.
@@ -51,12 +51,12 @@ class Header:
             if (not i.startswith('_') and not callable(v)) and (
                     v is not None or i not in self._orso_optionals):
                 if hasattr(v, '_orso_optionals'):
-                    d[i] = v._clean()
+                    d[i] = v.to_dict()
                 elif isinstance(v, list):
                     dd = []
                     for j in v:
                         if hasattr(j, '_orso_optionals'):
-                            dd.append(j._clean())
+                            dd.append(j.to_dict())
                         else:
                             dd.append(j)
                     d[i] = dd
@@ -71,7 +71,7 @@ class Header:
         :return: Yaml string
         :rtype: str
         """
-        return yaml.dump(self._clean(), sort_keys=False)
+        return yaml.dump(self.to_dict(), sort_keys=False)
 
     @staticmethod
     def _check_unit(unit):
