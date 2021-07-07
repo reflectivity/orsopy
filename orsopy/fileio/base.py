@@ -6,6 +6,7 @@ Implementation of the base classes for the ORSO header.
 
 from typing import Optional, Union, List
 from dataclasses import field, dataclass
+import datetime
 from dataclasses_json import dataclass_json
 import yaml
 
@@ -15,6 +16,16 @@ def _noop(self, *args, **kw):
 
 
 yaml.emitter.Emitter.process_tag = _noop
+
+
+def __datetime_representer(dumper, data):
+    """
+    Ensures that datetime objects are represented correctly."""
+    value = data.isoformat('T')
+    return dumper.represent_scalar('tag:yaml.org,2002:timestamp', value)
+
+
+yaml.add_representer(datetime.datetime, __datetime_representer)
 
 
 class Header:
@@ -33,8 +44,14 @@ class Header:
         :return: Cleaned dictionary
         :rtype: dict
         """
-        return dict((k, v) for (k, v) in self.__dict__.items()
-                    if (v is not None or k not in self.orso_optionals))
+        d = {}
+        for k, v in self.__dict__.items():
+            if (v is not None or k not in self.orso_optionals):
+                if hasattr(v, 'orso_optionals'):
+                    d[k] = v._clean()
+                else:
+                    d[k] = v
+        return d
 
     def to_yaml(self):
         """
@@ -132,6 +149,5 @@ class Column(Header):
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
     description: Optional[str] = field(
-        default=None,
-        metadata={'description': 'A description of the column'})
+        default=None, metadata={'description': 'A description of the column'})
     orso_optionals = ['unit', 'description']

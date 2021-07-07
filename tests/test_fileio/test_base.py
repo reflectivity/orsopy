@@ -263,5 +263,4 @@ class TestColumn(unittest.TestCase):
         Transformation to yaml.
         """
         value = fileio.Column('q', '1/angstrom')
-        assert value.to_yaml(
-        ) == 'quantity: q\nunit: 1/angstrom\n'
+        assert value.to_yaml() == 'quantity: q\nunit: 1/angstrom\n'
