@@ -52,6 +52,14 @@ class Header:
                     v is not None or i not in self._orso_optionals):
                 if hasattr(v, '_orso_optionals'):
                     d[i] = v._clean()
+                elif isinstance(v, list):
+                    dd = []
+                    for j in v:
+                        if hasattr(j, '_orso_optionals'):
+                            dd.append(j._clean())
+                        else:
+                            dd.append(j)
+                    d[i] = dd
                 else:
                     d[i] = v
         return d
