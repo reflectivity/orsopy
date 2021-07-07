@@ -39,7 +39,8 @@ class Sample(Header):
         })
     _orso_optionals = [
         'type', 'composition', 'description', 'environment',
-        'sample_parameters']
+        'sample_parameters'
+    ]
 
 
 @dataclass

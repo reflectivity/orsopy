@@ -294,8 +294,8 @@ class TestFile(unittest.TestCase):
         """
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            value = fileio.File(
-                'not_a_file.txt', datetime(2021, 7, 12, 14, 4, 20))
+            value = fileio.File('not_a_file.txt',
+                                datetime(2021, 7, 12, 14, 4, 20))
             assert len(w) == 1
             assert issubclass(w[0].category, UserWarning)
             assert 'The file not_a_file.txt cannot be found.' == str(
@@ -308,13 +308,11 @@ class TestFile(unittest.TestCase):
         Creation for a file that does exist with a given modified date.
         """
         fname = pathlib.Path('README.rst')
-        value = fileio.File(
-            str(fname.absolute()),
-            datetime.fromtimestamp(fname.stat().st_mtime))
+        value = fileio.File(str(fname.absolute()),
+                            datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.file == str(
             pathlib.Path().resolve().joinpath('README.rst'))
-        assert value.timestamp == datetime.fromtimestamp(
-            fname.stat().st_mtime)
+        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file(self):
         """
@@ -338,8 +336,7 @@ class TestFile(unittest.TestCase):
         value = fileio.File(str(fname.absolute()), None)
         assert value.file == str(
             pathlib.Path().resolve().joinpath("AUTHORS.rst"))
-        assert value.timestamp == datetime.fromtimestamp(
-            fname.stat().st_mtime)
+        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file_no_mod_time(self):
         """

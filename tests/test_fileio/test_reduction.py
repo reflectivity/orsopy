@@ -77,12 +77,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with call to yaml.
         """
-        value = fileio.Reduction(
-            fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
-            datetime.datetime(2021, 7, 7, 9, 11, 20),
-            fileio.Person('A Person', 'University'),
-            ['footprint doi', 'background'],
-            call='sh myreducer.sh 1 0')
+        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
+                                                 'Ubuntu-20.04'),
+                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
+                                 fileio.Person('A Person', 'University'),
+                                 ['footprint doi', 'background'],
+                                 call='sh myreducer.sh 1 0')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
@@ -94,12 +94,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with script to yaml.
         """
-        value = fileio.Reduction(
-            fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
-            datetime.datetime(2021, 7, 7, 9, 11, 20),
-            fileio.Person('A Person', 'University'),
-            ['footprint doi', 'background'],
-            script='/home/user/user1/scripts/reducer.py')
+        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
+                                                 'Ubuntu-20.04'),
+                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
+                                 fileio.Person('A Person', 'University'),
+                                 ['footprint doi', 'background'],
+                                 script='/home/user/user1/scripts/reducer.py')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
@@ -111,12 +111,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with computer to yaml.
         """
-        value = fileio.Reduction(
-            fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
-            datetime.datetime(2021, 7, 7, 9, 11, 20),
-            fileio.Person('A Person', 'University'),
-            ['footprint doi', 'background'],
-            computer='cluster.esss.dk')
+        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
+                                                 'Ubuntu-20.04'),
+                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
+                                 fileio.Person('A Person', 'University'),
+                                 ['footprint doi', 'background'],
+                                 computer='cluster.esss.dk')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
@@ -128,12 +128,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with computer to yaml.
         """
-        value = fileio.Reduction(
-            fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
-            datetime.datetime(2021, 7, 7, 9, 11, 20),
-            fileio.Person('A Person', 'University'),
-            ['footprint doi', 'background'],
-            binary='/home/users/user1/bin/file')
+        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
+                                                 'Ubuntu-20.04'),
+                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
+                                 fileio.Person('A Person', 'University'),
+                                 ['footprint doi', 'background'],
+                                 binary='/home/users/user1/bin/file')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\

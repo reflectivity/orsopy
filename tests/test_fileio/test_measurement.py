@@ -46,12 +46,11 @@ class TestInstrumentSettings(unittest.TestCase):
         """
         Creation with optional items.
         """
-        value = fileio.InstrumentSettings(
-            fileio.ValueScalar(4., 'deg'),
-            fileio.ValueRange(2., 12., 'angstrom'),
-            polarization='p',
-            configuration='liquid surface'
-        )
+        value = fileio.InstrumentSettings(fileio.ValueScalar(4., 'deg'),
+                                          fileio.ValueRange(
+                                              2., 12., 'angstrom'),
+                                          polarization='p',
+                                          configuration='liquid surface')
         assert value.incident_angle.magnitude == 4.
         assert value.incident_angle.unit == 'deg'
         assert value.wavelength.min == 2.
@@ -64,12 +63,11 @@ class TestInstrumentSettings(unittest.TestCase):
         """
         Transformation to yaml with optional items.
         """
-        value = fileio.InstrumentSettings(
-            fileio.ValueScalar(4., 'deg'),
-            fileio.ValueRange(2., 12., 'angstrom'),
-            polarization='p',
-            configuration='liquid surface'
-        )
+        value = fileio.InstrumentSettings(fileio.ValueScalar(4., 'deg'),
+                                          fileio.ValueRange(
+                                              2., 12., 'angstrom'),
+                                          polarization='p',
+                                          configuration='liquid surface')
         assert value.to_yaml() == 'incident_angle:\n  magnitude: '\
             + '4.0\n  unit: deg\nwavelength:\n  min: 2.0\n  '\
             + 'max: 12.0\n  unit: angstrom\npolarization: p\n'\
@@ -88,10 +86,10 @@ class TestMeasurement(unittest.TestCase):
             fileio.InstrumentSettings(
                 fileio.ValueScalar(4., 'deg'),
                 fileio.ValueRange(2., 12., 'angstrom'),
-            ),
-            [fileio.File(str(
-                pathlib.Path().resolve().joinpath("README.rst")), None)]
-        )
+            ), [
+                fileio.File(
+                    str(pathlib.Path().resolve().joinpath("README.rst")), None)
+            ])
         assert value.instrument_settings.incident_angle.magnitude == 4.0
         assert value.instrument_settings.incident_angle.unit == 'deg'
         assert value.instrument_settings.wavelength.min == 2.0
@@ -110,10 +108,10 @@ class TestMeasurement(unittest.TestCase):
             fileio.InstrumentSettings(
                 fileio.ValueScalar(4., 'deg'),
                 fileio.ValueRange(2., 12., 'angstrom'),
-            ),
-            [fileio.File(str(
-                pathlib.Path().resolve().joinpath("README.rst")), None)]
-        )
+            ), [
+                fileio.File(
+                    str(pathlib.Path().resolve().joinpath("README.rst")), None)
+            ])
         fname = pathlib.Path('README.rst')
         assert value.to_yaml() == 'instrument_settings:\n  incident_angle:'\
             + '\n    magnitude: 4.0\n    unit: deg\n  wavelength:\n    min: '\
@@ -130,12 +128,14 @@ class TestMeasurement(unittest.TestCase):
             fileio.InstrumentSettings(
                 fileio.ValueScalar(4., 'deg'),
                 fileio.ValueRange(2., 12., 'angstrom'),
-            ),
-            [fileio.File(str(
-                pathlib.Path().resolve().joinpath("README.rst")), None)],
-            [fileio.File(str(
-                pathlib.Path().resolve().joinpath("AUTHORS.rst")), None)]
-        )
+            ), [
+                fileio.File(
+                    str(pathlib.Path().resolve().joinpath("README.rst")), None)
+            ], [
+                fileio.File(
+                    str(pathlib.Path().resolve().joinpath("AUTHORS.rst")),
+                    None)
+            ])
         assert value.instrument_settings.incident_angle.magnitude == 4.0
         assert value.instrument_settings.incident_angle.unit == 'deg'
         assert value.instrument_settings.wavelength.min == 2.0
@@ -149,7 +149,7 @@ class TestMeasurement(unittest.TestCase):
             pathlib.Path().resolve().joinpath("AUTHORS.rst"))
         assert value.reference_data_files[
             0].timestamp == datetime.fromtimestamp(
-            pathlib.Path('AUTHORS.rst').stat().st_mtime)
+                pathlib.Path('AUTHORS.rst').stat().st_mtime)
 
     def test_to_yaml_optionals(self):
         """
@@ -159,13 +159,14 @@ class TestMeasurement(unittest.TestCase):
             fileio.InstrumentSettings(
                 fileio.ValueScalar(4., 'deg'),
                 fileio.ValueRange(2., 12., 'angstrom'),
-            ),
-            [fileio.File(str(
-                pathlib.Path().resolve().joinpath("README.rst")), None)],
-            [fileio.File(str(
-                pathlib.Path().resolve().joinpath("AUTHORS.rst")), None)],
-            'energy-dispersive'
-        )
+            ), [
+                fileio.File(
+                    str(pathlib.Path().resolve().joinpath("README.rst")), None)
+            ], [
+                fileio.File(
+                    str(pathlib.Path().resolve().joinpath("AUTHORS.rst")),
+                    None)
+            ], 'energy-dispersive')
         fname = pathlib.Path('README.rst')
         gname = pathlib.Path('AUTHORS.rst')
         assert value.to_yaml() == 'instrument_settings:\n  incident_angle:'\
