@@ -6,7 +6,9 @@ Tests for fileio.base module
 # pylint: disable=R0201
 
 from datetime import datetime
-import unittest, warnings, pathlib
+import unittest
+import warnings
+import pathlib
 from numpy.testing import assert_equal
 from orsopy import fileio
 
@@ -19,32 +21,31 @@ class TestValueScalar(unittest.TestCase):
         """
         Creation of an object with a magnitude and unit.
         """
+        value = fileio.ValueScalar(1., 'm')
+        assert value.magnitude == 1.
+        assert value.unit == 'm'
 
-    #     value = fileio.ValueScalar(1., 'm')
-    #     assert value.magnitude == 1.
-    #     assert value.unit == 'm'
+    def test_list(self):
+        """
+        Creation of an object with a a list of values and a unit.
+        """
+        value = fileio.ValueScalar([1, 2, 3], 'm')
+        assert_equal(value.magnitude, [1, 2, 3])
+        assert value.unit == 'm'
 
-    # def test_list(self):
-    #     """
-    #     Creation of an object with a a list of values and a unit.
-    #     """
-    #     value = fileio.ValueScalar([1, 2, 3], 'm')
-    #     assert_equal(value.magnitude, [1, 2, 3])
-    #     assert value.unit == 'm'
+    def test_bad_unit(self):
+        """
+        Rejection of non-ASCII units.
+        """
+        with self.assertRaises(ValueError):
+            _ = fileio.ValueScalar(1., 'Å')
 
-    # def test_bad_unit(self):
-    #     """
-    #     Rejection of non-ASCII units.
-    #     """
-    #     with self.assertRaises(ValueError):
-    #         _ = fileio.ValueScalar(1., 'Å')
-
-    # def test_to_yaml(self):
-    #     """
-    #     Transform to yaml.
-    #     """
-    #     value = fileio.ValueScalar(1., 'm')
-    #     assert value.to_yaml() == 'magnitude: 1.0\nunit: m\n'
+    def test_to_yaml(self):
+        """
+        Transform to yaml.
+        """
+        value = fileio.ValueScalar(1., 'm')
+        assert value.to_yaml() == 'magnitude: 1.0\nunit: m\n'
 
     def test_no_magnitude_to_yaml(self):
         """
@@ -293,53 +294,62 @@ class TestFile(unittest.TestCase):
         """
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            value = fileio.File('not_a_file.txt',
-                                datetime(2021, 7, 12, 14, 4, 20))
+            value = fileio.File(
+                'not_a_file.txt', datetime(2021, 7, 12, 14, 4, 20))
             assert len(w) == 1
             assert issubclass(w[0].category, UserWarning)
             assert 'The file not_a_file.txt cannot be found.' == str(
                 w[0].message)
-        assert value.to_yaml(
-        ) == 'file: not_a_file.txt\ntimestamp: 2021-07-12T14:04:20\n'
+        assert value.to_yaml() == 'file: not_a_file.txt\ntimestamp: '\
+            + '2021-07-12T14:04:20\n'
 
     def test_creation_for_existing_file(self):
         """
         Creation for a file that does exist with a given modified date.
         """
         fname = pathlib.Path('README.rst')
-        value = fileio.File(str(fname.absolute()),
-                            datetime.fromtimestamp(fname.stat().st_mtime))
+        value = fileio.File(
+            str(fname.absolute()),
+            datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.file == str(
             pathlib.Path().resolve().joinpath('README.rst'))
-        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
+        assert value.timestamp == datetime.fromtimestamp(
+            fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file(self):
         """
-        Transformation to yaml a file that does exist with a given modified date.
+        Transformation to yaml a file that does exist with a given modified
+        date.
         """
         fname = pathlib.Path('README.rst')
         value = fileio.File(str(fname.absolute()),
                             datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.to_yaml(
-        ) == f'file: {str(pathlib.Path().resolve().joinpath("README.rst"))}\ntimestamp: '\
+        ) == f'file: {str(pathlib.Path().resolve().joinpath("README.rst"))}\n'\
+            + 'timestamp: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'
 
     def test_creation_for_existing_file_no_mod_time(self):
         """
-            Transformation to yaml a file that does exist without a given modified date.
+            Transformation to yaml a file that does exist without a given
+            modified date.
             """
         fname = pathlib.Path('AUTHORS.rst')
         value = fileio.File(str(fname.absolute()), None)
         assert value.file == str(
             pathlib.Path().resolve().joinpath("AUTHORS.rst"))
-        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
+        assert value.timestamp == datetime.fromtimestamp(
+            fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file_no_mod_time(self):
         """
-            Transformation to yaml a file that does exist without a given modified date.
+            Transformation to yaml a file that does exist without a given
+            modified date.
             """
         fname = pathlib.Path('AUTHORS.rst')
         value = fileio.File(str(fname.absolute()), None)
         assert value.to_yaml(
-        ) == f'file: {str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))}\ntimestamp: '\
+        ) == 'file: '\
+            + f'{str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))}\n'\
+            + 'timestamp: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'
