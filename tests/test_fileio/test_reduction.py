@@ -1,5 +1,5 @@
 """
-Tests for fileio.base module
+Tests for fileio.reduction module
 """
 
 # author: Andrew R. McCluskey (arm61)
