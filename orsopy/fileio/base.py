@@ -45,24 +45,24 @@ class Header:
         :return: Cleaned dictionary
         :rtype: dict
         """
-        d = {}
+        out_dict = {}
         for i in self.__dir__():
-            v = getattr(self, i)
-            if (not i.startswith('_') and not callable(v)) and (
-                    v is not None or i not in self._orso_optionals):
-                if hasattr(v, '_orso_optionals'):
-                    d[i] = v.to_dict()
-                elif isinstance(v, list):
-                    dd = []
-                    for j in v:
+            value = getattr(self, i)
+            if (not i.startswith('_') and not callable(value)) and (
+                    value is not None or i not in self._orso_optionals):
+                if hasattr(value, '_orso_optionals'):
+                    out_dict[i] = value.to_dict()
+                elif isinstance(value, list):
+                    cleaned_list = []
+                    for j in value:
                         if hasattr(j, '_orso_optionals'):
-                            dd.append(j.to_dict())
+                            cleaned_list.append(j.to_dict())
                         else:
-                            dd.append(j)
-                    d[i] = dd
+                            cleaned_list.append(j)
+                    out_dict[i] = cleaned_list
                 else:
-                    d[i] = v
-        return d
+                    out_dict[i] = value
+        return out_dict
 
     def to_yaml(self):
         """
