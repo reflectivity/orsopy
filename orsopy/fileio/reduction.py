@@ -18,7 +18,7 @@ class Software(Header):
     name: str
     version: str
     platform: str
-    orso_optionals = []
+    _orso_optionals = []
 
 
 @dataclass_json
@@ -42,4 +42,4 @@ class Reduction(Header):
     binary: Optional[str] = field(
         default=None,
         metadata={'description': 'Path to full information file'})
-    orso_optionals = ['computer', 'call', 'script', 'binary']
+    _orso_optionals = ['computer', 'call', 'script', 'binary']
