@@ -7,7 +7,7 @@ Tests for fileio module
 import unittest
 import pathlib
 from datetime import datetime
-from orsopy.fileio.orso import Orso
+from orsopy.fileio.orso import Orso, make_empty
 from orsopy.fileio.data_source import DataSource, Experiment, Sample
 from orsopy.fileio.measurement import Measurement, InstrumentSettings
 from orsopy.fileio.reduction import Reduction, Software
@@ -145,3 +145,29 @@ class TestOrso(unittest.TestCase):
             + '    affiliation: European Spallation Source\n  corrections:\n'\
             + '  - footprint\n  - background\ncolumn_description:\n- '\
             + 'quantity: q\n  unit: 1/angstrom\n- quantity: R\ndata_set: 1\n'
+
+
+class TestFunctions(unittest.TestCase):
+    """
+    Tests for functionality in the Orso module.
+    """
+    def test_make_empty(self):
+        empty = make_empty()
+        assert issubclass(empty.__class__, Orso)
+        assert empty.data_source.owner is None
+        assert empty.data_source.experiment.title is None
+        assert empty.data_source.experiment.instrument is None
+        assert empty.data_source.experiment.timestamp is None
+        assert empty.data_source.experiment.probe is None
+        assert empty.data_source.sample.identifier is None
+        assert empty.measurement.instrument_settings.incident_angle is None
+        assert empty.measurement.instrument_settings.wavelength is None
+        assert empty.measurement.data_files is None
+        assert empty.reduction.software.name is None
+        assert empty.reduction.software.version is None
+        assert empty.reduction.software.platform is None
+        assert empty.reduction.timestamp is None
+        assert empty.reduction.creator is None
+        assert empty.reduction.corrections is None
+        assert empty.column_description is None
+        assert empty.data_set is None
