@@ -6,7 +6,7 @@ Implementation of the top level class for the ORSO header.
 
 from typing import List
 from dataclasses import dataclass
-from .base import Header, Column, Person
+from .base import Header, Column
 from .data_source import DataSource, Experiment, Sample
 from .measurement import InstrumentSettings, Measurement
 from .reduction import Reduction, Software
@@ -27,10 +27,10 @@ class Orso(Header):
 
 def make_empty():
     """
-    Create a complete Orso class object, with :code:`None` in all values 
-    which should be filled with objects from :code:`orsopy.fileio.base` 
+    Create a complete Orso class object, with :code:`None` in all values
+    which should be filled with objects from :code:`orsopy.fileio.base`
     or some Python base object (:code:`int`, :code:`list`, etc.).
-    
+
     :return: Uninformative object
     :rtype: orsopy.fileio.orso.Orso
     """
