@@ -60,6 +60,8 @@ class Header:
                         else:
                             cleaned_list.append(j)
                     out_dict[i] = cleaned_list
+                elif i == 'data_set' and value == 0:
+                    continue
                 else:
                     out_dict[i] = value
         return out_dict

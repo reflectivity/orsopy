@@ -6,7 +6,7 @@ Tests for fileio.reduction module
 
 import unittest
 import datetime
-from orsopy import fileio
+from orsopy.fileio import reduction, base
 
 
 class TestSoftware(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestSoftware(unittest.TestCase):
         """
         Creation of object with all arguments.
         """
-        value = fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04')
+        value = reduction.Software('Reducer', '1.2.3', 'Ubuntu-20.04')
         assert value.name == 'Reducer'
         assert value.version == '1.2.3'
         assert value.platform == 'Ubuntu-20.04'
@@ -26,7 +26,7 @@ class TestSoftware(unittest.TestCase):
         """
         Transform to yaml.
         """
-        value = fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04')
+        value = reduction.Software('Reducer', '1.2.3', 'Ubuntu-20.04')
         assert value.to_yaml(
         ) == 'name: Reducer\nversion: 1.2.3\nplatform: Ubuntu-20.04\n'
 
@@ -34,7 +34,7 @@ class TestSoftware(unittest.TestCase):
         """
         Transform to yaml with no name.
         """
-        value = fileio.Software(None, '1.0.0', 'WindowsXP')
+        value = reduction.Software(None, '1.0.0', 'WindowsXP')
         assert value.to_yaml(
         ) == 'name: null\nversion: 1.0.0\nplatform: WindowsXP\n'
 
@@ -47,25 +47,25 @@ class TestReduction(unittest.TestCase):
         """
         Creation of an reduction class with minimal options.
         """
-        value = fileio.Reduction(
-            fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
+        value = reduction.Reduction(
+            reduction.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
             datetime.datetime(2021, 7, 7, 9, 11, 20),
-            fileio.Person('A Person', 'University'),
+            base.Person('A Person', 'University'),
             ['footprint doi', 'background'])
-        assert value.software == fileio.Software('Reducer', '1.2.3',
-                                                 'Ubuntu-20.04')
+        assert value.software == reduction.Software('Reducer', '1.2.3',
+                                                    'Ubuntu-20.04')
         assert value.timestamp == datetime.datetime(2021, 7, 7, 9, 11, 20)
-        assert value.creator == fileio.Person('A Person', 'University')
+        assert value.creator == base.Person('A Person', 'University')
         assert value.corrections == ['footprint doi', 'background']
 
     def test_to_yaml(self):
         """
         Transform minimal options to yaml.
         """
-        value = fileio.Reduction(
-            fileio.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
+        value = reduction.Reduction(
+            reduction.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
             datetime.datetime(2021, 7, 7, 9, 11, 20),
-            fileio.Person('A Person', 'University'),
+            base.Person('A Person', 'University'),
             ['footprint doi', 'background'])
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
@@ -77,12 +77,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with call to yaml.
         """
-        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
-                                                 'Ubuntu-20.04'),
-                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
-                                 fileio.Person('A Person', 'University'),
-                                 ['footprint doi', 'background'],
-                                 call='sh myreducer.sh 1 0')
+        value = reduction.Reduction(reduction.Software('Reducer', '1.2.3',
+                                                       'Ubuntu-20.04'),
+                                    datetime.datetime(2021, 7, 7, 9, 11, 20),
+                                    base.Person('A Person', 'University'),
+                                    ['footprint doi', 'background'],
+                                    call='sh myreducer.sh 1 0')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
@@ -94,12 +94,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with script to yaml.
         """
-        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
-                                                 'Ubuntu-20.04'),
-                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
-                                 fileio.Person('A Person', 'University'),
-                                 ['footprint doi', 'background'],
-                                 script='/home/user/user1/scripts/reducer.py')
+        value = reduction.Reduction(
+            reduction.Software('Reducer', '1.2.3', 'Ubuntu-20.04'),
+            datetime.datetime(2021, 7, 7, 9, 11, 20),
+            base.Person('A Person',
+                        'University'), ['footprint doi', 'background'],
+            script='/home/user/user1/scripts/reducer.py')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
@@ -111,12 +111,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with computer to yaml.
         """
-        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
-                                                 'Ubuntu-20.04'),
-                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
-                                 fileio.Person('A Person', 'University'),
-                                 ['footprint doi', 'background'],
-                                 computer='cluster.esss.dk')
+        value = reduction.Reduction(reduction.Software('Reducer', '1.2.3',
+                                                       'Ubuntu-20.04'),
+                                    datetime.datetime(2021, 7, 7, 9, 11, 20),
+                                    base.Person('A Person', 'University'),
+                                    ['footprint doi', 'background'],
+                                    computer='cluster.esss.dk')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
@@ -128,12 +128,12 @@ class TestReduction(unittest.TestCase):
         """
         Tranform with computer to yaml.
         """
-        value = fileio.Reduction(fileio.Software('Reducer', '1.2.3',
-                                                 'Ubuntu-20.04'),
-                                 datetime.datetime(2021, 7, 7, 9, 11, 20),
-                                 fileio.Person('A Person', 'University'),
-                                 ['footprint doi', 'background'],
-                                 binary='/home/users/user1/bin/file')
+        value = reduction.Reduction(reduction.Software('Reducer', '1.2.3',
+                                                       'Ubuntu-20.04'),
+                                    datetime.datetime(2021, 7, 7, 9, 11, 20),
+                                    base.Person('A Person', 'University'),
+                                    ['footprint doi', 'background'],
+                                    binary='/home/users/user1/bin/file')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
             + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\

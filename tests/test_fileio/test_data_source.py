@@ -6,7 +6,7 @@ Tests for fileio.data_source module
 
 import unittest
 from datetime import datetime
-from orsopy import fileio
+from orsopy.fileio import data_source, base
 
 
 class TestExperiment(unittest.TestCase):
@@ -17,8 +17,10 @@ class TestExperiment(unittest.TestCase):
         """
         Creation with minimal set.
         """
-        value = fileio.Experiment('My First Experiment', 'A Lab Instrument',
-                                  datetime(1992, 7, 14, 10, 10, 10), 'X-ray')
+        value = data_source.Experiment('My First Experiment',
+                                       'A Lab Instrument',
+                                       datetime(1992, 7, 14, 10, 10,
+                                                10), 'X-ray')
         assert value.title == "My First Experiment"
         assert value.instrument == 'A Lab Instrument'
         assert value.timestamp == datetime(1992, 7, 14, 10, 10, 10)
@@ -31,8 +33,10 @@ class TestExperiment(unittest.TestCase):
         """
         Transformation to yaml with minimal set.
         """
-        value = fileio.Experiment('My First Experiment', 'A Lab Instrument',
-                                  datetime(1992, 7, 14, 10, 10, 10), 'X-ray')
+        value = data_source.Experiment('My First Experiment',
+                                       'A Lab Instrument',
+                                       datetime(1992, 7, 14, 10, 10,
+                                                10), 'X-ray')
         assert value.to_yaml() == 'title: My First Experiment\n'\
             + 'instrument: A Lab Instrument\ntimestamp: 1992-07-14T'\
             + '10:10:10\nprobe: X-ray\n'
@@ -41,13 +45,13 @@ class TestExperiment(unittest.TestCase):
         """
         Creation with optionals.
         """
-        value = fileio.Experiment('My First Neutron Experiment',
-                                  'TAS8',
-                                  datetime(1992, 7, 14, 10, 10, 10),
-                                  'neutron',
-                                  facility='Risoe',
-                                  proposalID='abc123',
-                                  doi='10.0000/abc1234')
+        value = data_source.Experiment('My First Neutron Experiment',
+                                       'TAS8',
+                                       datetime(1992, 7, 14, 10, 10, 10),
+                                       'neutron',
+                                       facility='Risoe',
+                                       proposalID='abc123',
+                                       doi='10.0000/abc1234')
         assert value.title == "My First Neutron Experiment"
         assert value.instrument == 'TAS8'
         assert value.timestamp == datetime(1992, 7, 14, 10, 10, 10)
@@ -60,13 +64,13 @@ class TestExperiment(unittest.TestCase):
         """
         Transformation to yaml with optionals.
         """
-        value = fileio.Experiment('My First Neutron Experiment',
-                                  'TAS8',
-                                  datetime(1992, 7, 14, 10, 10, 10),
-                                  'neutron',
-                                  facility='Risoe',
-                                  proposalID='abc123',
-                                  doi='10.0000/abc1234')
+        value = data_source.Experiment('My First Neutron Experiment',
+                                       'TAS8',
+                                       datetime(1992, 7, 14, 10, 10, 10),
+                                       'neutron',
+                                       facility='Risoe',
+                                       proposalID='abc123',
+                                       doi='10.0000/abc1234')
         assert value.to_yaml() == 'title: My First Neutron Experiment\n'\
             + 'instrument: TAS8\ntimestamp: 1992-07-14T'\
             + '10:10:10\nprobe: neutron\nfacility: Risoe\nproposalID: '\
@@ -81,7 +85,7 @@ class TestSample(unittest.TestCase):
         """
         Creation with a minimal set.
         """
-        value = fileio.Sample('A Perfect Sample')
+        value = data_source.Sample('A Perfect Sample')
         assert value.identifier == 'A Perfect Sample'
         assert value.type is None
         assert value.composition is None
@@ -92,14 +96,14 @@ class TestSample(unittest.TestCase):
         """
         Transformation to yaml with a minimal set.
         """
-        value = fileio.Sample('A Perfect Sample')
+        value = data_source.Sample('A Perfect Sample')
         assert value.to_yaml() == 'identifier: A Perfect Sample\n'
 
     def test_creation_optionals(self):
         """
         Creation with a optionals.
         """
-        value = fileio.Sample(
+        value = data_source.Sample(
             'A Perfect Sample',
             type='solid/gas',
             composition='Si | SiO2(20 A) | Fe(200 A) | air(beam side)',
@@ -116,7 +120,7 @@ class TestSample(unittest.TestCase):
         """
         Transformation to yaml with optionals.
         """
-        value = fileio.Sample(
+        value = data_source.Sample(
             'A Perfect Sample',
             type='solid/gas',
             composition='Si | SiO2(20 A) | Fe(200 A) | air(beam side)',
@@ -136,11 +140,11 @@ class TestDataSource(unittest.TestCase):
         """
         Creation with only default.
         """
-        value = fileio.DataSource(
-            fileio.Person('A Person', 'Some Uni'),
-            fileio.Experiment('My First Experiment', 'A Lab Instrument',
-                              datetime(1992, 7, 14, 10, 10, 10), 'X-ray'),
-            fileio.Sample('A Perfect Sample'))
+        value = data_source.DataSource(
+            base.Person('A Person', 'Some Uni'),
+            data_source.Experiment('My First Experiment', 'A Lab Instrument',
+                                   datetime(1992, 7, 14, 10, 10, 10), 'X-ray'),
+            data_source.Sample('A Perfect Sample'))
         assert value.owner.name == 'A Person'
         assert value.owner.affiliation == 'Some Uni'
         assert value.experiment.title == 'My First Experiment'
