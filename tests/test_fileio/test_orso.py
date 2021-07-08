@@ -152,6 +152,9 @@ class TestFunctions(unittest.TestCase):
     Tests for functionality in the Orso module.
     """
     def test_make_empty(self):
+        """
+        Creation of the empty Orso object.
+        """
         empty = make_empty()
         assert issubclass(empty.__class__, Orso)
         assert empty.data_source.owner is None
@@ -171,3 +174,19 @@ class TestFunctions(unittest.TestCase):
         assert empty.reduction.corrections is None
         assert empty.column_description is None
         assert empty.data_set is None
+
+    def test_empty_to_yaml(self):
+        """
+        Checking yaml string form empty Orso object.
+        """
+        empty = make_empty()
+        assert empty.to_yaml() == 'data_source:\n  owner: null\n  '\
+            + 'experiment:\n    title: null\n    instrument: null\n    '\
+            + 'timestamp: null\n    probe: null\n  sample:\n    '\
+            + 'identifier: null\nmeasurement:\n  '\
+            + 'instrument_settings:\n    incident_angle: null\n    '\
+            + 'wavelength: null\n    polarization: null\n  '\
+            + 'data_files: null\nreduction:\n  software:\n    '\
+            + 'name: null\n    version: null\n    platform: null\n  '\
+            + 'timestamp: null\n  creator: null\n  corrections: null\n'\
+            + 'column_description: null\ndata_set: null\n'
