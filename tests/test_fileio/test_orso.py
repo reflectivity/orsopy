@@ -107,9 +107,9 @@ class TestOrso(unittest.TestCase):
         assert value.column_description[0].quantity == 'q'
         assert value.data_set == 1
 
-    def test_to_yaml(self):
+    def test_to_yaml_data_set1(self):
         """
-        Transformation to yaml of Orso class.
+        Transformation to yaml of Orso class with a non-zero data_set.
         """
         value = Orso(
             DataSource(
