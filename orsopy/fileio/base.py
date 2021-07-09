@@ -6,7 +6,9 @@ Implementation of the base classes for the ORSO header.
 
 from typing import Optional, Union, List
 from dataclasses import field, dataclass
-from dataclasses_json import dataclass_json
+import datetime
+import pathlib
+import warnings
 import yaml
 
 
@@ -17,6 +19,16 @@ def _noop(self, *args, **kw):
 yaml.emitter.Emitter.process_tag = _noop
 
 
+def __datetime_representer(dumper, data):
+    """
+    Ensures that datetime objects are represented correctly."""
+    value = data.isoformat('T')
+    return dumper.represent_scalar('tag:yaml.org,2002:timestamp', value)
+
+
+yaml.add_representer(datetime.datetime, __datetime_representer)
+
+
 class Header:
     """
     The super class for all of the items in the orso module.
@@ -25,7 +37,7 @@ class Header:
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
 
-    def _clean(self):
+    def to_dict(self):
         """
         Produces a clean dictionary of the Header object, removing
         any optional attributes with the value `None`.
@@ -33,8 +45,26 @@ class Header:
         :return: Cleaned dictionary
         :rtype: dict
         """
-        return dict((k, v) for (k, v) in self.__dict__.items()
-                    if (v is not None or k not in self.orso_optionals))
+        out_dict = {}
+        for i in self.__dir__():
+            value = getattr(self, i)
+            if (not i.startswith('_') and not callable(value)) and (
+                    value is not None or i not in self._orso_optionals):
+                if hasattr(value, '_orso_optionals'):
+                    out_dict[i] = value.to_dict()
+                elif isinstance(value, list):
+                    cleaned_list = []
+                    for j in value:
+                        if hasattr(j, '_orso_optionals'):
+                            cleaned_list.append(j.to_dict())
+                        else:
+                            cleaned_list.append(j)
+                    out_dict[i] = cleaned_list
+                elif i == 'data_set' and value == 0:
+                    continue
+                else:
+                    out_dict[i] = value
+        return out_dict
 
     def to_yaml(self):
         """
@@ -43,7 +73,7 @@ class Header:
         :return: Yaml string
         :rtype: str
         """
-        return yaml.dump(self._clean(), sort_keys=False)
+        return yaml.dump(self.to_dict(), sort_keys=False)
 
     @staticmethod
     def _check_unit(unit):
@@ -60,17 +90,15 @@ class Header:
                 raise ValueError("The unit must be in ASCII text.")
 
 
-@dataclass_json
 @dataclass
 class ValueScalar(Header):
     """A value or list of values with an optional unit."""
     magnitude: Union[float, List[float]]
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
-    orso_optionals = ['unit']
+    _orso_optionals = ['unit']
 
 
-@dataclass_json
 @dataclass
 class ValueRange(Header):
     """A range or list of ranges with mins, maxs, and an optional unit."""
@@ -78,10 +106,9 @@ class ValueRange(Header):
     max: Union[float, List[float]]
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
-    orso_optionals = ['unit']
+    _orso_optionals = ['unit']
 
 
-@dataclass_json
 @dataclass
 class ValueVector(Header):
     """A vector or list of vectors with an optional unit.
@@ -102,18 +129,16 @@ class ValueVector(Header):
     z: Union[float, List[float]]
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
-    orso_optionals = ['unit']
+    _orso_optionals = ['unit']
 
 
-@dataclass_json
 @dataclass
 class Comment(Header):
     """A comment."""
     comment: str
-    orso_optionals = []
+    _orso_optionals = []
 
 
-@dataclass_json
 @dataclass
 class Person(Header):
     """Information about a person, including name, affilation(s), and email."""
@@ -121,10 +146,9 @@ class Person(Header):
     affiliation: Union[str, List[str]]
     email: Optional[str] = field(
         default=None, metadata={'description': 'Contact email address'})
-    orso_optionals = ['email']
+    _orso_optionals = ['email']
 
 
-@dataclass_json
 @dataclass
 class Column(Header):
     """Information about a data column"""
@@ -132,6 +156,26 @@ class Column(Header):
     unit: Optional[str] = field(default=None,
                                 metadata={'description': 'SI unit string'})
     description: Optional[str] = field(
+        default=None, metadata={'description': 'A description of the column'})
+    _orso_optionals = ['unit', 'description']
+
+
+@dataclass
+class File(Header):
+    """A file with a last modified timestamp."""
+    file: str
+    timestamp: Optional[datetime.datetime] = field(
         default=None,
-        metadata={'description': 'A description of the column'})
-    orso_optionals = ['unit', 'description']
+        metadata={
+            'description': 'Last modified timestamp if not given and available'
+        })
+    _orso_optionals = []
+
+    def __post_init__(self):
+        fname = pathlib.Path(self.file)
+        if not fname.exists():
+            warnings.warn(f"The file {self.file} cannot be found.")
+        else:
+            if self.timestamp is None:
+                self.timestamp = datetime.datetime.fromtimestamp(
+                    fname.stat().st_mtime)
