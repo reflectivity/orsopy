@@ -358,4 +358,3 @@ class TestFile(unittest.TestCase):
         header = file._read_header()
         assert len(header)
         yaml.safe_load(header)
-
