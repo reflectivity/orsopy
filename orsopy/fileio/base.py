@@ -188,7 +188,7 @@ class File(Header):
             for line in fi.readlines():
                 if not line.startswith("#"):
                     break
-                header.append(line)
+                header.append(line.lstrip("#"))
             return ''.join(header)
 
 
