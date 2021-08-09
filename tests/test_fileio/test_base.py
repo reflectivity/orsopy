@@ -350,3 +350,9 @@ class TestFile(unittest.TestCase):
             + f'{str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))}\n'\
             + 'timestamp: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'
+
+    def test_read_header(self):
+        fname = pathlib.Path('tests', 'test_example.ort')
+        file = base.File(fname)
+        header = file._read_header()
+        assert len(header)
