@@ -11,6 +11,7 @@ import warnings
 import pathlib
 from numpy.testing import assert_equal
 from orsopy.fileio import base
+import yaml
 
 
 class TestValueScalar(unittest.TestCase):
@@ -356,3 +357,5 @@ class TestFile(unittest.TestCase):
         file = base.File(fname)
         header = file._read_header()
         assert len(header)
+        yaml.safe_load(header)
+

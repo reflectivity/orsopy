@@ -183,12 +183,13 @@ class File(Header):
 
     def _read_header(self):
         # reads the header of the ORSO file.
+        # does not parse it
         with _possibly_open_file(self.file, 'r') as fi:
             header = []
             for line in fi.readlines():
                 if not line.startswith("#"):
                     break
-                header.append(line.lstrip("#"))
+                header.append(line[1:])
             return ''.join(header)
 
 
