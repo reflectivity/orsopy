@@ -23,7 +23,7 @@ class TestExperiment(unittest.TestCase):
                                                 10), 'X-ray')
         assert value.title == "My First Experiment"
         assert value.instrument == 'A Lab Instrument'
-        assert value.timestamp == datetime(1992, 7, 14, 10, 10, 10)
+        assert value.date == datetime(1992, 7, 14, 10, 10, 10)
         assert value.probe == 'X-ray'
         assert value.facility is None
         assert value.proposalID is None
@@ -38,7 +38,7 @@ class TestExperiment(unittest.TestCase):
                                        datetime(1992, 7, 14, 10, 10,
                                                 10), 'X-ray')
         assert value.to_yaml() == 'title: My First Experiment\n'\
-            + 'instrument: A Lab Instrument\ntimestamp: 1992-07-14T'\
+            + 'instrument: A Lab Instrument\ndate: 1992-07-14T'\
             + '10:10:10\nprobe: X-ray\n'
 
     def test_creation_optionals(self):
@@ -54,7 +54,7 @@ class TestExperiment(unittest.TestCase):
                                        doi='10.0000/abc1234')
         assert value.title == "My First Neutron Experiment"
         assert value.instrument == 'TAS8'
-        assert value.timestamp == datetime(1992, 7, 14, 10, 10, 10)
+        assert value.date == datetime(1992, 7, 14, 10, 10, 10)
         assert value.probe == 'neutron'
         assert value.facility == 'Risoe'
         assert value.proposalID == 'abc123'
@@ -72,7 +72,7 @@ class TestExperiment(unittest.TestCase):
                                        proposalID='abc123',
                                        doi='10.0000/abc1234')
         assert value.to_yaml() == 'title: My First Neutron Experiment\n'\
-            + 'instrument: TAS8\ntimestamp: 1992-07-14T'\
+            + 'instrument: TAS8\ndate: 1992-07-14T'\
             + '10:10:10\nprobe: neutron\nfacility: Risoe\nproposalID: '\
             + 'abc123\ndoi: 10.0000/abc1234\n'
 
@@ -149,6 +149,6 @@ class TestDataSource(unittest.TestCase):
         assert value.owner.affiliation == 'Some Uni'
         assert value.experiment.title == 'My First Experiment'
         assert value.experiment.instrument == 'A Lab Instrument'
-        assert value.experiment.timestamp == datetime(1992, 7, 14, 10, 10, 10)
+        assert value.experiment.date == datetime(1992, 7, 14, 10, 10, 10)
         assert value.experiment.probe == 'X-ray'
         assert value.sample.identifier == 'A Perfect Sample'

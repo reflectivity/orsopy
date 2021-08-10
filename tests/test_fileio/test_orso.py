@@ -66,7 +66,7 @@ class TestOrso(unittest.TestCase):
         fna = pathlib.Path('README.rst')
         assert value.to_yaml() == 'data_source:\n  owner:\n    name: '\
             + 'A Person\n    affiliation: Some Uni\n  experiment:\n    '\
-            + 'title: Experiment 1\n    instrument: ESTIA\n    timestamp: '\
+            + 'title: Experiment 1\n    instrument: ESTIA\n    date: '\
             + '2021-07-07T16:31:10\n    probe: neutron\n  sample:\n    '\
             + 'identifier: The sample\nmeasurement:\n  '\
             + 'instrument_settings:\n    incident_angle:\n      '\
@@ -130,7 +130,7 @@ class TestOrso(unittest.TestCase):
         fna = pathlib.Path('README.rst')
         assert value.to_yaml() == 'data_source:\n  owner:\n    name: '\
             + 'A Person\n    affiliation: Some Uni\n  experiment:\n    '\
-            + 'title: Experiment 1\n    instrument: ESTIA\n    timestamp: '\
+            + 'title: Experiment 1\n    instrument: ESTIA\n    date: '\
             + '2021-07-07T16:31:10\n    probe: neutron\n  sample:\n    '\
             + 'identifier: The sample\nmeasurement:\n  '\
             + 'instrument_settings:\n    incident_angle:\n      '\
@@ -160,7 +160,7 @@ class TestFunctions(unittest.TestCase):
         assert empty.data_source.owner is None
         assert empty.data_source.experiment.title is None
         assert empty.data_source.experiment.instrument is None
-        assert empty.data_source.experiment.timestamp is None
+        assert empty.data_source.experiment.date is None
         assert empty.data_source.experiment.probe is None
         assert empty.data_source.sample.identifier is None
         assert empty.measurement.instrument_settings.incident_angle is None
@@ -182,7 +182,7 @@ class TestFunctions(unittest.TestCase):
         empty = make_empty()
         assert empty.to_yaml() == 'data_source:\n  owner: null\n  '\
             + 'experiment:\n    title: null\n    instrument: null\n    '\
-            + 'timestamp: null\n    probe: null\n  sample:\n    '\
+            + 'date: null\n    probe: null\n  sample:\n    '\
             + 'identifier: null\nmeasurement:\n  '\
             + 'instrument_settings:\n    incident_angle: null\n    '\
             + 'wavelength: null\n    polarization: null\n  '\
