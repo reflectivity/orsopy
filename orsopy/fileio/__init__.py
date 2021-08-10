@@ -6,7 +6,7 @@ from .base import (Header, Column, Person, ValueRange, ValueVector, Value,
 from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
                           Measurement)
 from .reduction import Reduction, Software
-from .orso import Orso, make_empty
+from .orso import Orso
 
 # author: Andrew R. McCluskey (arm61)
 
