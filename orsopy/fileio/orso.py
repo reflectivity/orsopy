@@ -10,6 +10,7 @@ from .base import Header, Column
 from .data_source import DataSource, Experiment, Sample
 from .measurement import InstrumentSettings, Measurement
 from .reduction import Reduction, Software
+from .creator import Creator
 
 
 @dataclass
@@ -17,6 +18,7 @@ class Orso(Header):
     """
     The Orso object collects the necessary metadata.
     """
+    creator: Creator
     data_source: DataSource
     measurement: Measurement
     reduction: Reduction
@@ -34,8 +36,9 @@ def make_empty():
     :return: Uninformative object
     :rtype: orsopy.fileio.orso.Orso
     """
+    _creator = Creator(None, None, None, None)
     _data_source = DataSource(None, Experiment(None, None, None, None),
                               Sample(None))
     _measurement = Measurement(InstrumentSettings(None, None), None)
     _reduction = Reduction(Software(None, None, None), None, None, None)
-    return Orso(_data_source, _measurement, _reduction, None, None)
+    return Orso(_creator, _data_source, _measurement, _reduction, None, None)
