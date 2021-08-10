@@ -15,7 +15,7 @@ class Experiment(Header):
     """A definition of the experiment performed."""
     title: str
     instrument: str
-    timestamp: datetime.datetime
+    date: datetime.datetime
     probe: str
     facility: Optional[str] = field(default=None)
     proposalID: Optional[str] = field(default=None)
