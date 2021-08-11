@@ -15,5 +15,7 @@ class TestSchema:
 
         header = _read_header(os.path.join("tests", "test_example.ort"))
         d = yaml.safe_load(header)
+        # d contains datetime.datetime objects, which would fail the
+        # jsonschema validation, so force those to be strings.
         d = json.loads(json.dumps(d, default=str))
         jsonschema.validate(d, schema)
