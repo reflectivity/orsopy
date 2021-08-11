@@ -6,7 +6,6 @@ import orsopy
 from orsopy.fileio.base import _read_header
 
 
-
 class TestSchema:
     def test_example_ort(self):
         pth = os.path.dirname(orsopy.__file__)
