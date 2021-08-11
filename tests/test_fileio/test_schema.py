@@ -3,7 +3,7 @@ import os.path
 import jsonschema
 import yaml
 import orsopy
-from orsopy.fileio.base import _read_header
+from orsopy.fileio.base import _read_header, _validate_header
 
 
 class TestSchema:
@@ -19,3 +19,5 @@ class TestSchema:
         # jsonschema validation, so force those to be strings.
         d = json.loads(json.dumps(d, default=str))
         jsonschema.validate(d, schema)
+
+        _validate_header(header)
