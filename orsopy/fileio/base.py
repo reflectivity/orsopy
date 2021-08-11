@@ -225,7 +225,8 @@ def _validate_header(h: str):
         Header of file
     """
     # the magic string at the top of the file should look something like:
-    # # ORSO reflectivity data file | 0.1 standard | YAML encoding | https://www.reflectometry.org/
+    # "# # ORSO reflectivity data file | 0.1 standard | YAML encoding
+    # | https://www.reflectometry.org/"
 
     pattern = re.compile(
         r"^(# ORSO reflectivity data file \| ([0-9]+\.?[0-9]*|\.[0-9]+)"
