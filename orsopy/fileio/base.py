@@ -13,6 +13,7 @@ import warnings
 import json
 import yaml
 from contextlib import contextmanager
+import re
 from .. import orsopy
 
 
@@ -26,8 +27,8 @@ yaml.emitter.Emitter.process_tag = _noop
 def __datetime_representer(dumper, data):
     """
     Ensures that datetime objects are represented correctly."""
-    value = data.isoformat('T')
-    return dumper.represent_scalar('tag:yaml.org,2002:timestamp', value)
+    value = data.isoformat("T")
+    return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
 
 
 yaml.add_representer(datetime.datetime, __datetime_representer)
@@ -37,8 +38,9 @@ class Header:
     """
     The super class for all of the items in the orso module.
     """
+
     def __post_init__(self):
-        if hasattr(self, 'unit'):
+        if hasattr(self, "unit"):
             self._check_unit(self.unit)
 
     def to_dict(self):
@@ -52,19 +54,20 @@ class Header:
         out_dict = {}
         for i in self.__dir__():
             value = getattr(self, i)
-            if (not i.startswith('_') and not callable(value)) and (
-                    value is not None or i not in self._orso_optionals):
-                if hasattr(value, '_orso_optionals'):
+            if (not i.startswith("_") and not callable(value)) and (
+                value is not None or i not in self._orso_optionals
+            ):
+                if hasattr(value, "_orso_optionals"):
                     out_dict[i] = value.to_dict()
                 elif isinstance(value, list):
                     cleaned_list = []
                     for j in value:
-                        if hasattr(j, '_orso_optionals'):
+                        if hasattr(j, "_orso_optionals"):
                             cleaned_list.append(j.to_dict())
                         else:
                             cleaned_list.append(j)
                     out_dict[i] = cleaned_list
-                elif i == 'data_set' and value == 0:
+                elif i == "data_set" and value == 0:
                     continue
                 else:
                     out_dict[i] = value
@@ -97,20 +100,24 @@ class Header:
 @dataclass
 class ValueScalar(Header):
     """A value or list of values with an optional unit."""
+
     magnitude: Union[float, List[float]]
-    unit: Optional[str] = field(default=None,
-                                metadata={'description': 'SI unit string'})
-    _orso_optionals = ['unit']
+    unit: Optional[str] = field(
+        default=None, metadata={"description": "SI unit string"}
+    )
+    _orso_optionals = ["unit"]
 
 
 @dataclass
 class ValueRange(Header):
     """A range or list of ranges with mins, maxs, and an optional unit."""
+
     min: Union[float, List[float]]
     max: Union[float, List[float]]
-    unit: Optional[str] = field(default=None,
-                                metadata={'description': 'SI unit string'})
-    _orso_optionals = ['unit']
+    unit: Optional[str] = field(
+        default=None, metadata={"description": "SI unit string"}
+    )
+    _orso_optionals = ["unit"]
 
 
 @dataclass
@@ -128,17 +135,20 @@ class ValueVector(Header):
     * z is defined as normal to the sample surface, positive direction\
         in scattering direction
     """
+
     x: Union[float, List[float]]
     y: Union[float, List[float]]
     z: Union[float, List[float]]
-    unit: Optional[str] = field(default=None,
-                                metadata={'description': 'SI unit string'})
-    _orso_optionals = ['unit']
+    unit: Optional[str] = field(
+        default=None, metadata={"description": "SI unit string"}
+    )
+    _orso_optionals = ["unit"]
 
 
 @dataclass
 class Comment(Header):
     """A comment."""
+
     comment: str
     _orso_optionals = []
 
@@ -146,33 +156,40 @@ class Comment(Header):
 @dataclass
 class Person(Header):
     """Information about a person, including name, affilation(s), and email."""
+
     name: str
     affiliation: Union[str, List[str]]
     email: Optional[str] = field(
-        default=None, metadata={'description': 'Contact email address'})
-    _orso_optionals = ['email']
+        default=None, metadata={"description": "Contact email address"}
+    )
+    _orso_optionals = ["email"]
 
 
 @dataclass
 class Column(Header):
     """Information about a data column"""
+
     quantity: str
-    unit: Optional[str] = field(default=None,
-                                metadata={'description': 'SI unit string'})
+    unit: Optional[str] = field(
+        default=None, metadata={"description": "SI unit string"}
+    )
     description: Optional[str] = field(
-        default=None, metadata={'description': 'A description of the column'})
-    _orso_optionals = ['unit', 'description']
+        default=None, metadata={"description": "A description of the column"}
+    )
+    _orso_optionals = ["unit", "description"]
 
 
 @dataclass
 class File(Header):
     """A file with a last modified timestamp."""
+
     file: str
     timestamp: Optional[datetime.datetime] = field(
         default=None,
         metadata={
-            'description': 'Last modified timestamp if not given and available'
-        })
+            "description": "Last modified timestamp if not given and available"
+        },
+    )
     _orso_optionals = []
 
     def __post_init__(self):
@@ -182,19 +199,20 @@ class File(Header):
         else:
             if self.timestamp is None:
                 self.timestamp = datetime.datetime.fromtimestamp(
-                    fname.stat().st_mtime)
+                    fname.stat().st_mtime
+                )
 
 
 def _read_header(file):
     # reads the header of an ORSO file.
     # does not parse it
-    with _possibly_open_file(file, 'r') as fi:
+    with _possibly_open_file(file, "r") as fi:
         header = []
         for line in fi.readlines():
             if not line.startswith("#"):
                 break
             header.append(line[1:])
-        return ''.join(header)
+        return "".join(header)
 
 
 def _validate_header(h: str):
@@ -206,7 +224,23 @@ def _validate_header(h: str):
     h : str
         Header of file
     """
+    # the magic string at the top of the file should look something like:
+    # "# # ORSO reflectivity data file | 0.1 standard | YAML encoding
+    # | https://www.reflectometry.org/"
+
+    pattern = re.compile(
+        r"^(# ORSO reflectivity data file \| ([0-9]+\.?[0-9]*|\.[0-9]+)"
+        r" standard \| YAML encoding \| https://www\.reflectometry\.org/)$"
+    )
+
+    first_line = h.splitlines()[0]
+    if not pattern.match(first_line.lstrip(" ")):
+        raise ValueError(
+            "First line does not appear to match that of an ORSO file"
+        )
+
     import jsonschema
+
     pth = os.path.dirname(orsopy.__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
     with open(schema_pth, "r") as f:
