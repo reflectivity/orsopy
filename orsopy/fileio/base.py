@@ -4,13 +4,16 @@ Implementation of the base classes for the ORSO header.
 
 # author: Andrew R. McCluskey (arm61)
 
+import os.path
 from typing import Optional, Union, List
 from dataclasses import field, dataclass
 import datetime
 import pathlib
 import warnings
+import json
 import yaml
 from contextlib import contextmanager
+from .. import orsopy
 
 
 def _noop(self, *args, **kw):
@@ -192,6 +195,28 @@ def _read_header(file):
                 break
             header.append(line[1:])
         return ''.join(header)
+
+
+def _validate_header(h: str):
+    """
+    Checks whether a string is a valid ORSO header
+
+    Parameters
+    ----------
+    h : str
+        Header of file
+    """
+    import jsonschema
+    pth = os.path.dirname(orsopy.__file__)
+    schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
+    with open(schema_pth, "r") as f:
+        schema = json.load(f)
+
+    d = yaml.safe_load(h)
+    # d contains datetime.datetime objects, which would fail the
+    # jsonschema validation, so force those to be strings.
+    d = json.loads(json.dumps(d, default=str))
+    jsonschema.validate(d, schema)
 
 
 @contextmanager
