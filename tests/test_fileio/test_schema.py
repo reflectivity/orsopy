@@ -1,8 +1,10 @@
 import json
 import os.path
 import jsonschema
+import yaml
 import orsopy
 from orsopy.fileio.base import _read_header
+
 
 
 class TestSchema:
