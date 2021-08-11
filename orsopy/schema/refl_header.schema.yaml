@@ -1,0 +1,258 @@
+definitions:
+  Creator:
+    properties:
+      affiliation:
+        type: string
+      computer:
+        type: string
+      name:
+        type: string
+      time:
+        description: timestamp string, formatted as ISO 8601 datetime
+        format: date-time
+        type: string
+    required:
+    - name
+    - affiliation
+    - time
+    - computer
+    title: Creator
+    type: object
+  DataSource:
+    properties:
+      experiment:
+        $ref: '#/definitions/Experiment'
+      measurement:
+        $ref: '#/definitions/Measurement'
+      owner:
+        $ref: '#/definitions/owner'
+      sample:
+        $ref: '#/definitions/Sample'
+    required:
+    - owner
+    - experiment
+    - sample
+    - measurement
+    title: DataSource
+    type: object
+  Experiment:
+    properties:
+      ID:
+        type: string
+      date:
+        description: timestamp string, formatted as ISO 8601 datetime
+        format: date-time
+        type: string
+      facility:
+        type: string
+      instrument:
+        type: string
+      probe:
+        enum:
+        - neutrons
+        - x-rays
+        type: string
+      title:
+        type: string
+    required:
+    - instrument
+    - probe
+    title: Experiment
+    type: object
+  Measurement:
+    properties:
+      data_files:
+        items:
+          $ref: '#/definitions/data_file'
+        type: array
+      instrument_settings:
+        $ref: '#/definitions/instrument_settings'
+      scheme:
+        enum:
+        - angle- and energy-dispersive
+        - angle-dispersive
+        - energy-dispersive
+        type: string
+    required:
+    - scheme
+    - instrument_settings
+    - data_files
+    title: Measurement
+    type: object
+  Polarisation:
+    description: 'The first symbol indicates the magnetisation direction of the incident
+      beam.
+
+      An optional second symbol indicates the direction of the scattered beam, if
+      a spin analyser is present.'
+    enum:
+    - +
+    - '-'
+    - --
+    - -+
+    - +-
+    - ++
+    title: Polarisation
+    type: string
+  R_column:
+    properties:
+      name:
+        enum:
+        - R
+        type: string
+    required:
+    - name
+    title: R_column
+    type: object
+  Reduction:
+    properties:
+      call:
+        type: string
+      software:
+        type: string
+    required:
+    - software
+    - call
+    title: Reduction
+    type: object
+  Sample:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    title: Sample
+    type: object
+  Value:
+    properties:
+      magnitude:
+        anyOf:
+        - type: number
+        - items:
+            type: number
+          type: array
+      unit:
+        description: SI unit string
+        type: string
+    required:
+    - magnitude
+    - unit
+    title: Value
+    type: object
+  ValueRange:
+    properties:
+      max:
+        type: number
+      min:
+        type: number
+      steps:
+        type: integer
+      unit:
+        description: SI unit string
+        type: string
+    required:
+    - min
+    - max
+    - unit
+    title: ValueRange
+    type: object
+  column:
+    properties:
+      dimension:
+        type: string
+      name:
+        description: The name of the column
+        type: string
+      unit:
+        description: SI unit string
+        enum:
+        - 1/angstrom
+        - 1/nm
+        type: string
+    required:
+    - name
+    - dimension
+    title: column
+    type: object
+  data_file:
+    properties:
+      created:
+        format: date-time
+        type: string
+      file:
+        type: string
+    required:
+    - file
+    - created
+    title: data_file
+    type: object
+  instrument_settings:
+    properties:
+      incident_angle:
+        anyOf:
+        - $ref: '#/definitions/Value'
+        - $ref: '#/definitions/ValueRange'
+      polarisation:
+        $ref: '#/definitions/Polarisation'
+      wavelength:
+        anyOf:
+        - $ref: '#/definitions/Value'
+        - $ref: '#/definitions/ValueRange'
+    required:
+    - incident_angle
+    - wavelength
+    title: instrument_settings
+    type: object
+  owner:
+    properties:
+      affiliation:
+        type: string
+      contact:
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    - affiliation
+    - contact
+    title: owner
+    type: object
+  qz_column:
+    properties:
+      dimension:
+        type: string
+      name:
+        enum:
+        - Qz
+        type: string
+      unit:
+        description: SI unit string
+        enum:
+        - 1/angstrom
+        - 1/nm
+        type: string
+    required:
+    - name
+    - dimension
+    title: qz_column
+    type: object
+properties:
+  columns:
+    items:
+    - $ref: '#/definitions/qz_column'
+    - $ref: '#/definitions/R_column'
+    - $ref: '#/definitions/column'
+    - $ref: '#/definitions/column'
+    type: array
+  creator:
+    $ref: '#/definitions/Creator'
+  data_source:
+    $ref: '#/definitions/DataSource'
+  reduction:
+    $ref: '#/definitions/Reduction'
+required:
+- creator
+- data_source
+- columns
+title: ORSOHeader
+type: object

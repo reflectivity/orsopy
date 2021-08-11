@@ -5,8 +5,10 @@ Author: Brian Maranville (NIST)
 """
 import datetime
 import enum
-from typing import Optional, Union, List, Literal, Dict, Any
+from typing import Optional, Union, List, Literal, Dict, Any, Tuple, ClassVar
 from dataclasses import field
+
+from pydantic import Field
 
 GENERATE_SCHEMA = True
 
@@ -139,10 +141,20 @@ class column:
 
 
 @dataclass
+class qz_column(column):
+    name: Literal['Qz']
+
+
+@dataclass
+class R_column:
+    name: Literal['R']
+
+
+@dataclass
 class ORSOHeader:
     creator: Creator
     data_source: DataSource
-    columns: List[column]
+    columns: Tuple[qz_column, R_column, column, column]
     reduction: Optional[Reduction] = None
 
 
