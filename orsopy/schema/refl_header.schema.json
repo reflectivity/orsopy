@@ -9,19 +9,48 @@
       "$ref": "#/definitions/DataSource"
     },
     "columns": {
-      "type": "array",
-      "items": [
+      "anyOf": [
         {
-          "$ref": "#/definitions/qz_column"
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/qz_column"
+            },
+            {
+              "$ref": "#/definitions/R_column"
+            }
+          ]
         },
         {
-          "$ref": "#/definitions/R_column"
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/qz_column"
+            },
+            {
+              "$ref": "#/definitions/R_column"
+            },
+            {
+              "$ref": "#/definitions/sR_column"
+            }
+          ]
         },
         {
-          "$ref": "#/definitions/column"
-        },
-        {
-          "$ref": "#/definitions/column"
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/qz_column"
+            },
+            {
+              "$ref": "#/definitions/R_column"
+            },
+            {
+              "$ref": "#/definitions/sR_column"
+            },
+            {
+              "$ref": "#/definitions/sQz_column"
+            }
+          ]
         }
       ]
     },
@@ -329,18 +358,59 @@
             "R"
           ],
           "type": "string"
+        },
+        "dimension": {
+          "type": "string"
+        },
+        "unit": {
+          "description": "SI unit string",
+          "enum": [
+            "1/angstrom",
+            "1/nm"
+          ],
+          "type": "string"
         }
       },
       "required": [
-        "name"
+        "name",
+        "dimension"
       ]
     },
-    "column": {
-      "title": "column",
+    "sR_column": {
+      "title": "sR_column",
       "type": "object",
       "properties": {
         "name": {
-          "description": "The name of the column",
+          "enum": [
+            "sR"
+          ],
+          "type": "string"
+        },
+        "dimension": {
+          "type": "string"
+        },
+        "unit": {
+          "description": "SI unit string",
+          "enum": [
+            "1/angstrom",
+            "1/nm"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "dimension"
+      ]
+    },
+    "sQz_column": {
+      "title": "sQz_column",
+      "type": "object",
+      "properties": {
+        "name": {
+          "enum": [
+            "sQz"
+          ],
           "type": "string"
         },
         "dimension": {

@@ -96,12 +96,21 @@ definitions:
     type: string
   R_column:
     properties:
+      dimension:
+        type: string
       name:
         enum:
         - R
         type: string
+      unit:
+        description: SI unit string
+        enum:
+        - 1/angstrom
+        - 1/nm
+        type: string
     required:
     - name
+    - dimension
     title: R_column
     type: object
   Reduction:
@@ -155,24 +164,6 @@ definitions:
     - max
     - unit
     title: ValueRange
-    type: object
-  column:
-    properties:
-      dimension:
-        type: string
-      name:
-        description: The name of the column
-        type: string
-      unit:
-        description: SI unit string
-        enum:
-        - 1/angstrom
-        - 1/nm
-        type: string
-    required:
-    - name
-    - dimension
-    title: column
     type: object
   data_file:
     properties:
@@ -236,14 +227,62 @@ definitions:
     - dimension
     title: qz_column
     type: object
+  sQz_column:
+    properties:
+      dimension:
+        type: string
+      name:
+        enum:
+        - sQz
+        type: string
+      unit:
+        description: SI unit string
+        enum:
+        - 1/angstrom
+        - 1/nm
+        type: string
+    required:
+    - name
+    - dimension
+    title: sQz_column
+    type: object
+  sR_column:
+    properties:
+      dimension:
+        type: string
+      name:
+        enum:
+        - sR
+        type: string
+      unit:
+        description: SI unit string
+        enum:
+        - 1/angstrom
+        - 1/nm
+        type: string
+    required:
+    - name
+    - dimension
+    title: sR_column
+    type: object
 properties:
   columns:
-    items:
-    - $ref: '#/definitions/qz_column'
-    - $ref: '#/definitions/R_column'
-    - $ref: '#/definitions/column'
-    - $ref: '#/definitions/column'
-    type: array
+    anyOf:
+    - items:
+      - $ref: '#/definitions/qz_column'
+      - $ref: '#/definitions/R_column'
+      type: array
+    - items:
+      - $ref: '#/definitions/qz_column'
+      - $ref: '#/definitions/R_column'
+      - $ref: '#/definitions/sR_column'
+      type: array
+    - items:
+      - $ref: '#/definitions/qz_column'
+      - $ref: '#/definitions/R_column'
+      - $ref: '#/definitions/sR_column'
+      - $ref: '#/definitions/sQz_column'
+      type: array
   creator:
     $ref: '#/definitions/Creator'
   data_source:

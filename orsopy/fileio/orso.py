@@ -6,6 +6,7 @@ Implementation of the top level class for the ORSO header.
 
 from typing import List
 from dataclasses import dataclass
+import json
 from .base import Header, Column
 from .data_source import DataSource, Experiment, Sample
 from .measurement import InstrumentSettings, Measurement
