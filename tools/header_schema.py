@@ -146,15 +146,29 @@ class qz_column(column):
 
 
 @dataclass
-class R_column:
+class R_column(column):
     name: Literal['R']
+
+
+@dataclass
+class sR_column(column):
+    name: Literal['sR']
+
+
+@dataclass
+class sQz_column(column):
+    name: Literal['sQz']
 
 
 @dataclass
 class ORSOHeader:
     creator: Creator
     data_source: DataSource
-    columns: Tuple[qz_column, R_column, column, column]
+    columns: Union[
+        Tuple[qz_column, R_column],
+        Tuple[qz_column, R_column, sR_column],
+        Tuple[qz_column, R_column, sR_column, sQz_column]
+    ]
     reduction: Optional[Reduction] = None
 
 
