@@ -121,7 +121,7 @@ class TestFunctions(unittest.TestCase):
         """
         empty = make_empty()
         assert issubclass(empty.__class__, Orso)
-        ds = empty.ds
+        ds = empty.data_source
         assert ds.owner.name is None
         assert ds.experiment.title is None
         assert ds.experiment.instrument is None
