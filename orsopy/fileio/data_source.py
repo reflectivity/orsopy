@@ -16,6 +16,7 @@ except ImportError:
 
 from .base import File, Header, ValueRange, Value, ValueVector, Person
 
+
 @dataclass
 class Experiment(Header):
     """A definition of the experiment performed."""
