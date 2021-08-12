@@ -54,7 +54,7 @@ class TestReduction(unittest.TestCase):
             ['footprint doi', 'background'])
         assert value.software == reduction.Software('Reducer', '1.2.3',
                                                     'Ubuntu-20.04')
-        assert value.timestamp == datetime.datetime(2021, 7, 7, 9, 11, 20)
+        assert value.time == datetime.datetime(2021, 7, 7, 9, 11, 20)
         assert value.creator == base.Person('A Person', 'University')
         assert value.corrections == ['footprint doi', 'background']
 
@@ -69,7 +69,7 @@ class TestReduction(unittest.TestCase):
             ['footprint doi', 'background'])
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
-            + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
+            + 'platform: Ubuntu-20.04\ntime: 2021-07-07T09:11:20\n'\
             + 'creator:\n  name: A Person\n  affiliation: University\n'\
             + 'corrections:\n- footprint doi\n- background\n'
 
@@ -85,7 +85,7 @@ class TestReduction(unittest.TestCase):
                                     call='sh myreducer.sh 1 0')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
-            + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
+            + 'platform: Ubuntu-20.04\ntime: 2021-07-07T09:11:20\n'\
             + 'creator:\n  name: A Person\n  affiliation: University\n'\
             + 'corrections:\n- footprint doi\n- background\ncall: '\
             + 'sh myreducer.sh 1 0\n'
@@ -102,7 +102,7 @@ class TestReduction(unittest.TestCase):
             script='/home/user/user1/scripts/reducer.py')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
-            + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
+            + 'platform: Ubuntu-20.04\ntime: 2021-07-07T09:11:20\n'\
             + 'creator:\n  name: A Person\n  affiliation: University\n'\
             + 'corrections:\n- footprint doi\n- background\nscript: '\
             + '/home/user/user1/scripts/reducer.py\n'
@@ -119,7 +119,7 @@ class TestReduction(unittest.TestCase):
                                     computer='cluster.esss.dk')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
-            + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
+            + 'platform: Ubuntu-20.04\ntime: 2021-07-07T09:11:20\n'\
             + 'creator:\n  name: A Person\n  affiliation: University\n'\
             + 'corrections:\n- footprint doi\n- background\ncomputer: '\
             + 'cluster.esss.dk\n'
@@ -136,7 +136,7 @@ class TestReduction(unittest.TestCase):
                                     binary='/home/users/user1/bin/file')
         assert value.to_yaml(
         ) == 'software:\n  name: Reducer\n  version: 1.2.3\n  '\
-            + 'platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n'\
+            + 'platform: Ubuntu-20.04\ntime: 2021-07-07T09:11:20\n'\
             + 'creator:\n  name: A Person\n  affiliation: University\n'\
             + 'corrections:\n- footprint doi\n- background\nbinary: '\
             + '/home/users/user1/bin/file\n'

@@ -13,15 +13,15 @@ from numpy.testing import assert_equal
 from orsopy.fileio import base
 
 
-class TestValueScalar(unittest.TestCase):
+class TestValue(unittest.TestCase):
     """
-    Testing the ValueScalar class.
+    Testing the Value class.
     """
     def test_single_value(self):
         """
         Creation of an object with a magnitude and unit.
         """
-        value = base.ValueScalar(1., 'm')
+        value = base.Value(1., 'm')
         assert value.magnitude == 1.
         assert value.unit == 'm'
 
@@ -29,7 +29,7 @@ class TestValueScalar(unittest.TestCase):
         """
         Creation of an object with a a list of values and a unit.
         """
-        value = base.ValueScalar([1, 2, 3], 'm')
+        value = base.Value([1, 2, 3], 'm')
         assert_equal(value.magnitude, [1, 2, 3])
         assert value.unit == 'm'
 
@@ -38,20 +38,20 @@ class TestValueScalar(unittest.TestCase):
         Rejection of non-ASCII units.
         """
         with self.assertRaises(ValueError):
-            _ = base.ValueScalar(1., 'Å')
+            _ = base.Value(1., 'Å')
 
     def test_to_yaml(self):
         """
         Transform to yaml.
         """
-        value = base.ValueScalar(1., 'm')
+        value = base.Value(1., 'm')
         assert value.to_yaml() == 'magnitude: 1.0\nunit: m\n'
 
     def test_no_magnitude_to_yaml(self):
         """
         Transform to yaml with a non-optional ORSO item.
         """
-        value = base.ValueScalar(None)
+        value = base.Value(None)
         assert value.to_yaml() == 'magnitude: null\n'
 
 
@@ -190,7 +190,7 @@ class TestPerson(unittest.TestCase):
         assert value.name == 'Joe A. User'
         assert value.affiliation == 'Ivy League University'
 
-    def test_creation_with_email(self):
+    def test_creation_with_contact(self):
         """
         Creation with an email.
         """
@@ -198,7 +198,7 @@ class TestPerson(unittest.TestCase):
                             'jauser@ivy.edu')
         assert value.name == 'Joe A. User'
         assert value.affiliation == 'Ivy League University'
-        assert value.email == 'jauser@ivy.edu'
+        assert value.contact == 'jauser@ivy.edu'
 
     def test_to_yaml(self):
         """
@@ -230,7 +230,7 @@ class TestPerson(unittest.TestCase):
                             'jauser@ivy.edu')
         assert value.to_yaml(
         ) == 'name: Joe A. User\naffiliation: Ivy League University'\
-            + '\nemail: jauser@ivy.edu\n'
+            + '\ncontact: jauser@ivy.edu\n'
 
 
 class TestColumn(unittest.TestCase):
@@ -242,8 +242,8 @@ class TestColumn(unittest.TestCase):
         Creation of a column.
         """
         value = base.Column('q', '1/angstrom', 'qz vector')
-        assert value.description == 'qz vector'
-        assert value.quantity == 'q'
+        assert value.dimension == 'qz vector'
+        assert value.name == 'q'
         assert value.unit == '1/angstrom'
 
     def test_bad_unit(self):
@@ -259,21 +259,21 @@ class TestColumn(unittest.TestCase):
         """
         value = base.Column('q', '1/angstrom', 'qz vector')
         assert value.to_yaml(
-        ) == 'quantity: q\nunit: 1/angstrom\ndescription: qz vector\n'
+        ) == 'name: q\nunit: 1/angstrom\ndimension: qz vector\n'
 
     def test_no_description_to_yaml(self):
         """
         Transformation to yaml.
         """
         value = base.Column('q', '1/angstrom')
-        assert value.to_yaml() == 'quantity: q\nunit: 1/angstrom\n'
+        assert value.to_yaml() == 'name: q\nunit: 1/angstrom\n'
 
 
 class TestFile(unittest.TestCase):
     """
     Testing the File class.
     """
-    def test_creation_for_nonexistant_file(self):
+    def test_creation_for_nonexistent_file(self):
         """
         Creation of a file that does not exist.
         """
@@ -286,9 +286,9 @@ class TestFile(unittest.TestCase):
             assert 'The file not_a_file.txt cannot be found.' == str(
                 w[0].message)
         assert value.file == 'not_a_file.txt'
-        assert value.timestamp == datetime(2021, 7, 12, 14, 4, 20)
+        assert value.created == datetime(2021, 7, 12, 14, 4, 20)
 
-    def test_to_yaml_for_nonexistant_file(self):
+    def test_to_yaml_for_nonexistent_file(self):
         """
         Transformation to yaml of a file that does not exist.
         """
@@ -300,7 +300,7 @@ class TestFile(unittest.TestCase):
             assert issubclass(w[0].category, UserWarning)
             assert 'The file not_a_file.txt cannot be found.' == str(
                 w[0].message)
-        assert value.to_yaml() == 'file: not_a_file.txt\ntimestamp: '\
+        assert value.to_yaml() == 'file: not_a_file.txt\ncreated: '\
             + '2021-07-12T14:04:20\n'
 
     def test_creation_for_existing_file(self):
@@ -312,7 +312,7 @@ class TestFile(unittest.TestCase):
                           datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.file == str(
             pathlib.Path().resolve().joinpath('README.rst'))
-        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
+        assert value.created== datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file(self):
         """
@@ -324,7 +324,7 @@ class TestFile(unittest.TestCase):
                           datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.to_yaml(
         ) == f'file: {str(pathlib.Path().resolve().joinpath("README.rst"))}\n'\
-            + 'timestamp: '\
+            + 'created: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'
 
     def test_creation_for_existing_file_no_mod_time(self):
@@ -336,7 +336,7 @@ class TestFile(unittest.TestCase):
         value = base.File(str(fname.absolute()), None)
         assert value.file == str(
             pathlib.Path().resolve().joinpath("AUTHORS.rst"))
-        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
+        assert value.created == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file_no_mod_time(self):
         """
@@ -348,5 +348,5 @@ class TestFile(unittest.TestCase):
         assert value.to_yaml(
         ) == 'file: '\
             + f'{str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))}\n'\
-            + 'timestamp: '\
+            + 'created: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'

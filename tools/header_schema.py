@@ -32,20 +32,23 @@ else:
 
 
 @dataclass
-class Creator:
+class Person:
+    """Information about a person, including name, affilation(s), and email."""
+
     name: str
-    affiliation: str
-    time: datetime.datetime = d(
-        "timestamp string, formatted as ISO 8601 datetime"
+    affiliation: Union[str, List[str]]
+    contact: Optional[str] = field(
+        default=None, metadata={"description": "Contact (email) address"}
     )
-    computer: str
 
 
 @dataclass
-class owner:
-    name: str
-    affiliation: str
-    contact: str
+class Creator(Person):
+    time: datetime.datetime = field(
+        default=None,
+        metadata={"description": "timestamp string, formatted as ISO 8601 datetime"}
+    )
+    computer: str = ""
 
 
 @dataclass
@@ -68,10 +71,11 @@ class Experiment:
     title: Optional[str] = None
 
 
-class Polarisation(str, enum.Enum):
+class Polarization(str, enum.Enum):
     """The first symbol indicates the magnetisation direction of the incident beam.
     An optional second symbol indicates the direction of the scattered beam, if a spin analyser is present."""
 
+    unpolarized = "unpolarized"
     p = "+"
     m = "-"
     mm = "--"
@@ -104,7 +108,7 @@ class ValueRange:
 class instrument_settings:
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarisation: Optional[Polarisation] = None
+    polarization: Optional[Union[Polarization]] = Polarization.unpolarized
 
 
 @dataclass
@@ -117,18 +121,26 @@ class Measurement:
         ]
     ]
     instrument_settings: instrument_settings
-    data_files: List[data_file]
+    data_files: List[Union[data_file, str]]
+
+
+@dataclass
+class Software:
+    """Description of the reduction software."""
+    name: str
+    version: Optional[str] = None
+    platform: Optional[str] = None
 
 
 @dataclass
 class Reduction:
-    software: str
-    call: str
+    software: Union[Software, str]
+    call: Optional[str] = ""
 
 
 @dataclass
 class DataSource:
-    owner: owner
+    owner: Person
     experiment: Experiment
     sample: Sample
     measurement: Measurement
@@ -141,7 +153,7 @@ class column:
     """
 
     name: str = d("The name of the column")
-    dimension: str
+    dimension: Optional[str] = ""
     unit: Optional[Literal["1/angstrom", "1/nm"]] = field(
         default=None, metadata={"description": "SI unit string"}
     )
@@ -179,6 +191,7 @@ class ORSOHeader:
         Tuple[qz_column, R_column, sR_column, sQz_column],
     ]
     reduction: Optional[Reduction] = None
+    data_set: Union[str, int] = None
 
 
 if GENERATE_SCHEMA:

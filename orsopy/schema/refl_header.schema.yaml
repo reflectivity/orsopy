@@ -2,8 +2,16 @@ definitions:
   Creator:
     properties:
       affiliation:
-        type: string
+        anyOf:
+        - type: string
+        - items:
+            type: string
+          type: array
       computer:
+        default: ''
+        type: string
+      contact:
+        description: Contact (email) address
         type: string
       name:
         type: string
@@ -14,8 +22,6 @@ definitions:
     required:
     - name
     - affiliation
-    - time
-    - computer
     title: Creator
     type: object
   DataSource:
@@ -25,7 +31,7 @@ definitions:
       measurement:
         $ref: '#/definitions/Measurement'
       owner:
-        $ref: '#/definitions/owner'
+        $ref: '#/definitions/Person'
       sample:
         $ref: '#/definitions/Sample'
     required:
@@ -63,7 +69,9 @@ definitions:
     properties:
       data_files:
         items:
-          $ref: '#/definitions/data_file'
+          anyOf:
+          - $ref: '#/definitions/data_file'
+          - type: string
         type: array
       instrument_settings:
         $ref: '#/definitions/instrument_settings'
@@ -79,24 +87,44 @@ definitions:
     - data_files
     title: Measurement
     type: object
-  Polarisation:
+  Person:
+    properties:
+      affiliation:
+        anyOf:
+        - type: string
+        - items:
+            type: string
+          type: array
+      contact:
+        description: Contact (email) address
+        type: string
+      name:
+        type: string
+    required:
+    - name
+    - affiliation
+    title: Person
+    type: object
+  Polarization:
     description: 'The first symbol indicates the magnetisation direction of the incident
       beam.
 
       An optional second symbol indicates the direction of the scattered beam, if
       a spin analyser is present.'
     enum:
+    - unpolarized
     - +
     - '-'
     - --
     - -+
     - +-
     - ++
-    title: Polarisation
+    title: Polarization
     type: string
   R_column:
     properties:
       dimension:
+        default: ''
         type: string
       name:
         enum:
@@ -110,18 +138,19 @@ definitions:
         type: string
     required:
     - name
-    - dimension
     title: R_column
     type: object
   Reduction:
     properties:
       call:
+        default: ''
         type: string
       software:
-        type: string
+        anyOf:
+        - $ref: '#/definitions/Software'
+        - type: string
     required:
     - software
-    - call
     title: Reduction
     type: object
   Sample:
@@ -131,6 +160,18 @@ definitions:
     required:
     - name
     title: Sample
+    type: object
+  Software:
+    properties:
+      name:
+        type: string
+      platform:
+        type: string
+      version:
+        type: string
+    required:
+    - name
+    title: Software
     type: object
   Value:
     properties:
@@ -183,8 +224,11 @@ definitions:
         anyOf:
         - $ref: '#/definitions/Value'
         - $ref: '#/definitions/ValueRange'
-      polarisation:
-        $ref: '#/definitions/Polarisation'
+      polarization:
+        allOf:
+        - $ref: '#/definitions/Polarization'
+        default: !!python/object/apply:__main__.Polarization
+        - unpolarized
       wavelength:
         anyOf:
         - $ref: '#/definitions/Value'
@@ -194,23 +238,10 @@ definitions:
     - wavelength
     title: instrument_settings
     type: object
-  owner:
-    properties:
-      affiliation:
-        type: string
-      contact:
-        type: string
-      name:
-        type: string
-    required:
-    - name
-    - affiliation
-    - contact
-    title: owner
-    type: object
   qz_column:
     properties:
       dimension:
+        default: ''
         type: string
       name:
         enum:
@@ -224,12 +255,12 @@ definitions:
         type: string
     required:
     - name
-    - dimension
     title: qz_column
     type: object
   sQz_column:
     properties:
       dimension:
+        default: ''
         type: string
       name:
         enum:
@@ -243,12 +274,12 @@ definitions:
         type: string
     required:
     - name
-    - dimension
     title: sQz_column
     type: object
   sR_column:
     properties:
       dimension:
+        default: ''
         type: string
       name:
         enum:
@@ -262,7 +293,6 @@ definitions:
         type: string
     required:
     - name
-    - dimension
     title: sR_column
     type: object
 properties:
@@ -285,6 +315,10 @@ properties:
       type: array
   creator:
     $ref: '#/definitions/Creator'
+  data_set:
+    anyOf:
+    - type: string
+    - type: integer
   data_source:
     $ref: '#/definitions/DataSource'
   reduction:
