@@ -6,7 +6,17 @@
       "$ref": "#/definitions/Creator"
     },
     "data_source": {
-      "$ref": "#/definitions/DataSource"
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DataSource"
+          }
+        },
+        {
+          "$ref": "#/definitions/DataSource"
+        }
+      ]
     },
     "columns": {
       "anyOf": [

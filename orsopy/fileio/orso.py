@@ -19,10 +19,10 @@ class Orso(Header):
     The Orso object collects the necessary metadata.
     """
     creator: Creator
-    data_source: DataSource
+    data_source: Union[DataSource, List[DataSource]]
     reduction: Reduction
     columns: List[Column]
-    data_set: Union[str, int]
+    data_set: Union[str, List[str]]
     _orso_optionals = []
 
 
