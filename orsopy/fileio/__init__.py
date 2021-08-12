@@ -1,16 +1,15 @@
 """
 Implementation of the Orso class that defined the header.
 """
+from .base import Header, Column, Person, ValueRange, ValueVector, Value, File
+from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
+                          Measurement)
+from .reduction import Reduction, Software
+from .orso import Orso, make_empty
 
 # author: Andrew R. McCluskey (arm61)
 
 OSRO_VERSION = 0.1
-
-
-from .base import Header, Column, Person, ValueRange, ValueVector, Value, File
-from .data_source import DataSource, Experiment, Sample, InstrumentSettings, Measurement
-from .reduction import Reduction, Software
-from .orso import Orso, make_empty
 
 
 __all__ = [s for s in dir() if not s.startswith("_")]

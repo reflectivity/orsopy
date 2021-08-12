@@ -312,7 +312,7 @@ class TestFile(unittest.TestCase):
                           datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.file == str(
             pathlib.Path().resolve().joinpath('README.rst'))
-        assert value.created== datetime.fromtimestamp(fname.stat().st_mtime)
+        assert value.created == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file(self):
         """

@@ -159,7 +159,9 @@ class Person(Header):
 
     name: str
     affiliation: Union[str, List[str]]
-    contact: Optional[str] = field(default=None, metadata={"description": "Contact (email) address"})
+    contact: Optional[str] = field(
+        default=None, metadata={"description": "Contact (email) address"}
+    )
     _orso_optionals = ["contact"]
 
 

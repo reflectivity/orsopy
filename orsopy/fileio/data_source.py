@@ -45,8 +45,11 @@ class Sample(Header):
 
 
 class Polarization(str, enum.Enum):
-    """The first symbol indicates the magnetisation direction of the incident beam.
-    An optional second symbol indicates the direction of the scattered beam, if a spin analyser is present."""
+    """
+    The first symbol indicates the magnetisation direction of the incident
+    beam. An optional second symbol indicates the direction of the scattered
+    beam, if a spin analyser is present.
+    """
 
     unpolarized = "unpolarized"
     p = "+"
