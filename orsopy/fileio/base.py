@@ -220,7 +220,7 @@ def _read_header(file):
         header = []
         for line in fi.readlines():
             if not line.startswith("#"):
-                break
+                continue
             header.append(line[1:])
         return "".join(header)
 

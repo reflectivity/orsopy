@@ -167,7 +167,7 @@ class TestDataSource(unittest.TestCase):
         assert value.experiment.date == datetime(1992, 7, 14, 10, 10, 10)
         assert value.experiment.probe == 'X-ray'
         assert value.sample.name == 'A Perfect Sample'
-        assert value.x.shape == (100, 4)
+        assert value.data.shape == (100, 4)
 
 
 class TestInstrumentSettings(unittest.TestCase):
