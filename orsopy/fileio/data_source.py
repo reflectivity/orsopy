@@ -14,6 +14,7 @@ except ImportError:
     # not available until 3.8
     from typing_extensions import Literal
 
+import numpy as np
 from .base import File, Header, ValueRange, Value, ValueVector, Person
 
 
@@ -108,4 +109,10 @@ class DataSource(Header):
     experiment: Experiment
     sample: Sample
     measurement: Measurement
+    x: np.ndarray
     _orso_optionals = []
+
+    def to_dict(self):
+        dct = super(DataSource, self).to_dict()
+        dct.pop("x")
+        return dct

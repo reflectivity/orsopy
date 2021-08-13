@@ -7,6 +7,7 @@ Tests for fileio.data_source module
 import unittest
 import pathlib
 from datetime import datetime
+import numpy as np
 from orsopy.fileio import data_source, base
 
 
@@ -150,13 +151,15 @@ class TestDataSource(unittest.TestCase):
             base.File("2.nx.hdf", datetime.now())
         ]
         m = data_source.Measurement(inst, df, scheme="angle-dispersive")
-
+        x = np.zeros((100, 4))
         value = data_source.DataSource(
             base.Person('A Person', 'Some Uni'),
             data_source.Experiment('My First Experiment', 'A Lab Instrument',
                                    datetime(1992, 7, 14, 10, 10, 10), 'X-ray'),
             data_source.Sample('A Perfect Sample'),
-            m)
+            m,
+            x
+        )
         assert value.owner.name == 'A Person'
         assert value.owner.affiliation == 'Some Uni'
         assert value.experiment.title == 'My First Experiment'
@@ -164,6 +167,7 @@ class TestDataSource(unittest.TestCase):
         assert value.experiment.date == datetime(1992, 7, 14, 10, 10, 10)
         assert value.experiment.probe == 'X-ray'
         assert value.sample.name == 'A Perfect Sample'
+        assert value.x.shape == (100, 4)
 
 
 class TestInstrumentSettings(unittest.TestCase):

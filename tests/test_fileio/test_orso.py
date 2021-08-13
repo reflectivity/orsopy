@@ -7,6 +7,7 @@ Tests for fileio module
 import unittest
 import pathlib
 from datetime import datetime
+import numpy as np
 from orsopy.fileio.orso import Orso, make_empty
 from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
                                        Measurement, InstrumentSettings)
@@ -37,7 +38,8 @@ class TestOrso(unittest.TestCase):
         df = [File('README.rst', None)]
         m = Measurement(inst, df, scheme="angle-dispersive")
         p = Person('A Person', 'Some Uni')
-        ds = DataSource(p, e, s, m)
+        x = np.zeros((100, 4))
+        ds = DataSource(p, e, s, m, x)
 
         soft = Software('orsopy', '0.0.1', 'macOS-10.15')
         p2 = Person('Andrew McCluskey', 'European Spallation Source')
@@ -54,6 +56,7 @@ class TestOrso(unittest.TestCase):
         ds = value.data_source
         dsm = ds.measurement
         assert ds.owner.name == 'A Person'
+        assert ds.x.shape == (100, 4)
         assert dsm.data_files[0].file == 'README.rst'
         assert dsm.instrument_settings.incident_angle.magnitude == 4.0
         assert dsm.instrument_settings.wavelength.min == 2.0
@@ -91,7 +94,8 @@ class TestOrso(unittest.TestCase):
         df = [File('README.rst', None)]
         m = Measurement(inst, df, scheme="angle-dispersive")
         p = Person('A Person', 'Some Uni')
-        ds = DataSource(p, e, s, m)
+        x = np.zeros((100, 4))
+        ds = DataSource(p, e, s, m, x)
 
         soft = Software('orsopy', '0.0.1', 'macOS-10.15')
         p2 = Person('Andrew McCluskey', 'European Spallation Source')
@@ -105,6 +109,7 @@ class TestOrso(unittest.TestCase):
 
         dsm = value.data_source.measurement
         assert value.data_source.owner.name == 'A Person'
+        assert value.data_source.x.shape == (100, 4)
         assert dsm.data_files[0].file == 'README.rst'
         assert value.reduction.software.name == 'orsopy'
         assert value.columns[0].name == 'Qz'

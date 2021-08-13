@@ -11,6 +11,7 @@ from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
                           Measurement)
 from .reduction import Reduction, Software
 import datetime
+import numpy as np
 
 
 @dataclass
@@ -41,7 +42,7 @@ def make_empty():
     _instrument_settings = InstrumentSettings(None, None)
     _measurement = Measurement(_instrument_settings, None)
     _data_source = DataSource(
-        _person, _experiment, Sample(None), _measurement
+        _person, _experiment, Sample(None), _measurement, np.array([])
     )
 
     _reduction = Reduction(Software(None, None, None), None, None, None)
