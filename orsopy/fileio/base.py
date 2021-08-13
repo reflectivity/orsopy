@@ -98,7 +98,7 @@ class Header:
 
 
 @dataclass
-class ValueScalar(Header):
+class Value(Header):
     """A value or list of values with an optional unit."""
 
     magnitude: Union[float, List[float]]
@@ -159,24 +159,31 @@ class Person(Header):
 
     name: str
     affiliation: Union[str, List[str]]
-    email: Optional[str] = field(
-        default=None, metadata={"description": "Contact email address"}
+    contact: Optional[str] = field(
+        default=None, metadata={"description": "Contact (email) address"}
     )
-    _orso_optionals = ["email"]
+    _orso_optionals = ["contact"]
+
+
+@dataclass
+class Creator(Person):
+    time: datetime.datetime = None
+    computer: str = ""
+    _orso_optionals = ["contact"]
 
 
 @dataclass
 class Column(Header):
     """Information about a data column"""
 
-    quantity: str
+    name: str
     unit: Optional[str] = field(
         default=None, metadata={"description": "SI unit string"}
     )
-    description: Optional[str] = field(
-        default=None, metadata={"description": "A description of the column"}
+    dimension: Optional[str] = field(
+        default=None, metadata={"dimension": "A description of the column"}
     )
-    _orso_optionals = ["unit", "description"]
+    _orso_optionals = ["unit", "dimension"]
 
 
 @dataclass
@@ -184,7 +191,7 @@ class File(Header):
     """A file with a last modified timestamp."""
 
     file: str
-    timestamp: Optional[datetime.datetime] = field(
+    created: Optional[datetime.datetime] = field(
         default=None,
         metadata={
             "description": "Last modified timestamp if not given and available"
@@ -197,8 +204,8 @@ class File(Header):
         if not fname.exists():
             warnings.warn(f"The file {self.file} cannot be found.")
         else:
-            if self.timestamp is None:
-                self.timestamp = datetime.datetime.fromtimestamp(
+            if self.created is None:
+                self.created = datetime.datetime.fromtimestamp(
                     fname.stat().st_mtime
                 )
 

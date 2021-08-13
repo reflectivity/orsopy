@@ -12,3 +12,4 @@ numpy>=1.19.0
 pytest==6.2.4
 pyyaml>=5.4.1
 jsonschema
+typing_extensions

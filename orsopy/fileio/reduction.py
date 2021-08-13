@@ -4,7 +4,7 @@ The reduction elements for the ORSO header
 
 # author: Andrew R. McCluskey (arm61)
 
-from typing import Optional, List
+from typing import Optional, List, Union
 from dataclasses import field, dataclass
 import datetime
 from .base import Header, Person
@@ -14,21 +14,21 @@ from .base import Header, Person
 class Software(Header):
     """Description of the reduction software."""
     name: str
-    version: str
-    platform: str
-    _orso_optionals = []
+    version: Optional[str] = None
+    platform: Optional[str] = None
+    _orso_optionals = ["version", "platform"]
 
 
 @dataclass
 class Reduction(Header):
     """A description of the reduction that has been performed."""
-    software: Software
-    timestamp: datetime.datetime = field(
+    software: Union[Software, str]
+    time: Optional[datetime.datetime] = field(
         metadata={
             "description": "Timestamp string, formatted as ISO 8601 datetime"
         })
-    creator: Person
-    corrections: List[str]
+    creator: Optional[Person]
+    corrections: Optional[List[str]]
     computer: Optional[str] = field(
         default=None, metadata={'description': 'Computer used for reduction'})
     call: Optional[str] = field(

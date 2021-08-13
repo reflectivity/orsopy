@@ -6,7 +6,17 @@
       "$ref": "#/definitions/Creator"
     },
     "data_source": {
-      "$ref": "#/definitions/DataSource"
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DataSource"
+          }
+        },
+        {
+          "$ref": "#/definitions/DataSource"
+        }
+      ]
     },
     "columns": {
       "anyOf": [
@@ -56,6 +66,16 @@
     },
     "reduction": {
       "$ref": "#/definitions/Reduction"
+    },
+    "data_set": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "integer"
+        }
+      ]
     }
   },
   "required": [
@@ -72,6 +92,20 @@
           "type": "string"
         },
         "affiliation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "contact": {
+          "description": "Contact (email) address",
           "type": "string"
         },
         "time": {
@@ -80,34 +114,43 @@
           "format": "date-time"
         },
         "computer": {
+          "default": "",
           "type": "string"
         }
       },
       "required": [
         "name",
-        "affiliation",
-        "time",
-        "computer"
+        "affiliation"
       ]
     },
-    "owner": {
-      "title": "owner",
+    "Person": {
+      "title": "Person",
       "type": "object",
       "properties": {
         "name": {
           "type": "string"
         },
         "affiliation": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
         },
         "contact": {
+          "description": "Contact (email) address",
           "type": "string"
         }
       },
       "required": [
         "name",
-        "affiliation",
-        "contact"
+        "affiliation"
       ]
     },
     "Experiment": {
@@ -207,10 +250,11 @@
         "unit"
       ]
     },
-    "Polarisation": {
-      "title": "Polarisation",
+    "Polarization": {
+      "title": "Polarization",
       "description": "The first symbol indicates the magnetisation direction of the incident beam.\nAn optional second symbol indicates the direction of the scattered beam, if a spin analyser is present.",
       "enum": [
+        "unpolarized",
         "+",
         "-",
         "--",
@@ -244,8 +288,13 @@
             }
           ]
         },
-        "polarisation": {
-          "$ref": "#/definitions/Polarisation"
+        "polarization": {
+          "default": "unpolarized",
+          "allOf": [
+            {
+              "$ref": "#/definitions/Polarization"
+            }
+          ]
         }
       },
       "required": [
@@ -288,7 +337,14 @@
         "data_files": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/data_file"
+            "anyOf": [
+              {
+                "$ref": "#/definitions/data_file"
+              },
+              {
+                "type": "string"
+              }
+            ]
           }
         }
       },
@@ -303,7 +359,7 @@
       "type": "object",
       "properties": {
         "owner": {
-          "$ref": "#/definitions/owner"
+          "$ref": "#/definitions/Person"
         },
         "experiment": {
           "$ref": "#/definitions/Experiment"
@@ -333,6 +389,7 @@
           "type": "string"
         },
         "dimension": {
+          "default": "",
           "type": "string"
         },
         "unit": {
@@ -345,8 +402,7 @@
         }
       },
       "required": [
-        "name",
-        "dimension"
+        "name"
       ]
     },
     "R_column": {
@@ -360,6 +416,7 @@
           "type": "string"
         },
         "dimension": {
+          "default": "",
           "type": "string"
         },
         "unit": {
@@ -372,8 +429,7 @@
         }
       },
       "required": [
-        "name",
-        "dimension"
+        "name"
       ]
     },
     "sR_column": {
@@ -387,6 +443,7 @@
           "type": "string"
         },
         "dimension": {
+          "default": "",
           "type": "string"
         },
         "unit": {
@@ -399,8 +456,7 @@
         }
       },
       "required": [
-        "name",
-        "dimension"
+        "name"
       ]
     },
     "sQz_column": {
@@ -414,6 +470,7 @@
           "type": "string"
         },
         "dimension": {
+          "default": "",
           "type": "string"
         },
         "unit": {
@@ -426,8 +483,25 @@
         }
       },
       "required": [
-        "name",
-        "dimension"
+        "name"
+      ]
+    },
+    "Software": {
+      "title": "Software",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "platform": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
       ]
     },
     "Reduction": {
@@ -435,15 +509,22 @@
       "type": "object",
       "properties": {
         "software": {
-          "type": "string"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Software"
+            },
+            {
+              "type": "string"
+            }
+          ]
         },
         "call": {
+          "default": "",
           "type": "string"
         }
       },
       "required": [
-        "software",
-        "call"
+        "software"
       ]
     }
   }

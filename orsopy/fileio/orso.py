@@ -4,12 +4,13 @@ Implementation of the top level class for the ORSO header.
 
 # author: Andrew R. McCluskey (arm61)
 
-from typing import List
+from typing import List, Union
 from dataclasses import dataclass
-from .base import Header, Column
-from .data_source import DataSource, Experiment, Sample
-from .measurement import InstrumentSettings, Measurement
+from .base import Header, Column, Person, Creator
+from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
+                          Measurement)
 from .reduction import Reduction, Software
+import datetime
 
 
 @dataclass
@@ -17,11 +18,11 @@ class Orso(Header):
     """
     The Orso object collects the necessary metadata.
     """
-    data_source: DataSource
-    measurement: Measurement
+    creator: Creator
+    data_source: Union[DataSource, List[DataSource]]
     reduction: Reduction
-    column_description: List[Column]
-    data_set: int
+    columns: List[Column]
+    data_set: Union[str, List[str]]
     _orso_optionals = []
 
 
@@ -34,8 +35,14 @@ def make_empty():
     :return: Uninformative object
     :rtype: orsopy.fileio.orso.Orso
     """
-    _data_source = DataSource(None, Experiment(None, None, None, None),
-                              Sample(None))
-    _measurement = Measurement(InstrumentSettings(None, None), None)
+    _person = Person(None, None, None)
+    _creator = Creator(None, None, None, None, None)
+    _experiment = Experiment(None, None, None, None)
+    _instrument_settings = InstrumentSettings(None, None)
+    _measurement = Measurement(_instrument_settings, None)
+    _data_source = DataSource(
+        _person, _experiment, Sample(None), _measurement
+    )
+
     _reduction = Reduction(Software(None, None, None), None, None, None)
-    return Orso(_data_source, _measurement, _reduction, None, None)
+    return Orso(_creator, _data_source, _reduction, None, None)
