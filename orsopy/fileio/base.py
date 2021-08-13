@@ -14,6 +14,8 @@ import json
 import yaml
 from contextlib import contextmanager
 import re
+import numpy as np
+
 from .. import orsopy
 
 
@@ -213,16 +215,61 @@ class File(Header):
                 )
 
 
-def _read_header(file):
-    # reads the header of an ORSO file.
-    # does not parse it
+def _read_header_data(file):
+    """
+    reads the header and data contained within an ORSO file.
+    It does not parse the header
+
+    Parameters
+    ----------
+    file: str or file-like
+
+    Returns
+    -------
+    header, data_sets: str, list
+        `header` is a string containing the unparsed yaml header. This has to
+        be processed further
+        `data_sets` is a Python list containing numpy arrays holding the
+        reflectometry data in the file. It's contained in a list because each
+        of the datasets may have a different number of columns.
+    """
+
     with _possibly_open_file(file, "r") as fi:
         header = []
-        for line in fi.readlines():
+
+        # variables to keep track of where the datasets are
+        ds_lines = []
+        in_ds = False
+        start_line = -1
+        end_line = -1
+
+        for i, line in enumerate(fi.readlines()):
             if not line.startswith("#"):
+                if not in_ds:
+                    # you're in the first line of a dataset
+                    in_ds = True
+                    start_line = i
                 continue
+            if in_ds:
+                # you've reached the first line after a comment line
+                end_line = i - 1
+                ds_lines.append((start_line, end_line))
+                start_line = end_line = -1
+                in_ds = False
+
             header.append(line[1:])
-        return "".join(header)
+
+        # finished reading the file, have to append the last dataset
+        ds_lines.append((start_line, i))
+
+        data = []
+        for ds_line in ds_lines:
+            fi.seek(0, 0)
+            start, end = ds_line
+            arr = np.loadtxt(fi, skiprows=start, max_rows=end - start + 1)
+            data.append(arr)
+
+        return "".join(header), data
 
 
 def _validate_header(h: str):

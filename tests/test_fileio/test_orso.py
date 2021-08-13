@@ -13,7 +13,7 @@ from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
                                        Measurement, InstrumentSettings)
 from orsopy.fileio.reduction import Reduction, Software
 from orsopy.fileio.base import Person, ValueRange, Value, File, Column, Creator
-from orsopy.fileio.base import _validate_header, _read_header
+from orsopy.fileio.base import _validate_header, _read_header_data
 
 
 class TestOrso(unittest.TestCase):
@@ -139,14 +139,18 @@ class TestOrso(unittest.TestCase):
         cols = [Column("Qz"), Column("R")]
         value = Orso(c, ds, redn, cols, 0)
         value.save("test.ort")
-        h = _read_header("test.ort")
+        h, datasets = _read_header_data("test.ort")
         _validate_header(h)
+        assert len(datasets) == 1
+        assert datasets[0].shape == (100, 4)
 
         # now make a file with two datasets in it.
         value.add_data_source(ds, 1)
         value.save("test1.ort")
-        h = _read_header("test1.ort")
+        h, datasets = _read_header_data("test1.ort")
         _validate_header(h)
+        assert len(datasets) == 2
+        assert datasets[0].shape == datasets[1].shape == (100, 4)
 
 
 class TestFunctions(unittest.TestCase):
