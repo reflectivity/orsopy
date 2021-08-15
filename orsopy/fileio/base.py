@@ -39,6 +39,8 @@ class Header:
     The super class for all of the items in the orso module.
     """
 
+    _orso_optionals = []
+
     def __post_init__(self):
         if hasattr(self, "unit"):
             self._check_unit(self.unit)
@@ -52,25 +54,26 @@ class Header:
         :rtype: dict
         """
         out_dict = {}
-        for i in self.__dir__():
-            value = getattr(self, i)
-            if (not i.startswith("_") and not callable(value)) and (
-                value is not None or i not in self._orso_optionals
+        for i, value in self.__dict__.items():
+            if i.startswith("_") or (
+                value is None and i in self._orso_optionals
             ):
-                if hasattr(value, "_orso_optionals"):
-                    out_dict[i] = value.to_dict()
-                elif isinstance(value, list):
-                    cleaned_list = []
-                    for j in value:
-                        if hasattr(j, "_orso_optionals"):
-                            cleaned_list.append(j.to_dict())
-                        else:
-                            cleaned_list.append(j)
-                    out_dict[i] = cleaned_list
-                elif i == "data_set" and value == 0:
-                    continue
-                else:
-                    out_dict[i] = value
+                continue
+
+            if hasattr(value, "_orso_optionals"):
+                out_dict[i] = value.to_dict()
+            elif isinstance(value, list):
+                cleaned_list = []
+                for j in value:
+                    if hasattr(j, "_orso_optionals"):
+                        cleaned_list.append(j.to_dict())
+                    else:
+                        cleaned_list.append(j)
+                out_dict[i] = cleaned_list
+            elif i == "data_set" and value == 0:
+                continue
+            else:
+                out_dict[i] = value
         return out_dict
 
     def to_yaml(self):
