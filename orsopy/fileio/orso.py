@@ -22,3 +22,5 @@ class Orso(Header):
     columns: List[Column]
     data_set: Union[str, int]
     _orso_optionals = []
+
+    __repr__=Header._staggered_repr
