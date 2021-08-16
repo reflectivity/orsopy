@@ -8,7 +8,7 @@ from copy import deepcopy
 from collections.abc import Mapping
 from typing import Optional, Union, List, Tuple, get_args, get_origin
 import typing
-from typing import Optional, Union, List, get_args, get_origin
+from typing import Optional, Union, List, get_args, get_origin, Literal
 from inspect import isclass
 from dataclasses import field, dataclass, fields
 import datetime
@@ -96,6 +96,9 @@ class Header:
                     res=Header._resolve_type(subt, item)
                     if res is not None:
                         return res
+            elif hbase is Literal:
+                if item in get_args(hint):
+                    return item
         return None
 
     @classmethod
