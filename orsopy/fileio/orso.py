@@ -5,12 +5,13 @@ Implementation of the top level class for the ORSO header.
 # author: Andrew R. McCluskey (arm61)
 
 from typing import List, Union
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 import datetime
 import yaml
 import numpy as np
 
-from .base import Header, Column, Person, Creator, _possibly_open_file
+from .base import (Header, Column, Person, Creator, _possibly_open_file,
+                   _read_header_data, ValueRange, Value, File)
 from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
                           Measurement)
 from .reduction import Reduction, Software
@@ -127,9 +128,114 @@ class Orso(Header):
         """
         Read an ORSO file
         """
-        with _possibly_open_file(f, 'r'):
-            # TODO IMPLEMENT
-            pass
+        # TODO If we were using YAML tags then auto-object recreation would
+        # be easy. However, we're not doing this so parse the yaml dictionary
+        # by hand. There may be a better way of doing this.
+        with _possibly_open_file(f, 'r') as fi:
+            h, data = _read_header_data(fi)
+
+        dct = yaml.load(h)
+
+        # creator
+        c = _make_kls(Creator, dct.get('creator', None))
+        # columns
+        columns = [Column(**c) for c in dct['columns']]
+
+        # reduction
+        _r = dct['reduction'].copy()
+        _r['creator'] = _make_kls(Person, _r.get('creator', None))
+        _s = _r.get("software", None)
+        if isinstance(_s, str):
+            _r['software'] = _s
+        else:
+            _r['software'] = _make_kls(Software, _s)
+
+        r = _make_kls(Reduction, _r)
+
+        # data_set
+        data_set = dct.get('data_set')
+
+        # data_source
+        # if the number of data_source is 1, then data_source will be a dict
+        # otherwise it'll be a list
+        num_datasets = len(data)
+        _ds_dct= dct['data_source'].copy()
+        print(h)
+
+        if hasattr(_ds_dct, "len"):
+            ds = []
+            for i, _dct in enumerate(_ds_dct):
+                ds.append(_make_data_source(_dct, data[i]))
+        else:
+            ds = _make_data_source(_ds_dct, data[0])
+
+        return Orso(c, ds, r, columns, data_set)
+
+
+def _make_kls(kls, dct):
+    """
+    Factory for making the dataclass given an argument dictionary
+    """
+    if dct is None:
+        return None
+    else:
+        lcl_dct = dct.copy()
+        flds = fields(kls)
+        names = [fld.name for fld in flds]
+        # if the name isn't in the class field then remove from dct
+        not_present = set(dct.keys()).difference(names)
+        for k in not_present:
+            lcl_dct.pop(k)
+
+        return kls(**lcl_dct)
+
+
+def _make_data_source(ds_dct, data):
+    """Factory for creating a DataSource object"""
+    e = _make_kls(Experiment, ds_dct['experiment'])
+    o = _make_kls(Person, ds_dct['owner'])
+    s = _make_kls(Sample, ds_dct['sample'])
+
+    # constructing a Measurement is probably the hardest, since there
+    # are lots of nested classes.
+    meas = ds_dct['measurement']
+
+    # deal with InstrumentSettings first
+    inst = meas['instrument_settings']
+    kls = _v_or_vr(inst['incident_angle'])
+    inst['incident_angle'] = _make_kls(kls, inst['incident_angle'])
+    kls = _v_or_vr(inst['wavelength'])
+    inst['wavelength'] = _make_kls(kls, inst['wavelength'])
+    meas['instrument_settings'] = _make_kls(InstrumentSettings, inst)
+
+    def dfs_converter(df):
+        if isinstance(df, dict):
+            return _make_kls(File, df)
+        return df
+
+    if isinstance(meas['data_files'], list):
+        meas['data_files'] = [dfs_converter(df) for df in  meas['data_files']]
+    else:
+        meas['data_files'] = dfs_converter(meas['data_files'])
+
+    dfr = meas.get("references", None)
+    if dfr is not None:
+        if isinstance(meas['references'], list):
+            meas['references'] = [dfs_converter(df) for df in  meas['references']]
+        else:
+            meas['references'] = dfs_converter(meas['references'])
+
+    meas = _make_kls(Measurement, meas)
+
+    return DataSource(o, e, s, meas, data)
+
+
+def _v_or_vr(dct):
+    # Choose whether the dictionary is consistent with a Value or ValueRange
+    if "min" in dct and "max" in dct:
+        return ValueRange
+    elif "magnitude" in dct:
+        return Value
 
 
 def make_empty():

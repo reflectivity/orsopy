@@ -6,8 +6,10 @@ Tests for fileio module
 
 import unittest
 import pathlib
+import os.path
 from datetime import datetime
 import numpy as np
+import orsopy
 from orsopy.fileio.orso import Orso, make_empty, ORSO_designate
 from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
                                        Measurement, InstrumentSettings)
@@ -151,6 +153,32 @@ class TestOrso(unittest.TestCase):
         _validate_header(h)
         assert len(datasets) == 2
         assert datasets[0].shape == datasets[1].shape == (100, 4)
+
+        # read that multi-dataset file back in.
+        # o = Orso.from_file("test1.ort")
+        # print(o.data_source)
+        # assert len(o.data_source) == 2
+
+    def test_load(self):
+        pth = os.path.dirname(orsopy.__file__)
+        o = Orso.from_file(os.path.join("tests", "test_example.ort"))
+        assert isinstance(o, Orso)
+        assert o.creator.name == "G. User"
+        assert len(o.columns) == 4
+        cnames = [c.name for c in o.columns]
+        assert cnames == ["Qz", "R", "sR", "sQz"]
+        assert o.reduction.software == 'eos.py'
+        assert o.reduction.corrections == [
+            "footprint", "incident intensity", "detector efficiency"
+        ]
+        assert o.data_set == "spin_up"
+        ds = o.data_source
+        assert isinstance(ds, DataSource)
+        assert ds.measurement.scheme == "angle- and energy-dispersive"
+        assert ds.measurement.instrument_settings.wavelength.min == 3.0
+        assert ds.measurement.data_files[1].file == "amor2020n001926.hdf"
+        assert ds.measurement.references[0].file == "amor2020n001064.hdf"
+        assert ds.data.shape == (2, 4)
 
 
 class TestFunctions(unittest.TestCase):
