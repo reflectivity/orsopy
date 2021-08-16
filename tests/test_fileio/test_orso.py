@@ -160,7 +160,6 @@ class TestOrso(unittest.TestCase):
         # assert len(o.data_source) == 2
 
     def test_load(self):
-        pth = os.path.dirname(orsopy.__file__)
         o = Orso.from_file(os.path.join("tests", "test_example.ort"))
         assert isinstance(o, Orso)
         assert o.creator.name == "G. User"

@@ -158,9 +158,7 @@ class Orso(Header):
         # data_source
         # if the number of data_source is 1, then data_source will be a dict
         # otherwise it'll be a list
-        num_datasets = len(data)
-        _ds_dct= dct['data_source'].copy()
-        print(h)
+        _ds_dct = dct['data_source'].copy()
 
         if hasattr(_ds_dct, "len"):
             ds = []
@@ -214,14 +212,15 @@ def _make_data_source(ds_dct, data):
         return df
 
     if isinstance(meas['data_files'], list):
-        meas['data_files'] = [dfs_converter(df) for df in  meas['data_files']]
+        meas['data_files'] = [dfs_converter(df) for df in meas['data_files']]
     else:
         meas['data_files'] = dfs_converter(meas['data_files'])
 
     dfr = meas.get("references", None)
     if dfr is not None:
         if isinstance(meas['references'], list):
-            meas['references'] = [dfs_converter(df) for df in  meas['references']]
+            meas['references'] = [dfs_converter(df)
+                                  for df in meas['references']]
         else:
             meas['references'] = dfs_converter(meas['references'])
 
