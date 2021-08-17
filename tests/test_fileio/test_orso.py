@@ -26,7 +26,8 @@ class TestOrso(unittest.TestCase):
         Creation of Orso object.
         """
         c = Creator(
-            'A Person', 'Some Uni', "wally@wallyland.com", datetime.now(), ""
+            'A Person', 'Some Uni', datetime.now(), "",
+            contact="wally@wallyland.com"
         )
         e = Experiment(
             'Experiment 1', 'ESTIA', datetime(2021, 7, 7, 16, 31, 10),
@@ -81,7 +82,8 @@ class TestOrso(unittest.TestCase):
         Creation of Orso object with a non-zero data_set.
         """
         c = Creator(
-            'A Person', 'Some Uni', "wally@wallyland.com", datetime.now(), ""
+            'A Person', 'Some Uni', datetime.now(), "",
+            contact="wally@wallyland.com"
         )
         e = Experiment(
             'Experiment 1', 'ESTIA', datetime(2021, 7, 7, 16, 31, 10),
