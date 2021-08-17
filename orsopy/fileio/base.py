@@ -37,7 +37,6 @@ def __datetime_representer(dumper, data):
 
 yaml.add_representer(datetime.datetime, __datetime_representer)
 
-
 class Header:
     """
     The super class for all of the items in the orso module.
@@ -180,6 +179,17 @@ class Header:
             if not unit.isascii():
                 raise ValueError("The unit must be in ASCII text.")
 
+    def __repr__(self):
+        # representation that does not show empty arguments
+        out = f'{self.__class__.__name__}('
+        for fi in fields(self):
+            if fi.name in self._orso_optionals and getattr(self, fi.name) is None:
+                # ignore empty optional arguments
+                continue
+            out += f'{fi.name}={getattr(self, fi.name).__repr__()}, '
+        out = out[:-2]+')'
+        return out
+
     def _staggered_repr(self):
         """
         Generate a string representation distributed over multiple lines
@@ -190,6 +200,9 @@ class Header:
         slen = len(self.__class__.__name__)
         out = f'{self.__class__.__name__}(\n'
         for fi in fields(self):
+            if fi.name in self._orso_optionals and getattr(self, fi.name) is None:
+                # ignore empty optional arguments
+                continue
             nlen = len(fi.name)
             ftxt = getattr(self, fi.name).__repr__()
             ftxt = ftxt.replace('\n', '\n' + ' ' * (slen + nlen + 2))
@@ -198,7 +211,7 @@ class Header:
         return out
 
 
-@dataclass
+@dataclass(repr=False)
 class Value(Header):
     """A value or list of values with an optional unit."""
 
@@ -208,7 +221,7 @@ class Value(Header):
     )
 
 
-@dataclass
+@dataclass(repr=False)
 class ValueRange(Header):
     """A range or list of ranges with mins, maxs, and an optional unit."""
 
@@ -219,7 +232,7 @@ class ValueRange(Header):
     )
 
 
-@dataclass
+@dataclass(repr=False)
 class ValueVector(Header):
     """A vector or list of vectors with an optional unit.
 
@@ -243,14 +256,14 @@ class ValueVector(Header):
     )
 
 
-@dataclass
+@dataclass(repr=False)
 class Comment(Header):
     """A comment."""
 
     comment: str
 
 
-@dataclass
+@dataclass(repr=False)
 class Person(Header):
     """Information about a person, including name, affilation(s), and email."""
 
@@ -261,13 +274,13 @@ class Person(Header):
     )
 
 
-@dataclass
+@dataclass(repr=False)
 class Creator(Person):
     time: datetime.datetime = None
     computer: str = ""
 
 
-@dataclass
+@dataclass(repr=False)
 class Column(Header):
     """Information about a data column"""
 
@@ -280,7 +293,7 @@ class Column(Header):
     )
 
 
-@dataclass
+@dataclass(repr=False)
 class File(Header):
     """A file with a last modified timestamp."""
 
