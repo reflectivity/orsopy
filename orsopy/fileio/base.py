@@ -6,9 +6,8 @@ Implementation of the base classes for the ORSO header.
 import os.path
 from copy import deepcopy
 from collections.abc import Mapping
-from typing import Optional, Union, List, Tuple, get_args, get_origin
+from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
 import typing
-from typing import Optional, Union, List, get_args, get_origin, Literal
 from inspect import isclass
 from dataclasses import field, dataclass, fields
 import datetime
@@ -322,7 +321,6 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
     Returns
     -------
     dct_list, data_sets: list, list
-
         `dct_list` is a list of json dicts containing the parsed yaml header.
         This has to be processed further.
         `data_sets` is a Python list containing numpy arrays holding the

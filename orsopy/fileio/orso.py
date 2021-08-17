@@ -20,6 +20,6 @@ class Orso(Header):
     data_source: DataSource
     reduction: Reduction
     columns: List[Column]
-    data_set: Union[str, List[str]]
+    data_set: Union[str, str]
 
     __repr__ = Header._staggered_repr
