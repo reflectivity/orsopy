@@ -19,7 +19,6 @@ from contextlib import contextmanager
 import re
 
 import numpy as np
-from .. import orsopy
 
 
 def _noop(self, *args, **kw):
@@ -386,7 +385,7 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
         # synthesise json dicts for each dataset from the first dataset, and
         # updates to the yaml.
         first_dct = next(dcts)
-        dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
+        dct_list = [_nested_update(first_dct.copy(), dct) for dct in dcts]
         dct_list.insert(0, first_dct)
 
     if validate:
@@ -409,7 +408,7 @@ def _validate_header_data(dct_list: List[dict]):
     """
     import jsonschema
 
-    pth = os.path.dirname(orsopy.__file__)
+    pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
     with open(schema_pth, "r") as f:
         schema = json.load(f)
