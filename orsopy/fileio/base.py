@@ -7,7 +7,7 @@ Implementation of the base classes for the ORSO header.
 import os.path
 from copy import deepcopy
 from collections.abc import Mapping
-from typing import Optional, Union, List
+from typing import Optional, Union, List, Tuple
 from dataclasses import field, dataclass
 import datetime
 import pathlib
@@ -219,7 +219,7 @@ class File(Header):
                 )
 
 
-def _read_header_data(file):
+def _read_header_data(file, validate=False) -> Tuple[dict, list]:
     """
     Reads the header and data contained within an ORSO file, parsing it into
     json dictionaries and numerical arrays.
@@ -228,9 +228,14 @@ def _read_header_data(file):
     ----------
     file: str or file-like
 
+    validate: bool
+        Validates the file against the ORSO json schema.
+        Requires that the jsonschema package be installed.
+
     Returns
     -------
     dct_list, data_sets: list, list
+
         `dct_list` is a list of json dicts containing the parsed yaml header.
         This has to be processed further.
         `data_sets` is a Python list containing numpy arrays holding the
@@ -241,40 +246,42 @@ def _read_header_data(file):
     with _possibly_open_file(file, "r") as fi:
         header = []
 
-        # variables to keep track of where the numerical datasets are
-        ds_lines = []
-        in_ds = False
-        start_line = -1
-        end_line = -1
+        # collection of the numerical arrays
+        data = []
+        _ds_lines = []
         first_dataset = True
 
         for i, line in enumerate(fi.readlines()):
             if not line.startswith("#"):
-                if not in_ds:
-                    # you're in the first line of a dataset
-                    in_ds = True
-                    start_line = i
+                _ds_lines.append(line)
                 continue
-
-            # at this point all lines begin with #
-            if in_ds:
-                # you've reached the first line after a comment line
-                end_line = i - 1
-                ds_lines.append((start_line, end_line))
-                start_line = end_line = -1
-                in_ds = False
 
             if line.startswith("# data_set") and first_dataset:
                 header.append(line[1:])
                 first_dataset = False
             elif line.startswith("# data_set") and not first_dataset:
+                # a new dataset is starting. Complete the previous dataset's
+                # numerical array  and start collecting the numbers for this
+                # dataset
+                _d = np.array(
+                    [np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines]
+                )
+                data.append(_d)
+                _ds_lines = []
+
                 # append '---' to signify the start of a new yaml document
                 # Subsequent datasets get parsed into a separate dictionary,
                 # which can be used to synthesise new datasets from the first.
-                header.append(" ---\n")
+                header.append("---\n")
                 header.append(line[1:])
             else:
                 header.append(line[1:])
+
+        # append the last numerical array
+        _d = np.array(
+            [np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines]
+        )
+        data.append(_d)
 
         yml = "".join(header)
 
@@ -297,18 +304,11 @@ def _read_header_data(file):
         dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
         dct_list.insert(0, first_dct)
 
-        # now load the numerical data
-        # finished reading the file, have to append the last dataset
-        ds_lines.append((start_line, i))
+    if validate:
+        # requires jsonschema be installed
+        _validate_header_data(dct_list)
 
-        data = []
-        for ds_line in ds_lines:
-            fi.seek(0, 0)
-            start, end = ds_line
-            arr = np.loadtxt(fi, skiprows=start, max_rows=end - start + 1)
-            data.append(arr)
-
-        return dct_list, data
+    return dct_list, data
 
 
 def _validate_header_data(dct_list: List[dict]):
@@ -371,6 +371,7 @@ def _possibly_open_file(f, mode="wb"):
 
 def _todict(obj, classkey=None):
     """
+    Recursively converts an object to a dict representation
     https://stackoverflow.com/questions/1036409
     Licenced under CC BY-SA 4.0
     """
