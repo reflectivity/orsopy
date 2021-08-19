@@ -60,20 +60,22 @@ class Header:
             ):
                 continue
 
-            if hasattr(value, "_orso_optionals"):
+            if hasattr(value, "to_dict"):
                 out_dict[i] = value.to_dict()
-            elif isinstance(value, list):
+            elif isinstance(value, (list, tuple)):
                 cleaned_list = []
                 for j in value:
-                    if hasattr(j, "_orso_optionals"):
+                    if hasattr(j, "to_dict"):
                         cleaned_list.append(j.to_dict())
                     else:
                         cleaned_list.append(j)
-                out_dict[i] = cleaned_list
+                out_dict[i] = type(value)(cleaned_list)
             elif i == "data_set" and value == 0:
                 continue
             else:
-                out_dict[i] = value
+                # here _todict converts objects that aren't derived from Header
+                # and therefore don't have to_dict methods.
+                out_dict[i] = _todict(value)
         return out_dict
 
     def to_yaml(self):
@@ -292,3 +294,31 @@ def _possibly_open_file(f, mode="wb"):
     yield g
     if close_file:
         g.close()
+
+
+def _todict(obj, classkey=None):
+    """
+    https://stackoverflow.com/questions/1036409
+    Licenced under CC BY-SA 4.0
+    """
+    if isinstance(obj, dict):
+        data = {}
+        for (k, v) in obj.items():
+            data[k] = _todict(v, classkey)
+        return data
+    elif hasattr(obj, "_ast"):
+        return _todict(obj._ast())
+    elif hasattr(obj, "__iter__") and not isinstance(obj, str):
+        return [_todict(v, classkey) for v in obj]
+    elif hasattr(obj, "__dict__"):
+        data = dict(
+            [(key, _todict(value, classkey)) for key, value
+             in obj.__dict__.items()
+             if not callable(value) and not key.startswith('_')]
+        )
+
+        if classkey is not None and hasattr(obj, "__class__"):
+            data[classkey] = obj.__class__.__name__
+        return data
+    else:
+        return obj
