@@ -75,7 +75,7 @@ class Header:
             else:
                 # here todict converts objects that aren't derived from Header
                 # and therefore don't have to_dict methods.
-                out_dict[i] = todict(value)
+                out_dict[i] = _todict(value)
         return out_dict
 
     def to_yaml(self):
