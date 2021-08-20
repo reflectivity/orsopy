@@ -6,11 +6,13 @@ from orsopy import fileio
 def main():
     info=fileio.Orso.empty()
     info2=fileio.Orso.empty()
-    data=np.array([np.arange(100), np.arange(100), np.arange(100)])
+    data = np.zeros((100, 3))
+    data[:] = np.arange(100.0)[:, None]
+
     info.columns=[
-        fileio.Column('q', '1/A'),
-        fileio.Column('R', '1'),
-        fileio.Column('sR', '1'),
+        fileio.Column('Qz', '1/angstrom'),
+        fileio.Column('R'),
+        fileio.Column('sR'),
     ]
     info2.columns=info.columns
     info.data_source.measurement.instrument_settings.polarization='+'
@@ -57,10 +59,11 @@ def main():
     )
     ds3=fileio.OrsoDataset(info3, data)
 
-    fileio.save([ds, ds2, ds3], 'test.ort')
+    fileio.save_orso([ds, ds2, ds3], 'test.ort')
 
-    ls1, ls2, ls3=fileio.load('test.ort')
+    ls1, ls2, ls3 = fileio.load_orso('test.ort')
     print(ls1==ds, ls2==ds2, ls3==ds3)
+
 
 if __name__=='__main__':
     main()

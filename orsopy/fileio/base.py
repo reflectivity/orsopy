@@ -107,9 +107,9 @@ class Header(metaclass=HeaderMeta):
         else:
             # the hint is a combined type (Union/List etc.)
             hbase = get_origin(hint)
-            if hbase is list:
+            if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
-                if type(item) is list:
+                if isinstance(item, (list, tuple)):
                     return [Header._resolve_type(t0, i) for i in item]
                 else:
                     return [Header._resolve_type(t0, item)]
@@ -418,7 +418,7 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
         # synthesise json dicts for each dataset from the first dataset, and
         # updates to the yaml.
         first_dct = next(dcts)
-        dct_list = [_nested_update(first_dct.copy(), dct) for dct in dcts]
+        dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
         dct_list.insert(0, first_dct)
 
     if validate:
@@ -527,3 +527,23 @@ def _nested_update(d, u):
         else:
             d = {k: u[k]}
     return d
+
+
+def _dict_diff(old, new):
+    # recursive find differences between two dictionaries
+    out = {}
+    for key, value in new.items():
+        if key in old:
+            if type(value) is dict:
+                diff = _dict_diff(old[key], value)
+                if diff == {}:
+                    continue
+                else:
+                    out[key] = diff
+            elif old[key] == value:
+                continue
+            else:
+                out[key] = value
+        else:
+            out[key] = value
+    return out
