@@ -5,7 +5,9 @@ Implementation of the base classes for the ORSO header.
 # author: Andrew R. McCluskey (arm61)
 
 import os.path
-from typing import Optional, Union, List
+from copy import deepcopy
+from collections.abc import Mapping
+from typing import Optional, Union, List, Tuple
 from dataclasses import field, dataclass
 import datetime
 import pathlib
@@ -14,6 +16,8 @@ import json
 import yaml
 from contextlib import contextmanager
 import re
+
+import numpy as np
 from .. import orsopy
 
 
@@ -215,42 +219,109 @@ class File(Header):
                 )
 
 
-def _read_header(file):
-    # reads the header of an ORSO file.
-    # does not parse it
-    with _possibly_open_file(file, "r") as fi:
-        header = []
-        for line in fi.readlines():
-            if not line.startswith("#"):
-                break
-            header.append(line[1:])
-        return "".join(header)
-
-
-def _validate_header(h: str):
+def _read_header_data(file, validate=False) -> Tuple[dict, list]:
     """
-    Checks whether a string is a valid ORSO header
+    Reads the header and data contained within an ORSO file, parsing it into
+    json dictionaries and numerical arrays.
 
     Parameters
     ----------
-    h : str
-        Header of file
+    file: str or file-like
+
+    validate: bool
+        Validates the file against the ORSO json schema.
+        Requires that the jsonschema package be installed.
+
+    Returns
+    -------
+    dct_list, data_sets: list, list
+
+        `dct_list` is a list of json dicts containing the parsed yaml header.
+        This has to be processed further.
+        `data_sets` is a Python list containing numpy arrays holding the
+        reflectometry data in the file. It's contained in a list because each
+        of the datasets may have a different number of columns.
     """
-    # the magic string at the top of the file should look something like:
-    # "# # ORSO reflectivity data file | 0.1 standard | YAML encoding
-    # | https://www.reflectometry.org/"
 
-    pattern = re.compile(
-        r"^(# ORSO reflectivity data file \| ([0-9]+\.?[0-9]*|\.[0-9]+)"
-        r" standard \| YAML encoding \| https://www\.reflectometry\.org/)$"
-    )
+    with _possibly_open_file(file, "r") as fi:
+        header = []
 
-    first_line = h.splitlines()[0]
-    if not pattern.match(first_line.lstrip(" ")):
-        raise ValueError(
-            "First line does not appear to match that of an ORSO file"
+        # collection of the numerical arrays
+        data = []
+        _ds_lines = []
+        first_dataset = True
+
+        for i, line in enumerate(fi.readlines()):
+            if not line.startswith("#"):
+                _ds_lines.append(line)
+                continue
+
+            if line.startswith("# data_set") and first_dataset:
+                header.append(line[1:])
+                first_dataset = False
+            elif line.startswith("# data_set") and not first_dataset:
+                # a new dataset is starting. Complete the previous dataset's
+                # numerical array  and start collecting the numbers for this
+                # dataset
+                _d = np.array(
+                    [np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines]
+                )
+                data.append(_d)
+                _ds_lines = []
+
+                # append '---' to signify the start of a new yaml document
+                # Subsequent datasets get parsed into a separate dictionary,
+                # which can be used to synthesise new datasets from the first.
+                header.append("---\n")
+                header.append(line[1:])
+            else:
+                header.append(line[1:])
+
+        # append the last numerical array
+        _d = np.array(
+            [np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines]
+        )
+        data.append(_d)
+
+        yml = "".join(header)
+
+        # first line of an ORSO file should have the magic string
+        pattern = re.compile(
+            r"^(# ORSO reflectivity data file \| ([0-9]+\.?[0-9]*|\.[0-9]+)"
+            r" standard \| YAML encoding \| https://www\.reflectometry\.org/)$"
         )
 
+        if not pattern.match(header[0].lstrip(" ")):
+            raise ValueError(
+                "First line does not appear to match that of an ORSO file"
+            )
+
+        dcts = yaml.safe_load_all(yml)
+
+        # synthesise json dicts for each dataset from the first dataset, and
+        # updates to the yaml.
+        first_dct = next(dcts)
+        dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
+        dct_list.insert(0, first_dct)
+
+    if validate:
+        # requires jsonschema be installed
+        _validate_header_data(dct_list)
+
+    return dct_list, data
+
+
+def _validate_header_data(dct_list: List[dict]):
+    """
+    Checks whether a json dictionary corresponds to a valid ORSO header.
+
+    Obtain these dct_list by loading from _read_header_data first.
+
+    Parameters
+    ----------
+    dct_list : List[dict]
+        dicts corresponding to parsed yaml headers from the ORT file.
+    """
     import jsonschema
 
     pth = os.path.dirname(orsopy.__file__)
@@ -258,11 +329,13 @@ def _validate_header(h: str):
     with open(schema_pth, "r") as f:
         schema = json.load(f)
 
-    d = yaml.safe_load(h)
     # d contains datetime.datetime objects, which would fail the
     # jsonschema validation, so force those to be strings.
-    d = json.loads(json.dumps(d, default=str))
-    jsonschema.validate(d, schema)
+    modified_dct_list = [
+        json.loads(json.dumps(dct, default=str)) for dct in dct_list
+    ]
+    for dct in modified_dct_list:
+        jsonschema.validate(dct, schema)
 
 
 @contextmanager
@@ -298,6 +371,7 @@ def _possibly_open_file(f, mode="wb"):
 
 def _todict(obj, classkey=None):
     """
+    Recursively converts an object to a dict representation
     https://stackoverflow.com/questions/1036409
     Licenced under CC BY-SA 4.0
     """
@@ -322,3 +396,17 @@ def _todict(obj, classkey=None):
         return data
     else:
         return obj
+
+
+def _nested_update(d, u):
+    # nested dictionary update.
+    for k, v in u.items():
+        if isinstance(d, Mapping):
+            if isinstance(v, Mapping):
+                r = _nested_update(d.get(k, {}), v)
+                d[k] = r
+            else:
+                d[k] = u[k]
+        else:
+            d = {k: u[k]}
+    return d
