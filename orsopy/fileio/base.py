@@ -418,7 +418,7 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
         # synthesise json dicts for each dataset from the first dataset, and
         # updates to the yaml.
         first_dct = next(dcts)
-        dct_list = [_nested_update(first_dct.copy(), dct) for dct in dcts]
+        dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
         dct_list.insert(0, first_dct)
 
     if validate:
