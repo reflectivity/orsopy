@@ -295,12 +295,15 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
             raise ValueError(
                 "First line does not appear to match that of an ORSO file"
             )
+        version = re.findall("([0-9]+\.?[0-9]*|\.[0-9]+)+?", header[0])[0]
 
         dcts = yaml.safe_load_all(yml)
 
         # synthesise json dicts for each dataset from the first dataset, and
         # updates to the yaml.
         first_dct = next(dcts)
+        first_dct["_orso_version"] = version
+
         dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
         dct_list.insert(0, first_dct)
 
