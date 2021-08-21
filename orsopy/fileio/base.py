@@ -295,7 +295,7 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
             raise ValueError(
                 "First line does not appear to match that of an ORSO file"
             )
-        version = re.findall("([0-9]+\.?[0-9]*|\.[0-9]+)+?", header[0])[0]
+        version = re.findall(r"([0-9]+\.?[0-9]*|\.[0-9]+)+?", header[0])[0]
 
         dcts = yaml.safe_load_all(yml)
 
