@@ -14,12 +14,12 @@ class TestSchema:
         with open(schema_pth, "r") as f:
             schema = json.load(f)
 
-        dct_list, data = _read_header_data(
+        dct_list, data, version = _read_header_data(
             os.path.join("tests", "test_example.ort"),
             validate=True
         )
         assert data[0].shape == (2, 4)
-        assert dct_list[0]['_orso_version'] == "0.1"
+        assert version == "0.1"
 
         # d contains datetime.datetime objects, which would fail the
         # jsonschema validation, so force those to be strings.
@@ -32,7 +32,7 @@ class TestSchema:
         _validate_header_data(dct_list)
 
         # try a 2 dataset file
-        dct_list, data = _read_header_data(
+        dct_list, data, version = _read_header_data(
             os.path.join("tests", "test_example2.ort"),
             validate=True
         )

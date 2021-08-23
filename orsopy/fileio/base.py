@@ -337,7 +337,7 @@ class File(Header):
                 )
 
 
-def _read_header_data(file, validate=False) -> Tuple[dict, list]:
+def _read_header_data(file, validate=False) -> Tuple[dict, list, str]:
     """
     Reads the header and data contained within an ORSO file, parsing it into
     json dictionaries and numerical arrays.
@@ -352,12 +352,13 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
 
     Returns
     -------
-    dct_list, data_sets: list, list
+    dct_list, data_sets, version: list, list, str
         `dct_list` is a list of json dicts containing the parsed yaml header.
         This has to be processed further.
         `data_sets` is a Python list containing numpy arrays holding the
         reflectometry data in the file. It's contained in a list because each
         of the datasets may have a different number of columns.
+        `version` is the ORSO version string.
     """
 
     with _possibly_open_file(file, "r") as fi:
@@ -419,7 +420,6 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
         # synthesise json dicts for each dataset from the first dataset, and
         # updates to the yaml.
         first_dct = next(dcts)
-        first_dct["_orso_version"] = version
 
         dct_list = [_nested_update(deepcopy(first_dct), dct) for dct in dcts]
         dct_list.insert(0, first_dct)
@@ -428,7 +428,7 @@ def _read_header_data(file, validate=False) -> Tuple[dict, list]:
         # requires jsonschema be installed
         _validate_header_data(dct_list)
 
-    return dct_list, data
+    return dct_list, data, version
 
 
 def _validate_header_data(dct_list: List[dict]):

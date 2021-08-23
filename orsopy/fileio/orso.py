@@ -6,7 +6,7 @@ Implementation of the top level class for the ORSO header.
 
 import re
 import yaml
-from typing import List, Union, TextIO
+from typing import List, Union, TextIO, Optional
 from dataclasses import dataclass
 from .base import (Header, Column, Creator, _possibly_open_file,
                    _read_header_data, _nested_update, _dict_diff)
@@ -15,7 +15,7 @@ from .reduction import Reduction
 
 import numpy as np
 
-ORSO_VERSION = 0.1
+ORSO_VERSION = '0.1'
 ORSO_designate = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
                   "| YAML encoding | https://www.reflectometry.org/")
 
@@ -105,7 +105,7 @@ def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
 
 
 def load_orso(fname: Union[TextIO, str]):
-    dct_list, datas = _read_header_data(fname)
+    dct_list, datas, version = _read_header_data(fname)
     ods = []
     for dct, data in zip(dct_list, datas):
         o = Orso(**dct)
