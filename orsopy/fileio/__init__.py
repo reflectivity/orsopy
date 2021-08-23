@@ -10,7 +10,7 @@ from .orso import Orso, make_empty
 
 # author: Andrew R. McCluskey (arm61)
 
-OSRO_VERSION = 0.1
+ORSO_VERSION = 0.1
 
 
 __all__ = [s for s in dir() if not s.startswith("_")]
