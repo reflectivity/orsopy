@@ -205,14 +205,14 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(base.Value(4., 'deg'),
                                                base.ValueRange(
                                                    2., 12., 'angstrom'),
-                                               polarization='+',
+                                               polarization='p',
                                                configuration='liquid surface')
         assert value.incident_angle.magnitude == 4.
         assert value.incident_angle.unit == 'deg'
         assert value.wavelength.min == 2.
         assert value.wavelength.max == 12.
         assert value.wavelength.unit == 'angstrom'
-        assert value.polarization == '+'
+        assert value.polarization == 'p'
         assert value.configuration == 'liquid surface'
 
     def test_to_yaml_config_and_polarization(self):
@@ -222,11 +222,11 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(base.Value(4., 'deg'),
                                                base.ValueRange(
                                                    2., 12., 'angstrom'),
-                                               polarization='+',
+                                               polarization='p',
                                                configuration='liquid surface')
         assert value.to_yaml() == 'incident_angle:\n  magnitude: '\
             + '4.0\n  unit: deg\nwavelength:\n  min: 2.0\n  '\
-            + 'max: 12.0\n  unit: angstrom\npolarization: +\n'\
+            + 'max: 12.0\n  unit: angstrom\npolarization: p\n'\
             + 'configuration: liquid surface\n'
 
 

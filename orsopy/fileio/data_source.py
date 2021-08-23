@@ -46,7 +46,8 @@ class Sample(Header):
         })
 
 
-# Enum does not work with yaml, if we really want this it has to be handled as special case.
+# Enum does not work with yaml, if we really want this it has to be handle
+# as special case.
 #
 # class Polarization(str, enum.Enum):
 #     """
@@ -69,7 +70,7 @@ class InstrumentSettings(Header):
     """Settings associated with the instrumentation."""
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Literal['unpolarized', '+', '-', '--', '-+', '+-', '++'],
+    polarization: Optional[Union[Literal['unpolarized', 'p', 'm', 'mm', 'mp', 'pm', 'pp'],
                                  ValueVector]] = field(
         default='unpolarized',
         metadata={

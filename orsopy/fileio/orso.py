@@ -41,7 +41,8 @@ class Orso(Header):
             else:
                 out += '%-22s ' % (f"{ci.name} ({ci.unit})")
             if ci is self.columns[0]:
-                out = out[:-4]  # strip two characters from first column to align
+                # strip two characters from first column to align
+                out = out[:-4]
         return out[:-1]
 
     def from_difference(self, other_dict):
@@ -65,7 +66,9 @@ class OrsoDataset:
 
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):
-            raise ValueError("Data has to have the same number of columns as header")
+            raise ValueError(
+                "Data has to have the same number of columns as header"
+            )
 
     def header(self):
         out = self.info.to_yaml()
@@ -73,8 +76,8 @@ class OrsoDataset:
         return out
 
     def diff_header(self, other: 'OrsoDataset'):
-        # return a header string that only contains changes to other OrsoDataset
-        # ensure that data_set is the first entry
+        # return a header string that only contains changes to other
+        # OrsoDataset ensure that data_set is the first entry
         out_dict = {"data_set": None}
 
         _diff = self.info.to_difference(other.info)
