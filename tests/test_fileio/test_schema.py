@@ -19,6 +19,7 @@ class TestSchema:
             validate=True
         )
         assert data[0].shape == (2, 4)
+        assert dct_list[0]['_orso_version'] == "0.1"
 
         # d contains datetime.datetime objects, which would fail the
         # jsonschema validation, so force those to be strings.
