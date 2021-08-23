@@ -8,6 +8,7 @@ import enum
 from typing import Optional, Dict, List, Union
 from dataclasses import field, dataclass
 import datetime
+
 try:
     from typing import Literal
 except ImportError:
@@ -17,7 +18,7 @@ except ImportError:
 from .base import File, Header, ValueRange, Value, ValueVector, Person
 
 
-@dataclass
+@dataclass(repr=False)
 class Experiment(Header):
     """A definition of the experiment performed."""
     title: str
@@ -27,10 +28,9 @@ class Experiment(Header):
     facility: Optional[str] = field(default=None)
     ID: Optional[str] = field(default=None)
     doi: Optional[str] = field(default=None)
-    _orso_optionals = ['facility', 'ID', 'doi']
 
 
-@dataclass
+@dataclass(repr=False)
 class Sample(Header):
     """A description of the sample measured."""
     name: str
@@ -42,50 +42,50 @@ class Sample(Header):
         default=None,
         metadata={
             'description':
-            'Using keys for parameters and Value* objects for values.'
+                'Using keys for parameters and Value* objects for values.'
         })
-    _orso_optionals = [
-        'type', 'composition', 'description', 'environment',
-        'sample_parameters'
-    ]
 
 
-class Polarization(str, enum.Enum):
-    """
-    The first symbol indicates the magnetisation direction of the incident
-    beam. An optional second symbol indicates the direction of the scattered
-    beam, if a spin analyser is present.
-    """
+# Enum does not work with yaml, if we really want this it has to be handled as special case.
+#
+# class Polarization(str, enum.Enum):
+#     """
+#     The first symbol indicates the magnetisation direction of the incident
+#     beam. An optional second symbol indicates the direction of the scattered
+#     beam, if a spin analyser is present.
+#     """
+#
+#     unpolarized = "unpolarized"
+#     p = "+"
+#     m = "-"
+#     mm = "--"
+#     mp = "-+"
+#     pm = "+-"
+#     pp = "++"
 
-    unpolarized = "unpolarized"
-    p = "+"
-    m = "-"
-    mm = "--"
-    mp = "-+"
-    pm = "+-"
-    pp = "++"
 
-
-@dataclass
+@dataclass(repr=False)
 class InstrumentSettings(Header):
     """Settings associated with the instrumentation."""
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Polarization, ValueVector]] = field(
+    polarization: Optional[Union[Literal['unpolarized', '+', '-', '--', '-+', '+-', '++'],
+                                 ValueVector]] = field(
         default='unpolarized',
         metadata={
             'description':
-            'Polarization described as p / m / pp / pm / mp / mm / vector'
+                'Polarization described as p / m / pp / pm / mp / mm / vector'
         })
     configuration: Optional[str] = field(
         default=None,
         metadata={
             'description': 'half / full polarized | liquid_surface | etc'
         })
-    _orso_optionals = ['configuration']
+
+    __repr__ = Header._staggered_repr
 
 
-@dataclass
+@dataclass(repr=False)
 class Measurement(Header):
     """The measurement elements for the header."""
     instrument_settings: InstrumentSettings
@@ -98,10 +98,11 @@ class Measurement(Header):
             "energy-dispersive",
         ]
     ]] = None
-    _orso_optionals = ['references', 'scheme']
+
+    __repr__ = Header._staggered_repr
 
 
-@dataclass
+@dataclass(repr=False)
 class DataSource(Header):
     """The data_source object definition."""
     owner: Person
@@ -109,3 +110,5 @@ class DataSource(Header):
     sample: Sample
     measurement: Measurement
     _orso_optionals = []
+
+    __repr__ = Header._staggered_repr

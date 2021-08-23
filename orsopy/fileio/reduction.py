@@ -10,25 +10,25 @@ import datetime
 from .base import Header, Person
 
 
-@dataclass
+@dataclass(repr=False)
 class Software(Header):
     """Description of the reduction software."""
     name: str
     version: Optional[str] = None
     platform: Optional[str] = None
-    _orso_optionals = ["version", "platform"]
 
 
-@dataclass
+@dataclass(repr=False)
 class Reduction(Header):
     """A description of the reduction that has been performed."""
     software: Union[Software, str]
     time: Optional[datetime.datetime] = field(
+        default=None,
         metadata={
             "description": "Timestamp string, formatted as ISO 8601 datetime"
         })
-    creator: Optional[Person]
-    corrections: Optional[List[str]]
+    creator: Optional[Person] = None
+    corrections: Optional[List[str]] = None
     computer: Optional[str] = field(
         default=None, metadata={'description': 'Computer used for reduction'})
     call: Optional[str] = field(
@@ -39,4 +39,5 @@ class Reduction(Header):
     binary: Optional[str] = field(
         default=None,
         metadata={'description': 'Path to full information file'})
-    _orso_optionals = ['computer', 'call', 'script', 'binary']
+
+    __repr__ = Header._staggered_repr

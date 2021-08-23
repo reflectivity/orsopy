@@ -2,15 +2,14 @@
 Implementation of the Orso class that defined the header.
 """
 from .base import (Header, Column, Person, ValueRange, ValueVector, Value,
-                   File, _read_header_data, _validate_header_data)
+                   File, Creator,
+                   _read_header_data, _validate_header_data)
 from .data_source import (DataSource, Experiment, Sample, InstrumentSettings,
                           Measurement)
 from .reduction import Reduction, Software
-from .orso import Orso, make_empty
+from .orso import Orso, OrsoDataset, save_orso, load_orso, ORSO_VERSION
 
 # author: Andrew R. McCluskey (arm61)
-
-ORSO_VERSION = 0.1
 
 
 __all__ = [s for s in dir() if not s.startswith("_")]
