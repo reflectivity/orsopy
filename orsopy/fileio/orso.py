@@ -141,13 +141,34 @@ class OrsoDataset:
 
 def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]) -> None:
     """
+    Saves an ORSO file.
+
     Parameters
     ----------
     datasets: List
         List of OrsoDataset to save into the Orso file.
     fname: file-like or str
         The Orso file to save
+
+    Each of the datasets must have a unique `OrsoDataset.info.data_set`
+    attribute. If that attribute is not set, it is given an integer value
+    corresponding to it's position in the list. If more than one dataset has
+    the same attribute value then a Va
     """
+    for idx, dataset in enumerate(datasets):
+        info = dataset.info
+        data_set = info.data_set
+        if (data_set is None or (
+                isinstance(data_set, str) and len(data_set) == 0)):
+            # it's not set, or is zero length string
+            info.data_set = idx
+
+    dsets = [dataset.info.data_set for dataset in datasets]
+    if len(set(dsets)) != len(dsets):
+        raise ValueError(
+            "All `OrsoDataset.info.data_set` values must be unique"
+        )
+
     with _possibly_open_file(fname, 'w') as f:
         header = f"{ORSO_DESIGNATE}\n"
         ds1 = datasets[0]
