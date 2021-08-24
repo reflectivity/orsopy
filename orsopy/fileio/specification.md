@@ -9,7 +9,7 @@ contributors are:
 Andrew Caruana, 
 Andrew McCluskey,
 Andrew Nelson,
-Artur Galvic,
+Artur Glavic,
 Brian Maranville,
 Bridget Murphy,
 Maximilian Skoda, 
@@ -123,7 +123,7 @@ The first line contains information about
 - the encoding;
 - a link to us.
 
-Since it is not part of the YAML hirarchy, a second hash is needed.
+Since it is not part of the YAML hierarchy, a second hash is needed.
 
     # # ORSO reflectivity data file | 0.1 standard | YAML encoding | https://www.reflectometry.org/`  
 
@@ -231,7 +231,7 @@ In case there are several temperatures:
     #                 max: 
     #             polarization: 
 
-For neutrons one of `p / m / pp / pm / mp / mm  / vector`
+For neutrons one of `unpolarized/ p / m / pp / pm / mp / mm  / vector`
 
 For x-rays one of `tba`   
 
@@ -299,7 +299,7 @@ The `comment` is used to give some more information.
 
 ### column description
 
-This data representation is essentially ment to store a physical observable *I*
+This data representation is meant to store a physical observable *I*
 as a function of a variable *x*. Together with the related information about
 the error of *I* and the resolution of *x* this leads to the defined leading 4 
 columns of the data set. I.e.
@@ -312,9 +312,9 @@ columns of the data set. I.e.
 where for columns 3 and 4, *sigma* is the standard deviation of a Gaussian
 distribution.
 
-The exampe given refers to *R(Qz)* which has unit 1
+The example given refers to *R(Qz)* which has unit 1
 
-    # column_description:
+    # columns:
     #      - name:        Qz
     #        unit:        1/angstrom 
     #        description: wavevector transfer
@@ -339,12 +339,12 @@ description and units. E.g.
 In case there are various data sets in one file, the first one can be given an identifier
 with the optional line
 
-    # data set: <identifier>
+    # data_set: <identifier>
 
 Also optionally there might be a short-notation column description preceded with
 a hash, since this line is outside the YAML structure
 
-    # #         Qz             RQz              sR              sQ
+    # #         Qz             R              sR              sQz
 
 ---
 
@@ -379,7 +379,7 @@ This is recognised by gnuplot as a separator for 3 dimensional data sets.
 
 The mandatory separator between data sets is the string
 
-    # data set: <identifier>
+    # data_set: <identifier>
 
 where <identifier> is either an unique name or a number. The default numbering of dats sets starts with 0, the first additional one thus gets number 1 and so on.
 
