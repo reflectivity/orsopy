@@ -201,7 +201,6 @@ class TestOrso(unittest.TestCase):
         with pytest.raises(ValueError):
             fileio.save_orso([ds, ds2], 'test_data_set.ort')
 
-
     def test_user_data(self):
         # test write and read of userdata
         info = fileio.Orso.empty()
