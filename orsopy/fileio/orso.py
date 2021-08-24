@@ -16,7 +16,7 @@ from .reduction import Reduction
 import numpy as np
 
 ORSO_VERSION = '0.1'
-ORSO_designate = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
+ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
                   "| YAML encoding | https://www.reflectometry.org/")
 
 
@@ -33,7 +33,11 @@ class Orso(Header):
 
     __repr__ = Header._staggered_repr
 
-    def column_header(self):
+    def column_header(self) -> str:
+        """
+        An information string that explains what each of the columns
+        in a dataset corresponds to.
+        """
         out = '# '
         for ci in self.columns:
             if ci.unit is None:
@@ -45,13 +49,40 @@ class Orso(Header):
                 out = out[:-4]
         return out[:-1]
 
-    def from_difference(self, other_dict):
+    def from_difference(self, other_dict: dict) -> 'Orso':
+        """
+        Constructs another `Orso` instance from self, and a dict
+        containing updated header information.
+
+        Parameters
+        ----------
+        other_dict: dict
+            Contains updated header information
+
+        Returns
+        -------
+        new_orso: Orso
+            A new `Orso` object constructed from self, and the
+            updated header information.
+        """
         # recreate info from difference dictionary
         output = self.to_dict()
         output = _nested_update(output, other_dict)
         return Orso(**output)
 
-    def to_difference(self, other: 'Orso'):
+    def to_difference(self, other: 'Orso') -> dict:
+        """
+        A dictionary containing the difference in header information between
+        two Orso objects.
+
+        Parameters
+        ----------
+        other: Orso
+
+        Returns
+        -------
+        out_dict: dict
+        """
         # return a dictionary of differences to other object
         my_dict = self.to_dict()
         other_dict = other.to_dict()
@@ -61,6 +92,16 @@ class Orso(Header):
 
 @dataclass
 class OrsoDataset:
+    """
+    Parameters
+    ----------
+    info: Orso
+        The header information for the reflectivity measurement.
+    data: np.ndarray
+        The numerical data associated with the reflectivity measurement.
+        The data has shape `(npnts, ncols)`, where
+        `ncols == len(self.info.columns)`.
+    """
     info: Orso
     data: np.ndarray
 
@@ -70,12 +111,15 @@ class OrsoDataset:
                 "Data has to have the same number of columns as header"
             )
 
-    def header(self):
+    def header(self) -> str:
+        """
+        The header string for the ORSO file.
+        """
         out = self.info.to_yaml()
         out += self.info.column_header()
         return out
 
-    def diff_header(self, other: 'OrsoDataset'):
+    def diff_header(self, other: 'OrsoDataset') -> str:
         # return a header string that only contains changes to other
         # OrsoDataset ensure that data_set is the first entry
         out_dict = {"data_set": None}
@@ -95,9 +139,17 @@ class OrsoDataset:
         return self.info == other.info and (self.data == other.data).all()
 
 
-def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
+def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]) -> None:
+    """
+    Parameters
+    ----------
+    datasets: List
+        List of OrsoDataset to save into the Orso file.
+    fname: file-like or str
+        The Orso file to save
+    """
     with _possibly_open_file(fname, 'w') as f:
-        header = f"{ORSO_designate}\n"
+        header = f"{ORSO_DESIGNATE}\n"
         ds1 = datasets[0]
         header += ds1.header()
         np.savetxt(f, ds1.data, header=header, fmt='%-22.16e')
@@ -107,7 +159,19 @@ def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]):
             np.savetxt(f, dsi.data, header=hi, fmt='%-22.16e')
 
 
-def load_orso(fname: Union[TextIO, str]):
+def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
+    """
+    Parameters
+    ----------
+    fname: file-like or str
+        The Orso file to load
+
+    Returns
+    -------
+    ods: List
+        List of OrsoDataset corresponding to each dataset contained within the
+        ORT file.
+    """
     dct_list, datas, version = _read_header_data(fname)
     ods = []
     for dct, data in zip(dct_list, datas):
