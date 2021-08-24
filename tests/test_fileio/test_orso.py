@@ -8,8 +8,9 @@ import unittest
 import pathlib
 from datetime import datetime
 
+import pytest
 import yaml
-from orsopy.fileio.orso import Orso
+from orsopy.fileio.orso import Orso, OrsoDataset
 from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
                                        Measurement, InstrumentSettings)
 from orsopy.fileio.reduction import Reduction, Software
@@ -174,7 +175,6 @@ class TestOrso(unittest.TestCase):
             columns=info.columns,
         )
         ds3 = fileio.OrsoDataset(info3, data)
-
         fileio.save_orso([ds, ds2, ds3], "test.ort")
 
         ls1, ls2, ls3 = fileio.load_orso("test.ort")
@@ -184,6 +184,22 @@ class TestOrso(unittest.TestCase):
 
         # TODO This will fail because the files aren't valid
         # _read_header_data("test.ort", validate=True)
+
+    def test_unique_dataset(self):
+        # checks that data_set is unique on saving of OrsoDatasets
+        info = Orso.empty()
+        info.data_set = 0
+        info.columns = [Column("stuff")] * 4
+
+        info2 = Orso.empty()
+        info2.data_set = 0
+        info2.columns = [Column("stuff")] * 4
+
+        ds = OrsoDataset(info, np.empty((2, 4)))
+        ds2 = OrsoDataset(info2, np.empty((2, 4)))
+
+        with pytest.raises(ValueError):
+            fileio.save_orso([ds, ds2], 'test_data_set.ort')
 
 
 class TestFunctions(unittest.TestCase):

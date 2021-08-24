@@ -75,7 +75,7 @@ class InstrumentSettings(Header):
         default='unpolarized',
         metadata={
             'description':
-                'Polarization described as p / m / pp / pm / mp / mm / vector'
+                'Polarization described as unpolarized/ p / m / pp / pm / mp / mm / vector'
         })
     configuration: Optional[str] = field(
         default=None,
