@@ -231,7 +231,7 @@ In case there are several temperatures:
     #                 max: 
     #             polarization: 
 
-For neutrons one of `unpolarized/ p / m / pp / pm / mp / mm  / vector`
+For neutrons one of `unpolarized / p / m / pp / pm / mp / mm  / vector`
 
 For x-rays one of `tba`   
 
@@ -299,18 +299,26 @@ The `comment` is used to give some more information.
 
 ### column description
 
-This data representation is meant to store a physical observable *I*
-as a function of a variable *x*. Together with the related information about
-the error of *I* and the resolution of *x* this leads to the defined leading 4 
+This data representation is meant to store a physical observable *R* / *I*
+as a function of a variable *Qz*. Together with the related information about
+the error of *R* / *I* and the resolution of *Qz* this leads to the defined leading 4 
 columns of the data set. I.e.
 
-1. *x*   with units
-2. *I*   with units (if applicable)
-3. *sigma* of *I*   with units (if applicable)
-4. *sigma* of resolution of *x*   with units 
+1. *Qz* with units
+2. *I* with units (if applicable)
+3. *sigma* of *I* with units (if applicable)
+4. *sigma* of resolution of *Qz* with units 
 
 where for columns 3 and 4, *sigma* is the standard deviation of a Gaussian
 distribution.
+
+- The first column must be called *Qz*.
+- The second column must be the physically observed value. It is strongly advised that
+this be normalised reflectivity (called *R*), but can also be un-normalised intensity
+(called *I*). In the latter case units should be provided, e.g. 1/s. The naming of the
+third column is then *sR* or *sI*.
+- It's strongly advised that the third and fourth columns are provided. If these are
+unknown then a value of 'nan' can be used in the data array.
 
 The example given refers to *R(Qz)* which has unit 1
 
@@ -327,7 +335,8 @@ The example given refers to *R(Qz)* which has unit 1
     #        description: standard deviation of wavevector transfer resolution
 
 Further columns can be of any type, content and order. But always with
-description and units. E.g.
+description and units. These further columns correspond to the fifth column onwards,
+meaning that the third and fourth columns must be specified.
 
     #     - name:        alpha_i
     #       unit:        deg  
@@ -336,8 +345,8 @@ description and units. E.g.
     #       unit:        angstrom 
     #       description: wavelength
 
-In case there are various data sets in one file, the first one can be given an identifier
-with the optional line
+If there are multiple data sets in one file, the first one can be given an identifier
+with the optional line:
 
     # data_set: <identifier>
 
@@ -356,7 +365,9 @@ in the *column description* section.
 
 - All entries have to be of the same data type, preferably float.
 - There is no leading space.
-- Separators are spaces, tabs are not allowd.
+- Separators are spaces, tabs are not allowed.
+- Whilst it's strongly advised to provide values for the third and fourth columns, if
+these are unknown then use 'nan' for the values.
 
 - It is recommended to use the same format for all columns,
   preferably `%16.9e`.
@@ -381,7 +392,7 @@ The mandatory separator between data sets is the string
 
     # data_set: <identifier>
 
-where <identifier> is either an unique name or a number. The default numbering of dats sets starts with 0, the first additional one thus gets number 1 and so on.
+where <identifier> is either an unique name or a number. The default numbering of data sets starts with 0, the first additional one thus gets number 1 and so on.
 
 ### overwrite meta data
 
