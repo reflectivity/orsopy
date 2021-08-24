@@ -6,8 +6,8 @@ Implementation of the top level class for the ORSO header.
 
 import re
 import yaml
-from typing import List, Union, TextIO, Optional
-from dataclasses import dataclass
+from typing import List, Union, TextIO, Optional, Any
+from dataclasses import dataclass, field
 from .base import (Header, Column, Creator, _possibly_open_file,
                    _read_header_data, _nested_update, _dict_diff)
 from .data_source import DataSource
@@ -24,12 +24,18 @@ ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.
+    Extra information not part of the official Orso specification may be
+    stored in `user_data`.
     """
     creator: Creator
     data_source: DataSource
     reduction: Reduction
-    data_set: Union[str, int]
     columns: List[Column]
+    data_set: Union[str, int] = None
+    user_data: Optional[Any] = field(
+        default=None,
+        metadata={"description": "Extra information not part of the official Orso specification"}
+    )
 
     __repr__ = Header._staggered_repr
 
@@ -195,6 +201,7 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
     """
     dct_list, datas, version = _read_header_data(fname)
     ods = []
+
     for dct, data in zip(dct_list, datas):
         o = Orso(**dct)
         od = OrsoDataset(o, data)

@@ -53,7 +53,7 @@ class TestOrso(unittest.TestCase):
         )
 
         cols = [Column("Qz"), Column("R")]
-        value = Orso(c, ds, redn, 0, cols)
+        value = Orso(c, ds, redn, cols, 0)
 
         assert value.creator.name == "A Person"
         assert value.creator.contact == "wally@wallyland.com"
@@ -109,7 +109,7 @@ class TestOrso(unittest.TestCase):
         )
 
         cols = [Column("Qz"), Column("R")]
-        value = Orso(c, ds, redn, 1, cols)
+        value = Orso(c, ds, redn, cols, 1)
 
         dsm = value.data_source.measurement
         assert value.data_source.owner.name == 'A Person'
@@ -202,6 +202,33 @@ class TestOrso(unittest.TestCase):
             fileio.save_orso([ds, ds2], 'test_data_set.ort')
 
 
+    def test_user_data(self):
+        # test write and read of userdata
+        info = fileio.Orso.empty()
+        info.columns = [
+            fileio.Column("Qz", "1/angstrom"),
+            fileio.Column("R"),
+            fileio.Column("sR"),
+        ]
+
+        data = np.zeros((100, 3))
+        data[:] = np.arange(100.0)[:, None]
+        dct = {"ci": "1", "foo": ["bar", 1, 2, 3]}
+        info.user_data = dct
+        ds = fileio.OrsoDataset(info, data)
+
+        fileio.save_orso([ds], "test2.ort")
+        with pytest.warns(RuntimeWarning):
+            ls = fileio.load_orso("test2.ort")
+        assert ls[0].info.user_data == info.user_data
+
+        info.user_data = 12398098
+        fileio.save_orso([ds], "test2.ort")
+        with pytest.warns(RuntimeWarning):
+            ls = fileio.load_orso("test2.ort")
+        assert ls[0].info.user_data == info.user_data
+
+
 class TestFunctions(unittest.TestCase):
     """
     Tests for functionality in the Orso module.
@@ -250,6 +277,5 @@ class TestFunctions(unittest.TestCase):
             '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
             '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
             '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            'data_set: null\ncolumns:\n- name: null\n'
-
+            'columns:\n- name: null\ndata_set: null\n'
         )

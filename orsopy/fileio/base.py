@@ -82,7 +82,14 @@ class Header(metaclass=HeaderMeta):
                     # convert to dataclass instance
                     setattr(self, fld.name, updt)
                 else:
-                    raise ValueError(f"No suitable conversion found for {fld.type} with value {attr}")
+                    warnings.warn(
+                        f"No suitable conversion found for {fld.name}, "
+                        f"{fld.type} with value {attr}, "
+                        "setting attribute with raw value from ORSO file",
+                        RuntimeWarning
+                    )
+                    setattr(self, fld.name, attr)
+                    # raise ValueError(f"No suitable conversion found for {fld.type} with value {attr}")
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
 
@@ -110,7 +117,9 @@ class Header(metaclass=HeaderMeta):
             if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
                 if isinstance(item, (list, tuple)):
-                    return [Header._resolve_type(t0, i) for i in item]
+                    return type(item)(
+                        [Header._resolve_type(t0, i) for i in item]
+                    )
                 else:
                     return [Header._resolve_type(t0, item)]
             elif hbase in [Union, Optional]:
