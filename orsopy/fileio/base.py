@@ -170,8 +170,6 @@ class Header(metaclass=HeaderMeta):
                     else:
                         cleaned_list.append(j)
                 out_dict[i] = type(value)(cleaned_list)
-            elif i == "data_set" and value == 0:
-                continue
             else:
                 # here _todict converts objects that aren't derived from Header
                 # and therefore don't have to_dict methods.
