@@ -28,8 +28,8 @@ class Orso(Header):
     creator: Creator
     data_source: DataSource
     reduction: Reduction
-    data_set: Union[str, int]
     columns: List[Column]
+    data_set: Optional[Union[int, str]] = None
 
     __repr__ = Header._staggered_repr
 
@@ -195,6 +195,7 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
     """
     dct_list, datas, version = _read_header_data(fname)
     ods = []
+
     for dct, data in zip(dct_list, datas):
         o = Orso(**dct)
         od = OrsoDataset(o, data)
