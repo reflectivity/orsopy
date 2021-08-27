@@ -31,7 +31,7 @@ class Orso(Header):
     data_source: DataSource
     reduction: Reduction
     columns: List[Column]
-    data_set: Union[str, int] = None
+    data_set: Optional[Union[int, str]] = None
     user_data: Optional[Any] = field(
         default=None,
         metadata={"description": "Extra information not part of the official Orso specification"}

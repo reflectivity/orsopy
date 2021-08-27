@@ -69,7 +69,8 @@ class TestOrso(unittest.TestCase):
         assert value.reduction.time == datetime(2021, 7, 14, 10, 10, 10)
         assert value.columns[0].name == 'Qz'
         assert value.columns[1].name == 'R'
-        assert value.data_set == '0'
+        print(value.data_set, type(value.data_set))
+        assert value.data_set == 0
 
         h = value.to_yaml()
         h = "\n".join(
@@ -116,6 +117,13 @@ class TestOrso(unittest.TestCase):
         assert dsm.data_files[0].file == 'README.rst'
         assert value.reduction.software.name == 'orsopy'
         assert value.columns[0].name == 'Qz'
+        assert value.data_set == 1
+
+        # check that data_set can also be a string.
+        value = Orso(c, ds, redn, cols, 'fokdoks')
+        assert value.data_set == 'fokdoks'
+        # don't want class construction coercing a str to an int
+        value = Orso(c, ds, redn, cols, '1')
         assert value.data_set == '1'
 
     def test_write_read(self):
@@ -267,7 +275,7 @@ class TestFunctions(unittest.TestCase):
         TODO: Fix once correct format is known.
         """
         empty = Orso.empty()
-        assert empty.to_yaml() == (
+        req = (
             'creator:\n  name: null\n  affiliation: null\n  time: null\n'
             '  computer: null\ndata_source:\n  owner:\n    name: null\n'
             '    affiliation: null\n  experiment:\n    title: null\n'
@@ -276,5 +284,6 @@ class TestFunctions(unittest.TestCase):
             '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
             '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
             '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            'columns:\n- name: null\ndata_set: null\n'
+            'columns:\n- name: null\n'
         )
+        assert empty.to_yaml() == req

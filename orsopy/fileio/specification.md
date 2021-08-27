@@ -312,13 +312,14 @@ columns of the data set. I.e.
 where for columns 3 and 4, *sigma* is the standard deviation of a Gaussian
 distribution.
 
-- The first column must be called *Qz*.
+- The first column must be called *Qz*, the units must either be `1/angstrom` or `1/nm`.
 - The second column must be the physically observed value. It is strongly advised that
 this be normalised reflectivity (called *R*), but can also be un-normalised intensity
 (called *I*). In the latter case units should be provided, e.g. 1/s. The naming of the
 third column is then *sR* or *sI*.
 - It's strongly advised that the third and fourth columns are provided. If these are
-unknown then a value of 'nan' can be used in the data array.
+unknown then a value of 'nan' can be used in the data array. The third column must
+have the same units as the first.
 
 The example given refers to *R(Qz)* which has unit 1
 
