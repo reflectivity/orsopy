@@ -41,9 +41,9 @@ class Orso(Header):
         out = '# '
         for ci in self.columns:
             if ci.unit is None:
-                out += '%-22s ' % ci.name
+                out += f"{ci.name:<23}"
             else:
-                out += '%-22s ' % (f"{ci.name} ({ci.unit})")
+                out += f"{f'{ci.name} ({ci.unit})':<23}"
             if ci is self.columns[0]:
                 # strip two characters from first column to align
                 out = out[:-4]
