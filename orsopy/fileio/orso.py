@@ -139,7 +139,11 @@ class OrsoDataset:
         return self.info == other.info and (self.data == other.data).all()
 
 
-def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]) -> None:
+def save_orso(
+        datasets: List[OrsoDataset],
+        fname: Union[TextIO, str],
+        comment: Optional[str] = None
+) -> None:
     """
     Saves an ORSO file.
 
@@ -149,6 +153,8 @@ def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]) -> None:
         List of OrsoDataset to save into the Orso file.
     fname: file-like or str
         The Orso file to save
+    comment: str, Optional
+        Comment to write at top of Orso file.
 
     Each of the datasets must have a unique `OrsoDataset.info.data_set`
     attribute. If that attribute is not set, it is given an integer value
@@ -171,6 +177,9 @@ def save_orso(datasets: List[OrsoDataset], fname: Union[TextIO, str]) -> None:
 
     with _possibly_open_file(fname, 'w') as f:
         header = f"{ORSO_DESIGNATE}\n"
+        if comment is not None:
+            header += f"# {comment}\n"
+
         ds1 = datasets[0]
         header += ds1.header()
         np.savetxt(f, ds1.data, header=header, fmt='%-22.16e')
