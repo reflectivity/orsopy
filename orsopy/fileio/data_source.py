@@ -20,7 +20,7 @@ class Experiment(Header):
     date: datetime.datetime
     probe: Union[Literal["neutrons", "x-rays"]]
     facility: Optional[str] = field(default=None)
-    ID: Optional[str] = field(default=None)
+    proposalID: Optional[str] = field(default=None)
     doi: Optional[str] = field(default=None)
 
 

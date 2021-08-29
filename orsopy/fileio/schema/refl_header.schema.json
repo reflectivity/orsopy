@@ -51,6 +51,26 @@
               "$ref": "#/definitions/sQz_column"
             }
           ]
+        },
+        {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/qz_column"
+            },
+            {
+              "$ref": "#/definitions/R_column"
+            },
+            {
+              "$ref": "#/definitions/sR_column"
+            },
+            {
+              "$ref": "#/definitions/sQz_column"
+            },
+            {
+              "$ref": "#/definitions/column"
+            }
+          ]
         }
       ]
     },
@@ -160,7 +180,7 @@
         "facility": {
           "type": "string"
         },
-        "ID": {
+        "proposalID": {
           "type": "string"
         },
         "date": {
@@ -459,6 +479,27 @@
             "1/angstrom",
             "1/nm"
           ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "column": {
+      "title": "column",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the column",
+          "type": "string"
+        },
+        "dimension": {
+          "default": "",
+          "type": "string"
+        },
+        "unit": {
+          "description": "SI unit string",
           "type": "string"
         }
       },

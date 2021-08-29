@@ -61,7 +61,7 @@ class Experiment:
     instrument: str
     probe: Union[Literal["neutrons", "x-rays"]]
     facility: Optional[str] = None
-    ID: Optional[str] = None
+    proposalID: Optional[str] = None
     date: Optional[datetime.datetime] = field(
         metadata={
             "description": "timestamp string, formatted as ISO 8601 datetime"

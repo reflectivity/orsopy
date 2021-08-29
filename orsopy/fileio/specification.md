@@ -23,7 +23,7 @@ The rules and examples given below are still under discussion and the header ent
 listed are not exhaustive. Comments and contributions are welcome and should be 
 communicated to <Jochen.Stahn@psi.ch>.
 
-last modified: 2021-06-17
+last modified: 2021-08-30
 
 ---
 
@@ -42,7 +42,7 @@ the string `null`
 
 ### language
 
-In line with CANSAS and NEXUS, we use American English for the key words. 
+In line with canSAS and NeXUS, we use American English for the keywords. 
 E.g. `polarization` rather than `polarisation`. 
 
 
@@ -318,7 +318,7 @@ this be normalised reflectivity (called *R*), but can also be un-normalised inte
 (called *I*). In the latter case units should be provided, e.g. 1/s. The naming of the
 third column is then *sR* or *sI*.
 - It's strongly advised that the third and fourth columns are provided. If these are
-unknown then a value of 'nan' can be used in the data array. The third column must
+unknown then a value of 'nan' can be used in the data array. The fourth column must
 have the same units as the first.
 
 The example given refers to *R(Qz)* which has unit 1
