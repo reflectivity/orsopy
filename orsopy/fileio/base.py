@@ -470,7 +470,6 @@ def _validate_header_data(dct_list: List[dict]):
             )
 
 
-
 @contextmanager
 def _possibly_open_file(f, mode="wb"):
     """
