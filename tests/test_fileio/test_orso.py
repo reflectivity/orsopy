@@ -182,7 +182,7 @@ class TestOrso(unittest.TestCase):
             columns=info.columns,
         )
         ds3 = fileio.OrsoDataset(info3, data)
-        fileio.save_orso([ds, ds2, ds3], "test.ort")
+        fileio.save_orso([ds, ds2, ds3], "test.ort", comment='Interdiffusion')
 
         ls1, ls2, ls3 = fileio.load_orso("test.ort")
         assert ls1 == ds
