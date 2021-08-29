@@ -190,6 +190,7 @@ class ORSOHeader:
         Tuple[qz_column, R_column],
         Tuple[qz_column, R_column, sR_column],
         Tuple[qz_column, R_column, sR_column, sQz_column],
+        Tuple[qz_column, R_column, sR_column, sQz_column, column],
     ]
     reduction: Optional[Reduction] = None
     data_set: Union[str, int] = None

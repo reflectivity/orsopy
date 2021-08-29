@@ -5,15 +5,9 @@ Implementation of the data_source for the ORSO header.
 # author: Andrew R. McCluskey (arm61)
 
 import enum
-from typing import Optional, Dict, List, Union
+from typing import Optional, Dict, List, Union, Literal
 from dataclasses import field, dataclass
 import datetime
-
-try:
-    from typing import Literal
-except ImportError:
-    # not available until 3.8
-    from typing_extensions import Literal
 
 from .base import File, Header, ValueRange, Value, ValueVector, Person
 
