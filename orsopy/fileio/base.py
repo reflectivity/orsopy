@@ -457,6 +457,7 @@ def _validate_header_data(dct_list: List[dict]):
         dicts corresponding to parsed yaml headers from the ORT file.
     """
     import jsonschema
+    required_columns = ["Qz", "R", "sR", "sQz"]
 
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
@@ -470,6 +471,19 @@ def _validate_header_data(dct_list: List[dict]):
     ]
     for dct in modified_dct_list:
         jsonschema.validate(dct, schema)
+
+        # Validate the column names. Ideally this is done with the jsonschema,
+        # but it's difficult to create a schema from the 'default' orsopy
+        # dataclasses that does that. It is possible but it requires extra
+        # column objects like Qz_column, R_column, etc.
+        cols = dct["columns"]
+        ncols = min(4, len(cols))
+        col_names = [col['name'] for col in cols]
+        if col_names[:ncols] != required_columns[:ncols]:
+            raise ValueError(
+                "The first four columns should be named"
+                " 'Qz', 'R', ['sR', ['sQz']]"
+            )
 
 
 @contextmanager
