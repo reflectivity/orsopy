@@ -48,7 +48,7 @@ E.g. `polarization` rather than `polarisation`.
 
 ### encoding
 
-The text representation allows for ASCII characters following the !!! endcoding. 
+The text representation allows for ASCII characters following the !!! encoding. 
 
 For the keywords only !!! encoding is allowed. 
 
@@ -94,7 +94,7 @@ The key word `comment:` allows to add free text, e.g. to describe a related entr
 in more detail.
 
 A hash (`#`) declares everything that follows on the same line to be outside the
-hirarchical structure and will be ignored by YAML (or JSON) based information
+hierarchical structure and will be ignored by YAML (or JSON) based information
 processing. E.g. the first line of the text representation contains information
 not structured due to YAML rules and thus starts with `# # `, where the first
 hash means *header* and the second *non-YAML entry*.
@@ -205,7 +205,7 @@ In case there are several temperatures:
     #         electric_current:
     #             unit:
     #             value:
-    #         electic_ac_field: 
+    #         electric_ac_field: 
     #             amplitude:
     #                 unit:
     #                 value:
@@ -215,10 +215,10 @@ In case there are several temperatures:
 
 
     #    measurement: mandatory 
-    #         scheme:  optionl, best practice
+    #         scheme:  optional, best practice
                        angle-dispersive / energy-dispersive / angle- and energy-dispersive 
     #         instrument_settings:  
-    #             configuration: half / full polarised | liqid_surface | ....   free text
+    #             configuration: half / full polarised | liquid_surface | ....   free text
     #             incident_angle:  
     #                 unit:        
     #                 value:
@@ -253,8 +253,8 @@ An example where it is not required is the output of an x-ray lab source, as
 long as no normalisation or absorber correction has been performed.
 
 The content of this section should contain enough information to rerun
-the reduction, either by explicitely hosing all the required information,
-or by refering to a nexus representation, a note book or a log file. 
+the reduction, either by explicitly hosing all the required information,
+or by referring to a nexus representation, a note book or a log file. 
 
     # reduction:  
     #      software:
