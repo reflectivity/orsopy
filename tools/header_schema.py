@@ -154,7 +154,7 @@ class column:
 
     name: str = d("The name of the column")
     dimension: Optional[str] = ""
-    unit: Optional[Literal["1/angstrom", "1/nm"]] = field(
+    unit: Optional[str] = field(
         default=None, metadata={"description": "SI unit string"}
     )
     # description: Optional[str] = field(
@@ -164,7 +164,7 @@ class column:
 @dataclass
 class qz_column(column):
     name: Literal["Qz"]
-
+    unit: Literal["1/angstrom", "1/nm"]
 
 @dataclass
 class R_column(column):
@@ -179,6 +179,7 @@ class sR_column(column):
 @dataclass
 class sQz_column(column):
     name: Literal["sQz"]
+    unit: Literal["1/angstrom", "1/nm"]
 
 
 @dataclass
