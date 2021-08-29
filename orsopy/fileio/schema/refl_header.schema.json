@@ -383,7 +383,6 @@
           "type": "string"
         },
         "unit": {
-          "description": "SI unit string",
           "enum": [
             "1/angstrom",
             "1/nm"
@@ -411,10 +410,6 @@
         },
         "unit": {
           "description": "SI unit string",
-          "enum": [
-            "1/angstrom",
-            "1/nm"
-          ],
           "type": "string"
         }
       },
@@ -438,10 +433,6 @@
         },
         "unit": {
           "description": "SI unit string",
-          "enum": [
-            "1/angstrom",
-            "1/nm"
-          ],
           "type": "string"
         }
       },
@@ -464,7 +455,6 @@
           "type": "string"
         },
         "unit": {
-          "description": "SI unit string",
           "enum": [
             "1/angstrom",
             "1/nm"
