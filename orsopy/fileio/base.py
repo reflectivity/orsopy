@@ -458,6 +458,7 @@ def _validate_header_data(dct_list: List[dict]):
     """
     import jsonschema
     required_columns = ["Qz", "R", "sR", "sQz"]
+    acceptable_Qz_units = ["1/angstrom", "1/nm"]
 
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
@@ -479,11 +480,18 @@ def _validate_header_data(dct_list: List[dict]):
         cols = dct["columns"]
         ncols = min(4, len(cols))
         col_names = [col['name'] for col in cols]
+        units = [col.get('unit') for col in cols]
+
         if col_names[:ncols] != required_columns[:ncols]:
             raise ValueError(
                 "The first four columns should be named"
                 " 'Qz', 'R', ['sR', ['sQz']]"
             )
+        if units[0] not in acceptable_Qz_units:
+            raise ValueError("The Qz column must have units of '1/angstrom'"
+                             " or '1/nm'")
+        if len(units) >= 3 and units[0] != units[3]:
+            raise ValueError("Columns Qz and sQz must have the same units'")
 
 
 @contextmanager

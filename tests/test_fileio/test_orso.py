@@ -52,7 +52,7 @@ class TestOrso(unittest.TestCase):
             p2, ['footprint', 'background']
         )
 
-        cols = [Column("Qz"), Column("R")]
+        cols = [Column("Qz", unit='1/angstrom'), Column("R")]
         value = Orso(c, ds, redn, cols, 0)
 
         assert value.creator.name == "A Person"
@@ -69,7 +69,6 @@ class TestOrso(unittest.TestCase):
         assert value.reduction.time == datetime(2021, 7, 14, 10, 10, 10)
         assert value.columns[0].name == 'Qz'
         assert value.columns[1].name == 'R'
-        print(value.data_set, type(value.data_set))
         assert value.data_set == 0
 
         h = value.to_yaml()
@@ -109,7 +108,7 @@ class TestOrso(unittest.TestCase):
             ['footprint', 'background']
         )
 
-        cols = [Column("Qz"), Column("R")]
+        cols = [Column("Qz", unit='1/angstrom'), Column("R")]
         value = Orso(c, ds, redn, cols, 1)
 
         dsm = value.data_source.measurement
