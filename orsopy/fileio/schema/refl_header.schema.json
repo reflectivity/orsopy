@@ -142,7 +142,7 @@
             }
           ]
         },
-        "time": {
+        "timestamp": {
           "format": "date-time",
           "anyOf": [
             {
@@ -178,7 +178,7 @@
       "required": [
         "name",
         "affiliation",
-        "time",
+        "timestamp",
         "computer"
       ]
     },

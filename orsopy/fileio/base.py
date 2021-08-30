@@ -307,7 +307,7 @@ class Person(Header):
 class Creator(Header):
     name: str
     affiliation: Union[str, List[str]]
-    time: datetime.datetime
+    timestamp: datetime.datetime
     computer: str
     contact: Optional[str] = field(
         default=None, metadata={"description": "Contact (email) address"}
