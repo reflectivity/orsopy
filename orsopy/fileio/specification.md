@@ -240,7 +240,7 @@ For x-rays one of `tba`
     #               timestamp:  yyyy-mm-ddThh:mm:ss
     #             - file:       
     #               timestamp:  
-    #         reference_data_file:  
+    #         references:  
     #             - file:   
     #               timestamp: 
   
@@ -254,7 +254,7 @@ long as no normalisation or absorber correction has been performed.
 
 The content of this section should contain enough information to rerun
 the reduction, either by explicitly hosing all the required information,
-or by referring to a nexus representation, a note book or a log file. 
+or by referring to a Nexus representation, a notebook or a log file. 
 
     # reduction:  
     #      software:
@@ -265,7 +265,7 @@ or by referring to a nexus representation, a note book or a log file.
     #      call:             if applicable, command line call or similar               best practice
     #      script:           path to e.g. notebook
     #      binary:           path to full information file
-    #      timestamp:        date and time of file creation,
+    #      timestamp:             date and time of file creation,
 
 The following subsection identifies the person or routine who created this file.
 She/he is the one responsible for the content.

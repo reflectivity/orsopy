@@ -335,14 +335,14 @@
         "file": {
           "type": "string"
         },
-        "created": {
+        "timestamp": {
           "type": "string",
           "format": "date-time"
         }
       },
       "required": [
         "file",
-        "created"
+        "timestamp"
       ]
     },
     "Measurement": {
@@ -555,8 +555,34 @@
             }
           ]
         },
+        "computer": {
+          "description": "Computer used for reduction",
+          "type": "string"
+        },
         "call": {
-          "default": "",
+          "description": "The command line call used",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp string, formatted as ISO 8601 datetime",
+          "type": "string",
+          "format": "date-time"
+        },
+        "creator": {
+          "$ref": "#/definitions/Person"
+        },
+        "corrections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "script": {
+          "description": "Path to reduction script or notebook",
+          "type": "string"
+        },
+        "binary": {
+          "description": "Path to full information file",
           "type": "string"
         }
       },

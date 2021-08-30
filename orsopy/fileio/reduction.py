@@ -22,7 +22,7 @@ class Software(Header):
 class Reduction(Header):
     """A description of the reduction that has been performed."""
     software: Union[Software, str]
-    time: Optional[datetime.datetime] = field(
+    timestamp: Optional[datetime.datetime] = field(
         default=None,
         metadata={
             "description": "Timestamp string, formatted as ISO 8601 datetime"
