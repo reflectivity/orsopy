@@ -151,7 +151,7 @@ class TestOrso(unittest.TestCase):
             creator=fileio.Creator(
                 name="Artur Glavic",
                 affiliation="Paul Scherrer Institut",
-                time=datetime.now(),
+                timestamp=datetime.now(),
                 computer="localhost",
             ),
             data_source=fileio.DataSource(
@@ -251,7 +251,7 @@ class TestFunctions(unittest.TestCase):
         """
         empty = Orso.empty()
         req = (
-            'creator:\n  name: null\n  affiliation: null\n  time: null\n'
+            'creator:\n  name: null\n  affiliation: null\n  timestamp: null\n'
             '  computer: null\ndata_source:\n  owner:\n    name: null\n'
             '    affiliation: null\n  experiment:\n    title: null\n'
             '    instrument: null\n    date: null\n    probe: null\n'
