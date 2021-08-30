@@ -218,7 +218,7 @@ In case there are several temperatures:
     #         scheme:  optional, best practice
                        angle-dispersive / energy-dispersive / angle- and energy-dispersive 
     #         instrument_settings:  
-    #             configuration: half / full polarised | liquid_surface | ....   free text
+    #             configuration: half / full polarized | liquid_surface | ....   free text
     #             incident_angle:  
     #                 unit:        
     #                 value:
@@ -265,7 +265,7 @@ or by referring to a Nexus representation, a notebook or a log file.
     #      call:             if applicable, command line call or similar               best practice
     #      script:           path to e.g. notebook
     #      binary:           path to full information file
-    #      timestamp:             date and time of file creation,
+    #      timestamp:        date and time of file creation
 
 The following subsection identifies the person or routine who created this file.
 She/he is the one responsible for the content.
@@ -371,11 +371,11 @@ in the *column description* section.
 these are unknown then use 'nan' for the values.
 
 - It is recommended to use the same format for all columns,
-  preferably `%16.9e`.
+  preferably `'%-22.16e'`.
 
 ```
-1.03563296e-02  3.88100068e+00  4.33909068e+00  5.17816478e-05
-1.06717294e-02  1.16430511e+01  8.89252719e+00  5.33586471e-05
+1.0356329600000000e-02 3.8810006800000001e+00 4.3390906800000000e+00 5.1781647800000000e-05
+1.0671729400000000e-02 1.1643051099999999e+01 8.8925271899999991e+00 5.3358647100000001e-05
 ...
 ```
 
@@ -397,7 +397,7 @@ where <identifier> is either an unique name or a number. The default numbering o
 
 ### overwrite meta data
 
-Below the separator line, meta data might be added. These overwrite the meta data supplied in the header 
+Below the separator line, metadata might be added. These overwrite the metadata supplied in the header 
 (i.e. data set 2 does not know anything about the changes made for data set 1).
 
 
@@ -405,19 +405,19 @@ For the case of additional input data with different spin state this might look 
 
     #     data_source:
     #         measurement:
-    #             polarisation: -
+    #             polarization: m
     #     reduction:
     #         input_files:
     #             data_files:
-    #                 - file     : amor2020n001930.hdf
-    #                   created  : 2020-02-03T15:27:45
+    #                 - file      : amor2020n001930.hdf
+    #                   timestamp : 2020-02-03T15:27:45
 
 
 ### repetition of short-version column description
 
 optional
 
-    # #         Qz             RQz              sR              sQ          lambda
+    # #         Qz             R              sR              sQz          lambda
 
 ### next data set
 
@@ -425,8 +425,8 @@ The following data set has to be of the same format (number, format and descript
 probably with a different number of rows.
 
 ```
-1.03563296e-02  1.08100068e+00  4.33909068e+00  5.17816478e-05  4.00000000e+00
-1.06717294e-02  1.06430511e+01  8.89252719e+00  5.33586471e-05  4.10000000e+00
+1.0356329600000000e-02 3.8810006800000001e+00 4.3390906800000000e+00 5.1781647800000000e-05
+1.0671729400000000e-02 1.1643051099999999e+01 8.8925271899999991e+00 5.3358647100000001e-05
 ...
 ```
 

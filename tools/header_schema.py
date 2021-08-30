@@ -59,6 +59,7 @@ class Sample:
     description: Optional[Union[str, List[str], List[Any]]] = field(default=None)
     environment: Optional[Union[str, List[str], List[Any]]] = field(default=None)
 
+
 @dataclass
 class Experiment:
     title: str
