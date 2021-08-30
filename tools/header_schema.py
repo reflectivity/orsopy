@@ -54,21 +54,21 @@ class Creator(Person):
 @dataclass
 class Sample:
     name: str
+    type: Optional[str] = field(default=None)
+    composition: Optional[str] = field(default=None)
+    description: Optional[Union[str, List[str], List[Any]]] = field(default=None)
+    environment: Optional[Union[str, List[str], List[Any]]] = field(default=None)
 
 
 @dataclass
 class Experiment:
+    title: str
     instrument: str
+    date: Optional[datetime.datetime]
     probe: Union[Literal["neutrons", "x-rays"]]
-    facility: Optional[str] = None
-    ID: Optional[str] = None
-    date: Optional[datetime.datetime] = field(
-        metadata={
-            "description": "timestamp string, formatted as ISO 8601 datetime"
-        },
-        default=None,
-    )
-    title: Optional[str] = None
+    facility: Optional[str] = field(default=None)
+    proposalID: Optional[str] = field(default=None)
+    doi: Optional[str] = field(default=None)
 
 
 class Polarization(str, enum.Enum):
@@ -87,7 +87,7 @@ class Polarization(str, enum.Enum):
 @dataclass
 class data_file:
     file: str
-    created: datetime.datetime
+    timestamp: datetime.datetime
 
 
 @dataclass
@@ -135,7 +135,25 @@ class Software:
 @dataclass
 class Reduction:
     software: Union[Software, str]
+    computer: Optional[str] = field(
+        default=None, metadata={'description': 'Computer used for reduction'}
+    )
     call: Optional[str] = ""
+    timestamp: Optional[datetime.datetime] = field(
+        default=None,
+        metadata={
+            "description": "Timestamp string, formatted as ISO 8601 datetime"
+        })
+    creator: Optional[Person] = None
+    corrections: Optional[List[str]] = None
+    call: Optional[str] = field(
+        default=None, metadata={'description': 'The command line call used'})
+    script: Optional[str] = field(
+        default=None,
+        metadata={'description': 'Path to reduction script or notebook'})
+    binary: Optional[str] = field(
+        default=None,
+        metadata={'description': 'Path to full information file'})
 
 
 @dataclass

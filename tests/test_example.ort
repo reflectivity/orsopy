@@ -20,7 +20,7 @@
 #         name: Ni1000
 #         description:
 #             - amb: air
-#             - layer: {material: Ni, thickness: 100 nm}
+#             - layer: Ni, thickness 100 nm
 #             - sub: Si
 #     measurement:
 #         scheme: angle- and energy-dispersive
@@ -50,15 +50,15 @@
 #                      value: 0.022 # Delta lambda / lambda
 #             polarisation: +
 #         data_files:
-#             - file     : amor2020n001925.hdf
-#               created  : 2020-02-03T14:27:45
-#             - file     : amor2020n001926.hdf
-#               created  : 2020-02-03T14:37:15
-#             - file     : amor2020n001927.hdf
-#               created  : 2020-02-03T14:27:02
+#             - file      : amor2020n001925.hdf
+#               timestamp : 2020-02-03T14:27:45
+#             - file      : amor2020n001926.hdf
+#               timestamp : 2020-02-03T14:37:15
+#             - file      : amor2020n001927.hdf
+#               timestamp : 2020-02-03T14:27:02
 #         references:
-#             - file     : amor2020n001064.hdf
-#               created  : 2020-02-02T15:38:17
+#             - file      : amor2020n001064.hdf
+#               timestamp : 2020-02-02T15:38:17
 # reduction:
 #     software: eos.py
 #     call : eos.py -Y 2020 -n 1925-1927 -y 9,55 ni1000 -O -0.2 -r 1064 -s 1 -i -a 0.005 -e

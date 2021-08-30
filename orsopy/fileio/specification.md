@@ -23,7 +23,7 @@ The rules and examples given below are still under discussion and the header ent
 listed are not exhaustive. Comments and contributions are welcome and should be 
 communicated to <Jochen.Stahn@psi.ch>.
 
-last modified: 2021-06-17
+last modified: 2021-08-30
 
 ---
 
@@ -42,13 +42,13 @@ the string `null`
 
 ### language
 
-In line with CANSAS and NEXUS, we use American English for the key words. 
+In line with canSAS and NeXUS, we use American English for the keywords. 
 E.g. `polarization` rather than `polarisation`. 
 
 
 ### encoding
 
-The text representation allows for ASCII characters following the !!! endcoding. 
+The text representation allows for ASCII characters following the !!! encoding. 
 
 For the keywords only !!! encoding is allowed. 
 
@@ -94,7 +94,7 @@ The key word `comment:` allows to add free text, e.g. to describe a related entr
 in more detail.
 
 A hash (`#`) declares everything that follows on the same line to be outside the
-hirarchical structure and will be ignored by YAML (or JSON) based information
+hierarchical structure and will be ignored by YAML (or JSON) based information
 processing. E.g. the first line of the text representation contains information
 not structured due to YAML rules and thus starts with `# # `, where the first
 hash means *header* and the second *non-YAML entry*.
@@ -147,32 +147,32 @@ mandatory
 This section contains information about the origin and ownership of the raw data, 
 together with details !!!
 
-    # data_source:             This information should be available from the raw data 
+    # data_source:           This information should be available from the raw data 
                              file. If not, one has to find ways to provide it.  
 
-    #     owner:               This refers to the actual owner of the data set, i.e.
+    #     owner:             This refers to the actual owner of the data set, i.e.
                              the main proposer or the person doing the measurement
                              on a lab reflectometer
-    #         name:            main proposer at large scale facility or experimentator at
+    #         name:          Main proposer at large scale facility or experimentator at
                              lab source
     #         affiliation:     
-    #         email:           optional  
+    #         email:         optional  
     #     experiment:  
+    #         title:         proposal or project title
+    #         instrument:
+    #         date:          yyyy-mm-ddThh:mm:ss
+    #         probe:         neutrons or x-rays
     #         facility:
-    #         proposalID:           proposal ID
+    #         proposalID:    proposal ID
     #         doi:
-    #         timestamp:         yyyy-mm-ddThh:mm:ss 
-    #         title:        proposal or project title
-    #         instrument:   
-    #         probe:        neutrons or x-rays
     #     sample:  
-    #         identifier:   mandatory, string
-    #         type:         best effort, solid/liquid, liquid/solid, gas/liquid, liquid/liquid, solid/gas, gas/solid 
-    #         composition:  optional 
-                            free text notes on the nominal composition of the sample  
-                            e.g. Si | SiO2 (20 A) | Fe (200 A) | air (beam side)
-    #         description:  optional, free text
-    #         environment:  optional, free text, name of the sample environment device(s)
+    #         name:          mandatory, string
+    #         type:          best effort, solid/liquid, liquid/solid, gas/liquid, liquid/liquid, solid/gas, gas/solid 
+    #         composition:   optional 
+                             free text notes on the nominal composition of the sample  
+                             e.g. Si | SiO2 (20 A) | Fe (200 A) | air (beam side)
+    #         description:   optional, free text
+    #         environment:   optional, free text, name of the sample environment device(s)
 
 The following list of sample parameters is incomplete and expandable
 
@@ -205,7 +205,7 @@ In case there are several temperatures:
     #         electric_current:
     #             unit:
     #             value:
-    #         electic_ac_field: 
+    #         electric_ac_field: 
     #             amplitude:
     #                 unit:
     #                 value:
@@ -215,10 +215,10 @@ In case there are several temperatures:
 
 
     #    measurement: mandatory 
-    #         scheme:  optionl, best practice
+    #         scheme:  optional, best practice
                        angle-dispersive / energy-dispersive / angle- and energy-dispersive 
     #         instrument_settings:  
-    #             configuration: half / full polarised | liqid_surface | ....   free text
+    #             configuration: half / full polarized | liquid_surface | ....   free text
     #             incident_angle:  
     #                 unit:        
     #                 value:
@@ -240,7 +240,7 @@ For x-rays one of `tba`
     #               timestamp:  yyyy-mm-ddThh:mm:ss
     #             - file:       
     #               timestamp:  
-    #         reference_data_file:  
+    #         references:  
     #             - file:   
     #               timestamp: 
   
@@ -253,8 +253,8 @@ An example where it is not required is the output of an x-ray lab source, as
 long as no normalisation or absorber correction has been performed.
 
 The content of this section should contain enough information to rerun
-the reduction, either by explicitely hosing all the required information,
-or by refering to a nexus representation, a note book or a log file. 
+the reduction, either by explicitly hosing all the required information,
+or by referring to a Nexus representation, a notebook or a log file. 
 
     # reduction:  
     #      software:
@@ -265,7 +265,7 @@ or by refering to a nexus representation, a note book or a log file.
     #      call:             if applicable, command line call or similar               best practice
     #      script:           path to e.g. notebook
     #      binary:           path to full information file
-    #      timestamp:        date and time of file creation,
+    #      timestamp:        date and time of file creation
 
 The following subsection identifies the person or routine who created this file.
 She/he is the one responsible for the content.
@@ -318,7 +318,7 @@ this be normalised reflectivity (called *R*), but can also be un-normalised inte
 (called *I*). In the latter case units should be provided, e.g. 1/s. The naming of the
 third column is then *sR* or *sI*.
 - It's strongly advised that the third and fourth columns are provided. If these are
-unknown then a value of 'nan' can be used in the data array. The third column must
+unknown then a value of 'nan' can be used in the data array. The fourth column must
 have the same units as the first.
 
 The example given refers to *R(Qz)* which has unit 1
@@ -371,11 +371,11 @@ in the *column description* section.
 these are unknown then use 'nan' for the values.
 
 - It is recommended to use the same format for all columns,
-  preferably `%16.9e`.
+  preferably `'%-22.16e'`.
 
 ```
-1.03563296e-02  3.88100068e+00  4.33909068e+00  5.17816478e-05
-1.06717294e-02  1.16430511e+01  8.89252719e+00  5.33586471e-05
+1.0356329600000000e-02 3.8810006800000001e+00 4.3390906800000000e+00 5.1781647800000000e-05
+1.0671729400000000e-02 1.1643051099999999e+01 8.8925271899999991e+00 5.3358647100000001e-05
 ...
 ```
 
@@ -397,7 +397,7 @@ where <identifier> is either an unique name or a number. The default numbering o
 
 ### overwrite meta data
 
-Below the separator line, meta data might be added. These overwrite the meta data supplied in the header 
+Below the separator line, metadata might be added. These overwrite the metadata supplied in the header 
 (i.e. data set 2 does not know anything about the changes made for data set 1).
 
 
@@ -405,19 +405,19 @@ For the case of additional input data with different spin state this might look 
 
     #     data_source:
     #         measurement:
-    #             polarisation: -
+    #             polarization: m
     #     reduction:
     #         input_files:
     #             data_files:
-    #                 - file     : amor2020n001930.hdf
-    #                   created  : 2020-02-03T15:27:45
+    #                 - file      : amor2020n001930.hdf
+    #                   timestamp : 2020-02-03T15:27:45
 
 
 ### repetition of short-version column description
 
 optional
 
-    # #         Qz             RQz              sR              sQ          lambda
+    # #         Qz             R              sR              sQz          lambda
 
 ### next data set
 
@@ -425,8 +425,8 @@ The following data set has to be of the same format (number, format and descript
 probably with a different number of rows.
 
 ```
-1.03563296e-02  1.08100068e+00  4.33909068e+00  5.17816478e-05  4.00000000e+00
-1.06717294e-02  1.06430511e+01  8.89252719e+00  5.33586471e-05  4.10000000e+00
+1.0356329600000000e-02 3.8810006800000001e+00 4.3390906800000000e+00 5.1781647800000000e-05
+1.0671729400000000e-02 1.1643051099999999e+01 8.8925271899999991e+00 5.3358647100000001e-05
 ...
 ```
 

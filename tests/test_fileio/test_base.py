@@ -260,7 +260,7 @@ class TestFile(unittest.TestCase):
             assert 'The file not_a_file.txt cannot be found.' == str(
                 w[0].message)
         assert value.file == 'not_a_file.txt'
-        assert value.created == datetime(2021, 7, 12, 14, 4, 20)
+        assert value.timestamp == datetime(2021, 7, 12, 14, 4, 20)
 
     def test_to_yaml_for_nonexistent_file(self):
         """
@@ -274,7 +274,7 @@ class TestFile(unittest.TestCase):
             assert issubclass(w[0].category, UserWarning)
             assert 'The file not_a_file.txt cannot be found.' == str(
                 w[0].message)
-        assert value.to_yaml() == 'file: not_a_file.txt\ncreated: '\
+        assert value.to_yaml() == 'file: not_a_file.txt\ntimestamp: '\
             + '2021-07-12T14:04:20\n'
 
     def test_creation_for_existing_file(self):
@@ -286,7 +286,7 @@ class TestFile(unittest.TestCase):
                           datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.file == str(
             pathlib.Path().resolve().joinpath('README.rst'))
-        assert value.created == datetime.fromtimestamp(fname.stat().st_mtime)
+        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file(self):
         """
@@ -298,7 +298,7 @@ class TestFile(unittest.TestCase):
                           datetime.fromtimestamp(fname.stat().st_mtime))
         assert value.to_yaml(
         ) == f'file: {str(pathlib.Path().resolve().joinpath("README.rst"))}\n'\
-            + 'created: '\
+            + 'timestamp: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'
 
     def test_creation_for_existing_file_no_mod_time(self):
@@ -310,7 +310,7 @@ class TestFile(unittest.TestCase):
         value = base.File(str(fname.absolute()), None)
         assert value.file == str(
             pathlib.Path().resolve().joinpath("AUTHORS.rst"))
-        assert value.created == datetime.fromtimestamp(fname.stat().st_mtime)
+        assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file_no_mod_time(self):
         """
@@ -322,5 +322,5 @@ class TestFile(unittest.TestCase):
         assert value.to_yaml(
         ) == 'file: '\
             + f'{str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))}\n'\
-            + 'created: '\
+            + 'timestamp: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'

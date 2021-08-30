@@ -20,7 +20,7 @@ class Experiment(Header):
     date: datetime.datetime
     probe: Union[Literal["neutrons", "x-rays"]]
     facility: Optional[str] = field(default=None)
-    ID: Optional[str] = field(default=None)
+    proposalID: Optional[str] = field(default=None)
     doi: Optional[str] = field(default=None)
 
 
@@ -30,8 +30,8 @@ class Sample(Header):
     name: str
     type: Optional[str] = field(default=None)
     composition: Optional[str] = field(default=None)
-    description: Optional[str] = field(default=None)
-    environment: Optional[str] = field(default=None)
+    description: Optional[Union[str, List[str]]] = field(default=None)
+    environment: Optional[Union[str, List[str]]] = field(default=None)
     sample_parameters: Optional[Dict] = field(
         default=None,
         metadata={

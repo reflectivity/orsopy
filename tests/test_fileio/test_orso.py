@@ -66,7 +66,7 @@ class TestOrso(unittest.TestCase):
         assert dsm.instrument_settings.wavelength.max == 12.0
         assert value.reduction.software.name == 'orsopy'
         assert value.reduction.software.version == "0.0.1"
-        assert value.reduction.time == datetime(2021, 7, 14, 10, 10, 10)
+        assert value.reduction.timestamp == datetime(2021, 7, 14, 10, 10, 10)
         assert value.columns[0].name == 'Qz'
         assert value.columns[1].name == 'R'
         assert value.data_set == 0
@@ -232,7 +232,7 @@ class TestFunctions(unittest.TestCase):
         assert empty.reduction.software.name is None
         assert empty.reduction.software.version is None
         assert empty.reduction.software.platform is None
-        assert empty.reduction.time is None
+        assert empty.reduction.timestamp is None
         assert empty.reduction.creator is None
         assert ds.owner.affiliation is None
         assert ds.sample.name is None

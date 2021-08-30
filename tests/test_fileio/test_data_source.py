@@ -27,7 +27,7 @@ class TestExperiment(unittest.TestCase):
         assert value.date == datetime(1992, 7, 14, 10, 10, 10)
         assert value.probe == 'x-rays'
         assert value.facility is None
-        assert value.ID is None
+        assert value.proposalID is None
         assert value.doi is None
 
     def test_to_yaml(self):
@@ -51,14 +51,14 @@ class TestExperiment(unittest.TestCase):
                                        datetime(1992, 7, 14, 10, 10, 10),
                                        'neutrons',
                                        facility='Risoe',
-                                       ID='abc123',
+                                       proposalID='abc123',
                                        doi='10.0000/abc1234')
         assert value.title == "My First Neutron Experiment"
         assert value.instrument == 'TAS8'
         assert value.date == datetime(1992, 7, 14, 10, 10, 10)
         assert value.probe == 'neutrons'
         assert value.facility == 'Risoe'
-        assert value.ID == 'abc123'
+        assert value.proposalID == 'abc123'
         assert value.doi == '10.0000/abc1234'
 
     def test_to_yaml_optionals(self):
@@ -70,12 +70,14 @@ class TestExperiment(unittest.TestCase):
                                        datetime(1992, 7, 14, 10, 10, 10),
                                        'neutrons',
                                        facility='Risoe',
-                                       ID='abc123',
+                                       proposalID='abc123',
                                        doi='10.0000/abc1234')
-        assert value.to_yaml() == 'title: My First Neutron Experiment\n'\
-            + 'instrument: TAS8\ndate: 1992-07-14T'\
-            + '10:10:10\nprobe: neutrons\nfacility: Risoe\nID: '\
-            + 'abc123\ndoi: 10.0000/abc1234\n'
+        assert value.to_yaml() == (
+            'title: My First Neutron Experiment\n'
+            'instrument: TAS8\ndate: 1992-07-14T'
+            '10:10:10\nprobe: neutrons\nfacility: Risoe\nproposalID: '
+            'abc123\ndoi: 10.0000/abc1234\n'
+        )
 
 
 class TestSample(unittest.TestCase):
@@ -253,7 +255,7 @@ class TestMeasurement(unittest.TestCase):
         assert value.instrument_settings.wavelength.unit == 'angstrom'
         assert value.data_files[0].file == str(
             pathlib.Path().resolve().joinpath("README.rst"))
-        assert value.data_files[0].created == datetime.fromtimestamp(
+        assert value.data_files[0].timestamp == datetime.fromtimestamp(
             pathlib.Path('README.rst').stat().st_mtime)
 
     def test_to_yaml(self):
@@ -273,7 +275,7 @@ class TestMeasurement(unittest.TestCase):
             + '\n    magnitude: 4.0\n    unit: deg\n  wavelength:\n    min: '\
             + '2.0\n    max: 12.0\n    unit: angstrom\n  polarization: '\
             + 'unpolarized\ndata_files:\n- file: '\
-            + f'{str(fname.absolute())}\n  created: '\
+            + f'{str(fname.absolute())}\n  timestamp: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'
 
     def test_creation_optionals(self):
@@ -299,12 +301,12 @@ class TestMeasurement(unittest.TestCase):
         assert value.instrument_settings.wavelength.unit == 'angstrom'
         assert value.data_files[0].file == str(
             pathlib.Path().resolve().joinpath("README.rst"))
-        assert value.data_files[0].created == datetime.fromtimestamp(
+        assert value.data_files[0].timestamp == datetime.fromtimestamp(
             pathlib.Path('README.rst').stat().st_mtime)
         assert value.references[0].file == str(
             pathlib.Path().resolve().joinpath("AUTHORS.rst"))
         assert value.references[
-            0].created == datetime.fromtimestamp(
+            0].timestamp == datetime.fromtimestamp(
                 pathlib.Path('AUTHORS.rst').stat().st_mtime)
 
     def test_to_yaml_optionals(self):
@@ -329,9 +331,9 @@ class TestMeasurement(unittest.TestCase):
             + '\n    magnitude: 4.0\n    unit: deg\n  wavelength:\n    min: '\
             + '2.0\n    max: 12.0\n    unit: angstrom\n  polarization: '\
             + 'unpolarized\ndata_files:\n- file: '\
-            + f'{str(fname.absolute())}\n  created: '\
+            + f'{str(fname.absolute())}\n  timestamp: '\
             + f'{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n'\
             + 'references:\n- file: '\
-            + f'{str(gname.absolute())}\n  created: '\
+            + f'{str(gname.absolute())}\n  timestamp: '\
             + f'{datetime.fromtimestamp(gname.stat().st_mtime).isoformat()}\n'\
             + 'scheme: energy-dispersive\n'

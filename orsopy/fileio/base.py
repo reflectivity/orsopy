@@ -332,7 +332,7 @@ class File(Header):
     """A file with a last modified timestamp."""
 
     file: str
-    created: Optional[datetime.datetime] = field(
+    timestamp: Optional[datetime.datetime] = field(
         default=None,
         metadata={
             "description": "Last modified timestamp if not given and available"
@@ -345,8 +345,8 @@ class File(Header):
         if not fname.exists():
             warnings.warn(f"The file {self.file} cannot be found.")
         else:
-            if self.created is None:
-                self.created = datetime.datetime.fromtimestamp(
+            if self.timestamp is None:
+                self.timestamp = datetime.datetime.fromtimestamp(
                     fname.stat().st_mtime
                 )
 

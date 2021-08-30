@@ -51,6 +51,26 @@
               "$ref": "#/definitions/sQz_column"
             }
           ]
+        },
+        {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/qz_column"
+            },
+            {
+              "$ref": "#/definitions/R_column"
+            },
+            {
+              "$ref": "#/definitions/sR_column"
+            },
+            {
+              "$ref": "#/definitions/sQz_column"
+            },
+            {
+              "$ref": "#/definitions/column"
+            }
+          ]
         }
       ]
     },
@@ -147,8 +167,15 @@
       "title": "Experiment",
       "type": "object",
       "properties": {
+        "title": {
+          "type": "string"
+        },
         "instrument": {
           "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
         },
         "probe": {
           "enum": [
@@ -160,20 +187,17 @@
         "facility": {
           "type": "string"
         },
-        "ID": {
+        "proposalID": {
           "type": "string"
         },
-        "date": {
-          "description": "timestamp string, formatted as ISO 8601 datetime",
-          "type": "string",
-          "format": "date-time"
-        },
-        "title": {
+        "doi": {
           "type": "string"
         }
       },
       "required": [
+        "title",
         "instrument",
+        "date",
         "probe"
       ]
     },
@@ -183,6 +207,46 @@
       "properties": {
         "name": {
           "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "composition": {
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "array",
+              "items": {}
+            }
+          ]
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "array",
+              "items": {}
+            }
+          ]
         }
       },
       "required": [
@@ -299,14 +363,14 @@
         "file": {
           "type": "string"
         },
-        "created": {
+        "timestamp": {
           "type": "string",
           "format": "date-time"
         }
       },
       "required": [
         "file",
-        "created"
+        "timestamp"
       ]
     },
     "Measurement": {
@@ -466,6 +530,27 @@
         "name"
       ]
     },
+    "column": {
+      "title": "column",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the column",
+          "type": "string"
+        },
+        "dimension": {
+          "default": "",
+          "type": "string"
+        },
+        "unit": {
+          "description": "SI unit string",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
     "Software": {
       "title": "Software",
       "type": "object",
@@ -498,8 +583,34 @@
             }
           ]
         },
+        "computer": {
+          "description": "Computer used for reduction",
+          "type": "string"
+        },
         "call": {
-          "default": "",
+          "description": "The command line call used",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Timestamp string, formatted as ISO 8601 datetime",
+          "type": "string",
+          "format": "date-time"
+        },
+        "creator": {
+          "$ref": "#/definitions/Person"
+        },
+        "corrections": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "script": {
+          "description": "Path to reduction script or notebook",
+          "type": "string"
+        },
+        "binary": {
+          "description": "Path to full information file",
           "type": "string"
         }
       },
