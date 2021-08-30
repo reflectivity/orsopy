@@ -167,8 +167,15 @@
       "title": "Experiment",
       "type": "object",
       "properties": {
+        "title": {
+          "type": "string"
+        },
         "instrument": {
           "type": "string"
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time"
         },
         "probe": {
           "enum": [
@@ -183,17 +190,14 @@
         "proposalID": {
           "type": "string"
         },
-        "date": {
-          "description": "timestamp string, formatted as ISO 8601 datetime",
-          "type": "string",
-          "format": "date-time"
-        },
-        "title": {
+        "doi": {
           "type": "string"
         }
       },
       "required": [
+        "title",
         "instrument",
+        "date",
         "probe"
       ]
     },
@@ -202,6 +206,18 @@
       "type": "object",
       "properties": {
         "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "composition": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "environment": {
           "type": "string"
         }
       },

@@ -54,21 +54,20 @@ class Creator(Person):
 @dataclass
 class Sample:
     name: str
-
+    type: Optional[str] = field(default=None)
+    composition: Optional[str] = field(default=None)
+    description: Optional[str] = field(default=None)
+    environment: Optional[str] = field(default=None)
 
 @dataclass
 class Experiment:
+    title: str
     instrument: str
+    date: Optional[datetime.datetime]
     probe: Union[Literal["neutrons", "x-rays"]]
-    facility: Optional[str] = None
-    proposalID: Optional[str] = None
-    date: Optional[datetime.datetime] = field(
-        metadata={
-            "description": "timestamp string, formatted as ISO 8601 datetime"
-        },
-        default=None,
-    )
-    title: Optional[str] = None
+    facility: Optional[str] = field(default=None)
+    proposalID: Optional[str] = field(default=None)
+    doi: Optional[str] = field(default=None)
 
 
 class Polarization(str, enum.Enum):

@@ -147,32 +147,32 @@ mandatory
 This section contains information about the origin and ownership of the raw data, 
 together with details !!!
 
-    # data_source:             This information should be available from the raw data 
+    # data_source:           This information should be available from the raw data 
                              file. If not, one has to find ways to provide it.  
 
-    #     owner:               This refers to the actual owner of the data set, i.e.
+    #     owner:             This refers to the actual owner of the data set, i.e.
                              the main proposer or the person doing the measurement
                              on a lab reflectometer
-    #         name:            main proposer at large scale facility or experimentator at
+    #         name:          Main proposer at large scale facility or experimentator at
                              lab source
     #         affiliation:     
-    #         email:           optional  
+    #         email:         optional  
     #     experiment:  
+    #         title:         proposal or project title
+    #         instrument:
+    #         date:          yyyy-mm-ddThh:mm:ss
+    #         probe:         neutrons or x-rays
     #         facility:
-    #         proposalID:           proposal ID
+    #         proposalID:    proposal ID
     #         doi:
-    #         timestamp:         yyyy-mm-ddThh:mm:ss 
-    #         title:        proposal or project title
-    #         instrument:   
-    #         probe:        neutrons or x-rays
     #     sample:  
-    #         identifier:   mandatory, string
-    #         type:         best effort, solid/liquid, liquid/solid, gas/liquid, liquid/liquid, solid/gas, gas/solid 
-    #         composition:  optional 
-                            free text notes on the nominal composition of the sample  
-                            e.g. Si | SiO2 (20 A) | Fe (200 A) | air (beam side)
-    #         description:  optional, free text
-    #         environment:  optional, free text, name of the sample environment device(s)
+    #         name:          mandatory, string
+    #         type:          best effort, solid/liquid, liquid/solid, gas/liquid, liquid/liquid, solid/gas, gas/solid 
+    #         composition:   optional 
+                             free text notes on the nominal composition of the sample  
+                             e.g. Si | SiO2 (20 A) | Fe (200 A) | air (beam side)
+    #         description:   optional, free text
+    #         environment:   optional, free text, name of the sample environment device(s)
 
 The following list of sample parameters is incomplete and expandable
 

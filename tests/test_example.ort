@@ -18,10 +18,7 @@
 #         probe: neutrons
 #     sample:
 #         name: Ni1000
-#         description:
-#             - amb: air
-#             - layer: {material: Ni, thickness: 100 nm}
-#             - sub: Si
+#         description: air | material Ni, thickness 100 nm | Si
 #     measurement:
 #         scheme: angle- and energy-dispersive
 #         instrument_settings:
