@@ -30,8 +30,8 @@ class Sample(Header):
     name: str
     type: Optional[str] = field(default=None)
     composition: Optional[str] = field(default=None)
-    description: Optional[str] = field(default=None)
-    environment: Optional[str] = field(default=None)
+    description: Optional[Union[str, List[str]]] = field(default=None)
+    environment: Optional[Union[str, List[str]]] = field(default=None)
     sample_parameters: Optional[Dict] = field(
         default=None,
         metadata={

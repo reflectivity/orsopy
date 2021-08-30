@@ -56,8 +56,8 @@ class Sample:
     name: str
     type: Optional[str] = field(default=None)
     composition: Optional[str] = field(default=None)
-    description: Optional[str] = field(default=None)
-    environment: Optional[str] = field(default=None)
+    description: Optional[Union[str, List[str], List[Any]]] = field(default=None)
+    environment: Optional[Union[str, List[str], List[Any]]] = field(default=None)
 
 @dataclass
 class Experiment:
