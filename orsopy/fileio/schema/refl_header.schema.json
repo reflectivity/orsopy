@@ -3,10 +3,18 @@
   "type": "object",
   "properties": {
     "creator": {
-      "$ref": "#/definitions/Creator"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Creator"
+        }
+      ]
     },
     "data_source": {
-      "$ref": "#/definitions/DataSource"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/DataSource"
+        }
+      ]
     },
     "columns": {
       "anyOf": [
@@ -68,14 +76,21 @@
               "$ref": "#/definitions/sQz_column"
             },
             {
-              "$ref": "#/definitions/column"
+              "$ref": "#/definitions/Column"
             }
           ]
+        },
+        {
+          "type": "null"
         }
       ]
     },
     "reduction": {
-      "$ref": "#/definitions/Reduction"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Reduction"
+        }
+      ]
     },
     "data_set": {
       "anyOf": [
@@ -84,6 +99,9 @@
         },
         {
           "type": "integer"
+        },
+        {
+          "type": "null"
         }
       ]
     }
@@ -99,7 +117,14 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "affiliation": {
           "anyOf": [
@@ -111,26 +136,50 @@
               "items": {
                 "type": "string"
               }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "time": {
+          "format": "date-time",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "computer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
             }
           ]
         },
         "contact": {
           "description": "Contact (email) address",
-          "type": "string"
-        },
-        "time": {
-          "description": "timestamp string, formatted as ISO 8601 datetime",
-          "type": "string",
-          "format": "date-time"
-        },
-        "computer": {
-          "default": "",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "name",
-        "affiliation"
+        "affiliation",
+        "time",
+        "computer"
       ]
     },
     "Person": {
@@ -138,7 +187,14 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "affiliation": {
           "anyOf": [
@@ -150,12 +206,22 @@
               "items": {
                 "type": "string"
               }
+            },
+            {
+              "type": "null"
             }
           ]
         },
         "contact": {
           "description": "Contact (email) address",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -168,30 +234,80 @@
       "type": "object",
       "properties": {
         "title": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "instrument": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "date": {
-          "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "probe": {
           "enum": [
             "neutrons",
-            "x-rays"
+            "x-rays",
+            null
           ],
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "facility": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "proposalID": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "doi": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -206,13 +322,34 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "type": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "composition": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "description": {
           "anyOf": [
@@ -228,6 +365,9 @@
             {
               "type": "array",
               "items": {}
+            },
+            {
+              "type": "null"
             }
           ]
         },
@@ -245,6 +385,9 @@
             {
               "type": "array",
               "items": {}
+            },
+            {
+              "type": "null"
             }
           ]
         }
@@ -267,17 +410,26 @@
               "items": {
                 "type": "number"
               }
+            },
+            {
+              "type": "null"
             }
           ]
         },
         "unit": {
           "description": "SI unit string",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
-        "magnitude",
-        "unit"
+        "magnitude"
       ]
     },
     "ValueRange": {
@@ -285,41 +437,54 @@
       "type": "object",
       "properties": {
         "min": {
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "max": {
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "unit": {
           "description": "SI unit string",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "steps": {
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "min",
-        "max",
-        "unit"
+        "max"
       ]
     },
-    "Polarization": {
-      "title": "Polarization",
-      "description": "The first symbol indicates the magnetisation direction of the incident beam.\nAn optional second symbol indicates the direction of the scattered beam, if a spin analyser is present.",
-      "enum": [
-        "unpolarized",
-        "+",
-        "-",
-        "--",
-        "-+",
-        "+-",
-        "++"
-      ],
-      "type": "string"
-    },
-    "instrument_settings": {
-      "title": "instrument_settings",
+    "InstrumentSettings": {
+      "title": "InstrumentSettings",
       "type": "object",
       "properties": {
         "incident_angle": {
@@ -329,6 +494,9 @@
             },
             {
               "$ref": "#/definitions/ValueRange"
+            },
+            {
+              "type": "null"
             }
           ]
         },
@@ -339,14 +507,31 @@
             },
             {
               "$ref": "#/definitions/ValueRange"
+            },
+            {
+              "type": "null"
             }
           ]
         },
         "polarization": {
+          "description": "Polarization described as unpolarized/ p / m / pp / pm / mp / mm / vector",
           "default": "unpolarized",
-          "allOf": [
+          "enum": [
+            "unpolarized",
+            "p",
+            "m",
+            "mm",
+            "mp",
+            "pm",
+            "pp",
+            null
+          ],
+          "anyOf": [
             {
-              "$ref": "#/definitions/Polarization"
+              "type": "string"
+            },
+            {
+              "type": "null"
             }
           ]
         }
@@ -356,16 +541,30 @@
         "wavelength"
       ]
     },
-    "data_file": {
-      "title": "data_file",
+    "File": {
+      "title": "File",
       "type": "object",
       "properties": {
         "file": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "timestamp": {
-          "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -377,33 +576,51 @@
       "title": "Measurement",
       "type": "object",
       "properties": {
-        "scheme": {
-          "enum": [
-            "angle- and energy-dispersive",
-            "angle-dispersive",
-            "energy-dispersive"
-          ],
-          "type": "string"
-        },
         "instrument_settings": {
-          "$ref": "#/definitions/instrument_settings"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/InstrumentSettings"
+            }
+          ]
         },
         "data_files": {
-          "type": "array",
           "items": {
             "anyOf": [
               {
-                "$ref": "#/definitions/data_file"
+                "$ref": "#/definitions/File"
               },
               {
                 "type": "string"
               }
             ]
-          }
+          },
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "scheme": {
+          "enum": [
+            "angle- and energy-dispersive",
+            "angle-dispersive",
+            "energy-dispersive",
+            null
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
-        "scheme",
         "instrument_settings",
         "data_files"
       ]
@@ -413,16 +630,32 @@
       "type": "object",
       "properties": {
         "owner": {
-          "$ref": "#/definitions/Person"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Person"
+            }
+          ]
         },
         "experiment": {
-          "$ref": "#/definitions/Experiment"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Experiment"
+            }
+          ]
         },
         "sample": {
-          "$ref": "#/definitions/Sample"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Sample"
+            }
+          ]
         },
         "measurement": {
-          "$ref": "#/definitions/Measurement"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Measurement"
+            }
+          ]
         }
       },
       "required": [
@@ -438,20 +671,43 @@
       "properties": {
         "name": {
           "enum": [
-            "Qz"
+            "Qz",
+            null
           ],
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dimension": {
           "default": "",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "unit": {
           "enum": [
             "1/angstrom",
-            "1/nm"
+            "1/nm",
+            null
           ],
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -464,17 +720,39 @@
       "properties": {
         "name": {
           "enum": [
-            "R"
+            "R",
+            null
           ],
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dimension": {
           "default": "",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "unit": {
           "description": "SI unit string",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -487,17 +765,39 @@
       "properties": {
         "name": {
           "enum": [
-            "sR"
+            "sR",
+            null
           ],
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dimension": {
           "default": "",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "unit": {
           "description": "SI unit string",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -510,41 +810,85 @@
       "properties": {
         "name": {
           "enum": [
-            "sQz"
+            "sQz",
+            null
           ],
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dimension": {
           "default": "",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "unit": {
           "enum": [
             "1/angstrom",
-            "1/nm"
+            "1/nm",
+            null
           ],
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "name"
       ]
     },
-    "column": {
-      "title": "column",
+    "Column": {
+      "title": "Column",
       "type": "object",
       "properties": {
         "name": {
           "description": "The name of the column",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "dimension": {
           "default": "",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "unit": {
           "description": "SI unit string",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -556,13 +900,34 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "version": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "platform": {
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -580,38 +945,87 @@
             },
             {
               "type": "string"
+            },
+            {
+              "type": "null"
             }
           ]
         },
         "computer": {
           "description": "Computer used for reduction",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "call": {
           "description": "The command line call used",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "timestamp": {
           "description": "Timestamp string, formatted as ISO 8601 datetime",
-          "type": "string",
-          "format": "date-time"
+          "format": "date-time",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "creator": {
-          "$ref": "#/definitions/Person"
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Person"
+            }
+          ]
         },
         "corrections": {
-          "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "script": {
           "description": "Path to reduction script or notebook",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "binary": {
           "description": "Path to full information file",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
