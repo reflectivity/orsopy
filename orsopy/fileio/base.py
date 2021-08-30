@@ -479,15 +479,15 @@ def _validate_header_data(dct_list: List[dict]):
         # column objects like Qz_column, R_column, etc.
         cols = dct["columns"]
 
-        # If dct was created with Orso.empty() the Orso.columns attribute
-        # will be [None]. In which case don't both validating column names
-        # and units.
-        if len(cols) == 1 and cols[0] is None:
-            continue
-
         ncols = min(4, len(cols))
         col_names = [col['name'] for col in cols]
         units = [col.get('unit') for col in cols]
+
+        # If dct was created with Orso.empty() the Orso.columns attribute
+        # will be [{"name": None}]. In which case don't both validating column
+        # names and units.
+        if len(col_names) == 1 and col_names[0] is None:
+            continue
 
         if col_names[:ncols] != req_cols[:ncols]:
             raise ValueError(

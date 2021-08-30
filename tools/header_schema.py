@@ -57,12 +57,14 @@ class Person:
 
 
 @dataclass
-class Creator(Person):
-    time: datetime.datetime = field(
-        default=None,
-        metadata={"description": "timestamp string, formatted as ISO 8601 datetime"}
+class Creator:
+    name: str
+    affiliation: Union[str, List[str]]
+    time: datetime.datetime
+    computer: str
+    contact: Optional[str] = field(
+        default=None, metadata={"description": "Contact (email) address"}
     )
-    computer: str = ""
 
 
 @dataclass

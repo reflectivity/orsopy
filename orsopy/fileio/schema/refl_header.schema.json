@@ -142,19 +142,7 @@
             }
           ]
         },
-        "contact": {
-          "description": "Contact (email) address",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
         "time": {
-          "description": "timestamp string, formatted as ISO 8601 datetime",
           "format": "date-time",
           "anyOf": [
             {
@@ -166,7 +154,17 @@
           ]
         },
         "computer": {
-          "default": "",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contact": {
+          "description": "Contact (email) address",
           "anyOf": [
             {
               "type": "string"
@@ -179,7 +177,9 @@
       },
       "required": [
         "name",
-        "affiliation"
+        "affiliation",
+        "time",
+        "computer"
       ]
     },
     "Person": {
