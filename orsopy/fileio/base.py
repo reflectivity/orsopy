@@ -457,7 +457,7 @@ def _validate_header_data(dct_list: List[dict]):
         dicts corresponding to parsed yaml headers from the ORT file.
     """
     import jsonschema
-    required_columns = ["Qz", "R", "sR", "sQz"]
+    req_cols = ["Qz", "R", "sR", "sQz"]
     acceptable_Qz_units = ["1/angstrom", "1/nm"]
 
     pth = os.path.dirname(__file__)
@@ -478,19 +478,28 @@ def _validate_header_data(dct_list: List[dict]):
         # dataclasses that does that. It is possible but it requires extra
         # column objects like Qz_column, R_column, etc.
         cols = dct["columns"]
+
+        # If dct was created with Orso.empty() the Orso.columns attribute
+        # will be [None]. In which case don't both validating column names
+        # and units.
+        if len(cols) == 1 and cols[0] is None:
+            continue
+
         ncols = min(4, len(cols))
         col_names = [col['name'] for col in cols]
         units = [col.get('unit') for col in cols]
 
-        if col_names[:ncols] != required_columns[:ncols]:
+        if col_names[:ncols] != req_cols[:ncols]:
             raise ValueError(
                 "The first four columns should be named"
                 " 'Qz', 'R', ['sR', ['sQz']]"
             )
+
         if units[0] not in acceptable_Qz_units:
             raise ValueError("The Qz column must have units of '1/angstrom'"
                              " or '1/nm'")
-        if len(units) >= 3 and units[0] != units[3]:
+
+        if len(units) >= 4 and units[0] != units[3]:
             raise ValueError("Columns Qz and sQz must have the same units'")
 
 

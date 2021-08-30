@@ -23,8 +23,22 @@ if GENERATE_SCHEMA:
     class Config:
         @staticmethod
         def schema_extra(schema: Dict[str, Any]) -> None:
-            for prop in schema.get("properties", {}).values():
-                prop.pop("title", None)
+            for prop, value in schema.get('properties', {}).items():
+                value.pop("title", None)
+
+                # make the schema accept None as a value for any of the
+                # Header class attributes.
+                if 'enum' in value:
+                    value['enum'].append(None)
+
+                if 'type' in value:
+                    value['anyOf'] = [{'type': value.pop('type')}]
+                    value['anyOf'].append({'type': 'null'})
+                elif "anyOf" in value:
+                    value['anyOf'].append({'type': 'null'})
+                # only one $ref e.g. from other model
+                elif '$ref' in value:
+                    value['anyOf'] = [{'$ref': value.pop('$ref')}]
 
     dataclass = _dataclass(config=Config)
 else:
@@ -71,21 +85,21 @@ class Experiment:
     doi: Optional[str] = field(default=None)
 
 
-class Polarization(str, enum.Enum):
-    """The first symbol indicates the magnetisation direction of the incident beam.
-    An optional second symbol indicates the direction of the scattered beam, if a spin analyser is present."""
-
-    unpolarized = "unpolarized"
-    p = "+"
-    m = "-"
-    mm = "--"
-    mp = "-+"
-    pm = "+-"
-    pp = "++"
+# class Polarization(str, enum.Enum):
+#     """The first symbol indicates the magnetisation direction of the incident beam.
+#     An optional second symbol indicates the direction of the scattered beam, if a spin analyser is present."""
+#
+#     unpolarized = "unpolarized"
+#     p = "+"
+#     m = "-"
+#     mm = "--"
+#     mp = "-+"
+#     pm = "+-"
+#     pp = "++"
 
 
 @dataclass
-class data_file:
+class File:
     file: str
     timestamp: datetime.datetime
 
@@ -93,35 +107,40 @@ class data_file:
 @dataclass
 class Value:
     magnitude: Union[float, List[float]]
-    unit: str = field(metadata={"description": "SI unit string"})
+    unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
 
 @dataclass
 class ValueRange:
     min: float
     max: float
-    unit: str = field(metadata={"description": "SI unit string"})
+    unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     steps: Optional[int] = None
 
 
 @dataclass
-class instrument_settings:
+class InstrumentSettings:
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Polarization]] = Polarization.unpolarized
+    polarization: Optional[Union[Literal['unpolarized', 'p', 'm', 'mm', 'mp', 'pm', 'pp']]] = field(
+        default='unpolarized',
+        metadata={
+            'description':
+                'Polarization described as unpolarized/ p / m / pp / pm / mp / mm / vector'
+        })
 
 
 @dataclass
 class Measurement:
-    scheme: Union[
+    instrument_settings: InstrumentSettings
+    data_files: List[Union[File, str]]
+    scheme: Optional[Union[
         Literal[
             "angle- and energy-dispersive",
             "angle-dispersive",
             "energy-dispersive",
         ]
-    ]
-    instrument_settings: instrument_settings
-    data_files: List[Union[data_file, str]]
+    ]] = None
 
 
 @dataclass
@@ -165,7 +184,7 @@ class DataSource:
 
 
 @dataclass
-class column:
+class Column:
     """
     Information on a data column.
     """
@@ -180,22 +199,22 @@ class column:
 
 
 @dataclass
-class qz_column(column):
+class qz_column(Column):
     name: Literal["Qz"]
     unit: Literal["1/angstrom", "1/nm"]
 
 @dataclass
-class R_column(column):
+class R_column(Column):
     name: Literal["R"]
 
 
 @dataclass
-class sR_column(column):
+class sR_column(Column):
     name: Literal["sR"]
 
 
 @dataclass
-class sQz_column(column):
+class sQz_column(Column):
     name: Literal["sQz"]
     unit: Literal["1/angstrom", "1/nm"]
 
@@ -208,7 +227,7 @@ class ORSOHeader:
         Tuple[qz_column, R_column],
         Tuple[qz_column, R_column, sR_column],
         Tuple[qz_column, R_column, sR_column, sQz_column],
-        Tuple[qz_column, R_column, sR_column, sQz_column, column],
+        Tuple[qz_column, R_column, sR_column, sQz_column, Column],
     ]
     reduction: Optional[Reduction] = None
     data_set: Union[str, int] = None

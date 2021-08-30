@@ -190,7 +190,7 @@ class TestOrso(unittest.TestCase):
         assert ls3 == ds3
 
         # TODO This will fail because the files aren't valid
-        # _read_header_data("test.ort", validate=True)
+        _read_header_data("test.ort", validate=True)
 
     def test_unique_dataset(self):
         # checks that data_set is unique on saving of OrsoDatasets
@@ -240,6 +240,8 @@ class TestFunctions(unittest.TestCase):
         assert empty.reduction.creator is None
         assert empty.columns == [Column.empty()]
         assert empty.data_set is None
+        dct = empty.to_dict()
+        _validate_header_data([dct])
 
     def test_empty_to_yaml(self):
         """
