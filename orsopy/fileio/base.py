@@ -189,6 +189,10 @@ class Header(metaclass=HeaderMeta):
                 attr_items[fld.name] = None
         return cls(**attr_items)
 
+    @staticmethod
+    def asdict(header):
+        return header.to_dict()
+
     def to_dict(self):
         """
         Produces a clean dictionary of the Header object, removing
