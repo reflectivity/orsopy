@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
 import typing
 from inspect import isclass
-from dataclasses import field, dataclass, fields, asdict
+from dataclasses import field, dataclass, fields
 import datetime
 import pathlib
 import warnings
