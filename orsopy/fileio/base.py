@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
 import typing
 from inspect import isclass
-from dataclasses import field, dataclass, fields
+from dataclasses import field, dataclass, fields, asdict
 import datetime
 import pathlib
 import warnings
@@ -172,6 +172,10 @@ class Header(metaclass=HeaderMeta):
             else:
                 attr_items[fld.name] = None
         return cls(**attr_items)
+
+    @staticmethod
+    def asdict(header):
+        return header.to_dict()
 
     def to_dict(self):
         """
