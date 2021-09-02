@@ -114,8 +114,24 @@ class Header(metaclass=HeaderMeta):
                     return None
             if issubclass(hint, Header):
                 # convert to dataclass instance
+                attribs = hint.__annotations__.keys()
+                realised_items = {
+                    k: item[k] for k in item.keys() if k in attribs
+                }
+                # orphan items are extra dictionary entries that don't correspond to
+                # arguments of a Header instance. They can't be used to construct
+                # a header instance, so remove them from the dict of arguments
+                orphan_items = {
+                    k: item[k] for k in item.keys() if k not in attribs
+                }
+
                 try:
-                    return hint(**item)
+                    value = hint(**realised_items)
+                    # however, keep the orphan items with the newly constructed
+                    # Header item.
+                    for k, it in orphan_items.items():
+                        setattr(value, k, it)
+                    return value
                 except (ValueError, TypeError):
                     return None
             else:
