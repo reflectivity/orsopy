@@ -15,6 +15,7 @@ import pathlib
 import warnings
 import json
 import yaml
+import yaml.constructor
 from contextlib import contextmanager
 import re
 
@@ -36,6 +37,10 @@ def __datetime_representer(dumper, data):
 
 
 yaml.add_representer(datetime.datetime, __datetime_representer)
+
+# make sure that datetime strings get loaded as str not datetime instances
+yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:timestamp'] = (
+    yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:str'])
 
 
 class HeaderMeta(type):
@@ -100,6 +105,13 @@ class Header(metaclass=HeaderMeta):
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
+            if issubclass(hint, datetime.datetime) and isinstance(item, str):
+                # convert str to datetime
+                try:
+                    return datetime.datetime.fromisoformat(item)
+                except ValueError:
+                    # string wasn't ISO8601 format
+                    return None
             if issubclass(hint, Header):
                 # convert to dataclass instance
                 try:
@@ -465,12 +477,7 @@ def _validate_header_data(dct_list: List[dict]):
     with open(schema_pth, "r") as f:
         schema = json.load(f)
 
-    # d contains datetime.datetime objects, which would fail the
-    # jsonschema validation, so force those to be strings.
-    modified_dct_list = [
-        json.loads(json.dumps(dct, default=str)) for dct in dct_list
-    ]
-    for dct in modified_dct_list:
+    for dct in dct_list:
         jsonschema.validate(dct, schema)
 
         # Validate the column names. Ideally this is done with the jsonschema,

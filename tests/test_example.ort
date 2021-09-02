@@ -2,7 +2,7 @@
 # creator:
 #     name        : G. User
 #     affiliation : PSI
-#     timestamp   : 2020-04-06T13:21:18
+#     timestamp   : 2020-04-06T13:21:18+01:00
 #     computer    : lnsa17.psi.ch
 # data_source:
 #     owner:
@@ -51,14 +51,14 @@
 #             polarisation: p
 #         data_files:
 #             - file      : amor2020n001925.hdf
-#               timestamp : 2020-02-03T14:27:45
+#               timestamp : 2020-02-03T14:27:45+01:00
 #             - file      : amor2020n001926.hdf
-#               timestamp : 2020-02-03T14:37:15
+#               timestamp : 2020-02-03T14:37:15+01:00
 #             - file      : amor2020n001927.hdf
-#               timestamp : 2020-02-03T14:27:02
+#               timestamp : 2020-02-03T14:27:02+01:00
 #         references:
 #             - file      : amor2020n001064.hdf
-#               timestamp : 2020-02-02T15:38:17
+#               timestamp : 2020-02-02T15:38:17+01:00
 # reduction:
 #     software: eos.py
 #     call : eos.py -Y 2020 -n 1925-1927 -y 9,55 ni1000 -O -0.2 -r 1064 -s 1 -i -a 0.005 -e
