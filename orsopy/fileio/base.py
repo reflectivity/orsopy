@@ -234,7 +234,7 @@ class Header(metaclass=HeaderMeta):
             if fi.name in self._orso_optionals and getattr(self, fi.name) is None:
                 # ignore empty optional arguments
                 continue
-            out += f'{fi.name}={getattr(self, fi.name).__repr__()}, '
+            out += f'{fi.name}={getattr(self, fi.name)!r}, '
         out = out[:-2] + ')'
         return out
 
@@ -252,7 +252,7 @@ class Header(metaclass=HeaderMeta):
                 # ignore empty optional arguments
                 continue
             nlen = len(fi.name)
-            ftxt = getattr(self, fi.name).__repr__()
+            ftxt = repr(getattr(self, fi.name))
             ftxt = ftxt.replace('\n', '\n' + ' ' * (slen + nlen + 2))
             out += ' ' * (slen + 1) + f'{fi.name}={ftxt},\n'
         out += ' ' * (slen + 1) + ')'
