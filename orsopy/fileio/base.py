@@ -368,17 +368,17 @@ class File(Header):
     timestamp: Optional[datetime.datetime] = field(
         default=None,
         metadata={
-            "description": "Last modified timestamp if not given and available"
+            "description": "Last modified timestamp. If it's not specified,"
+                           " then an attempt will be made to check on the file"
+                           " itself"
         },
     )
 
     def __post_init__(self):
         Header.__post_init__(self)
-        fname = pathlib.Path(self.file)
-        if not fname.exists():
-            warnings.warn(f"The file {self.file} cannot be found.")
-        else:
-            if self.timestamp is None:
+        if self.timestamp is None:
+            fname = pathlib.Path(self.file)
+            if fname.exists():
                 self.timestamp = datetime.datetime.fromtimestamp(
                     fname.stat().st_mtime
                 )
