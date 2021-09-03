@@ -19,19 +19,19 @@ class Experiment(Header):
     instrument: str
     date: datetime.datetime
     probe: Union[Literal["neutrons", "x-rays"]]
-    facility: Optional[str] = field(default=None)
-    proposalID: Optional[str] = field(default=None)
-    doi: Optional[str] = field(default=None)
+    facility: Optional[str] = None
+    proposalID: Optional[str] = None
+    doi: Optional[str] = None
 
 
 @dataclass(repr=False)
 class Sample(Header):
     """A description of the sample measured."""
     name: str
-    type: Optional[str] = field(default=None)
-    composition: Optional[str] = field(default=None)
-    description: Optional[Union[str, List[str]]] = field(default=None)
-    environment: Optional[Union[str, List[str]]] = field(default=None)
+    type: Optional[str] = None
+    composition: Optional[str] = None
+    description: Optional[Union[str, List[str]]] = None
+    environment: Optional[Union[str, List[str]]] = None
     sample_parameters: Optional[Dict] = field(
         default=None,
         metadata={
@@ -85,7 +85,7 @@ class Measurement(Header):
     """The measurement elements for the header."""
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
-    references: Optional[List[Union[File, str]]] = field(default=None)
+    references: Optional[List[Union[File, str]]] = None
     scheme: Optional[Union[
         Literal[
             "angle- and energy-dispersive",
