@@ -5,8 +5,8 @@ Tests for fileio module
 # author: Andrew R. McCluskey (arm61)
 
 import unittest
-import pathlib
 from datetime import datetime
+import os.path
 
 import pytest
 import yaml
@@ -189,7 +189,6 @@ class TestOrso(unittest.TestCase):
         assert ls2 == ds2
         assert ls3 == ds3
 
-        # TODO This will fail because the files aren't valid
         _read_header_data("test.ort", validate=True)
 
     def test_unique_dataset(self):
@@ -207,6 +206,17 @@ class TestOrso(unittest.TestCase):
 
         with pytest.raises(ValueError):
             fileio.save_orso([ds, ds2], 'test_data_set.ort')
+
+    def test_extra_elements(self):
+        # if there are extra elements present in the ORT file they should still
+        # be loadable. They won't be there as dataclass fields, but they'll be
+        # visible as attributes.
+        datasets = fileio.load_orso(os.path.join("tests", "test_example.ort"))
+        info = datasets[0].info
+        assert hasattr(
+            info.data_source.measurement.instrument_settings.incident_angle,
+            'resolution'
+        )
 
 
 class TestFunctions(unittest.TestCase):

@@ -251,14 +251,8 @@ class TestFile(unittest.TestCase):
         """
         Creation of a file that does not exist.
         """
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            value = base.File('not_a_file.txt',
-                              datetime(2021, 7, 12, 14, 4, 20))
-            assert len(w) == 1
-            assert issubclass(w[0].category, UserWarning)
-            assert 'The file not_a_file.txt cannot be found.' == str(
-                w[0].message)
+        value = base.File('not_a_file.txt',
+                          datetime(2021, 7, 12, 14, 4, 20))
         assert value.file == 'not_a_file.txt'
         assert value.timestamp == datetime(2021, 7, 12, 14, 4, 20)
 
@@ -266,14 +260,8 @@ class TestFile(unittest.TestCase):
         """
         Transformation to yaml of a file that does not exist.
         """
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            value = base.File('not_a_file.txt',
-                              datetime(2021, 7, 12, 14, 4, 20))
-            assert len(w) == 1
-            assert issubclass(w[0].category, UserWarning)
-            assert 'The file not_a_file.txt cannot be found.' == str(
-                w[0].message)
+        value = base.File('not_a_file.txt',
+                          datetime(2021, 7, 12, 14, 4, 20))
         assert value.to_yaml() == 'file: not_a_file.txt\ntimestamp: '\
             + '2021-07-12T14:04:20\n'
 
