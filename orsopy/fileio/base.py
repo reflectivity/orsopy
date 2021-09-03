@@ -118,17 +118,18 @@ class Header(metaclass=HeaderMeta):
                 realised_items = {
                     k: item[k] for k in item.keys() if k in attribs
                 }
-                # orphan items are extra dictionary entries that don't correspond to
+                # orphan_items are extra dictionary entries that don't correspond to
                 # arguments of a Header instance. They can't be used to construct
-                # a header instance, so remove them from the dict of arguments
+                # a header instance, so remove them from the dict of arguments.
+                # This enables back compatibility of Orso files as attributes
+                # present in later versions will still be loadable by earlier code.
                 orphan_items = {
                     k: item[k] for k in item.keys() if k not in attribs
                 }
 
                 try:
                     value = hint(**realised_items)
-                    # however, keep the orphan items with the newly constructed
-                    # Header item.
+                    # keep the orphan items with the newly constructed Header
                     for k, it in orphan_items.items():
                         setattr(value, k, it)
                     return value
