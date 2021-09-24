@@ -4,16 +4,16 @@ Implementation of the top level class for the ORSO header.
 
 # author: Andrew R. McCluskey (arm61)
 
-import re
 import yaml
 from typing import List, Union, TextIO, Optional
 from dataclasses import dataclass
 from .base import (Header, Column, Creator, _possibly_open_file,
-                   _read_header_data, _nested_update, _dict_diff)
+                   _read_header_data, _nested_update, _dict_diff, )
 from .data_source import DataSource
 from .reduction import Reduction
 
 import numpy as np
+
 
 ORSO_VERSION = '0.1'
 ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
@@ -34,16 +34,16 @@ class Orso(Header):
     __repr__ = Header._staggered_repr
 
     def __init__(self, creator: Creator, data_source: DataSource, reduction: Reduction,
-                 columns: List[Column], data_set: Optional[Union[int, str]]=None, **user_data):
-        self.creator=creator
-        self.data_source=data_source
-        self.reduction=reduction
-        self.columns=columns
-        self.data_set=data_set
+                 columns: List[Column], data_set: Optional[Union[int, str]] = None, **user_data):
+        self.creator = creator
+        self.data_source = data_source
+        self.reduction = reduction
+        self.columns = columns
+        self.data_set = data_set
         self.__post_init__()
         # additional keywords used to add fields to the file header
         # some recreation does not work when using the attribute directly so it's wrapped in a property
-        self._user_data=user_data
+        self._user_data = user_data
 
     @property
     def user_data(self):
@@ -53,7 +53,7 @@ class Orso(Header):
     def user_data(self, value):
         if not type(value) is dict:
             raise ValueError("user_data has to be a dictionary")
-        self._user_data=value
+        self._user_data = value
 
     def column_header(self) -> str:
         """
@@ -115,12 +115,13 @@ class Orso(Header):
         """
         Adds the user data to the returned dictionary.
         """
-        out=super().to_dict()
+        out = super().to_dict()
         out.update(self._user_data)
         # put columns at the end of the dictionary
-        cols=out.pop('columns')
-        out['columns']=cols
+        cols = out.pop('columns')
+        out['columns'] = cols
         return out
+
 
 @dataclass
 class OrsoDataset:
@@ -138,10 +139,10 @@ class OrsoDataset:
     data: np.ndarray
 
     def __post_init__(self):
-        if self.data.shape[1] != len(self.info.columns):
+        if self.data.shape[1]!=len(self.info.columns):
             raise ValueError(
                 "Data has to have the same number of columns as header"
-            )
+                )
 
     def header(self) -> str:
         """
@@ -168,14 +169,14 @@ class OrsoDataset:
         return save_orso([self], fname)
 
     def __eq__(self, other: 'OrsoDataset'):
-        return self.info == other.info and (self.data == other.data).all()
+        return self.info==other.info and (self.data==other.data).all()
 
 
 def save_orso(
         datasets: List[OrsoDataset],
         fname: Union[TextIO, str],
         comment: Optional[str] = None
-) -> None:
+        ) -> None:
     """
     Saves an ORSO file.
 
@@ -197,15 +198,15 @@ def save_orso(
         info = dataset.info
         data_set = info.data_set
         if (data_set is None or (
-                isinstance(data_set, str) and len(data_set) == 0)):
+                isinstance(data_set, str) and len(data_set)==0)):
             # it's not set, or is zero length string
             info.data_set = idx
 
     dsets = [dataset.info.data_set for dataset in datasets]
-    if len(set(dsets)) != len(dsets):
+    if len(set(dsets))!=len(dsets):
         raise ValueError(
             "All `OrsoDataset.info.data_set` values must be unique"
-        )
+            )
 
     with _possibly_open_file(fname, 'w') as f:
         header = f"{ORSO_DESIGNATE}\n"
