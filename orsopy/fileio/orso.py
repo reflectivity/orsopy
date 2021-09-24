@@ -20,7 +20,7 @@ ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
                   "| YAML encoding | https://www.reflectometry.org/")
 
 
-@dataclass(repr=False)
+@dataclass(repr=False, init=False)
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.
@@ -32,6 +32,28 @@ class Orso(Header):
     data_set: Optional[Union[int, str]] = None
 
     __repr__ = Header._staggered_repr
+
+    def __init__(self, creator: Creator, data_source: DataSource, reduction: Reduction,
+                 columns: List[Column], data_set: Optional[Union[int, str]]=None, **user_data):
+        self.creator=creator
+        self.data_source=data_source
+        self.reduction=reduction
+        self.columns=columns
+        self.data_set=data_set
+        self.__post_init__()
+        # additional keywords used to add fields to the file header
+        # some recreation does not work when using the attribute directly so it's wrapped in a property
+        self._user_data=user_data
+
+    @property
+    def user_data(self):
+        return self._user_data
+
+    @user_data.setter
+    def user_data(self, value):
+        if not type(value) is dict:
+            raise ValueError("user_data has to be a dictionary")
+        self._user_data=value
 
     def column_header(self) -> str:
         """
@@ -89,6 +111,16 @@ class Orso(Header):
         out_dict = _dict_diff(my_dict, other_dict)
         return out_dict
 
+    def to_dict(self):
+        """
+        Adds the user data to the returned dictionary.
+        """
+        out=super().to_dict()
+        out.update(self._user_data)
+        # put columns at the end of the dictionary
+        cols=out.pop('columns')
+        out['columns']=cols
+        return out
 
 @dataclass
 class OrsoDataset:
