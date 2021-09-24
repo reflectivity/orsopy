@@ -139,10 +139,8 @@ class OrsoDataset:
     data: np.ndarray
 
     def __post_init__(self):
-        if self.data.shape[1]!=len(self.info.columns):
-            raise ValueError(
-                "Data has to have the same number of columns as header"
-                )
+        if self.data.shape[1] != len(self.info.columns):
+            raise ValueError("Data has to have the same number of columns as header")
 
     def header(self) -> str:
         """
@@ -169,14 +167,13 @@ class OrsoDataset:
         return save_orso([self], fname)
 
     def __eq__(self, other: 'OrsoDataset'):
-        return self.info==other.info and (self.data==other.data).all()
+        return self.info == other.info and (self.data == other.data).all()
 
 
 def save_orso(
         datasets: List[OrsoDataset],
         fname: Union[TextIO, str],
-        comment: Optional[str] = None
-        ) -> None:
+        comment: Optional[str] = None) -> None:
     """
     Saves an ORSO file.
 
@@ -197,16 +194,14 @@ def save_orso(
     for idx, dataset in enumerate(datasets):
         info = dataset.info
         data_set = info.data_set
-        if (data_set is None or (
-                isinstance(data_set, str) and len(data_set)==0)):
+        if (data_set is None or (isinstance(data_set, str) and len(data_set) == 0)):
             # it's not set, or is zero length string
             info.data_set = idx
 
     dsets = [dataset.info.data_set for dataset in datasets]
-    if len(set(dsets))!=len(dsets):
+    if len(set(dsets)) != len(dsets):
         raise ValueError(
-            "All `OrsoDataset.info.data_set` values must be unique"
-            )
+            "All `OrsoDataset.info.data_set` values must be unique")
 
     with _possibly_open_file(fname, 'w') as f:
         header = f"{ORSO_DESIGNATE}\n"
