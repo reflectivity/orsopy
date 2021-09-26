@@ -1,9 +1,4 @@
 # # ORSO reflectivity data file | 0.1 standard | YAML encoding | https://www.reflectometry.org/
-# creator:
-#     name        : G. User
-#     affiliation : PSI
-#     timestamp   : 2020-04-06T13:21:18
-#     computer    : lnsa17.psi.ch
 # data_source:
 #     owner:
 #         name: T. Proposer

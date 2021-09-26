@@ -2,13 +2,6 @@
   "title": "ORSOHeader",
   "type": "object",
   "properties": {
-    "creator": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Creator"
-        }
-      ]
-    },
     "data_source": {
       "anyOf": [
         {
@@ -107,81 +100,10 @@
     }
   },
   "required": [
-    "creator",
     "data_source",
     "columns"
   ],
   "definitions": {
-    "Creator": {
-      "title": "Creator",
-      "type": "object",
-      "properties": {
-        "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "affiliation": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "timestamp": {
-          "format": "date-time",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "computer": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "contact": {
-          "description": "Contact (email) address",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "name",
-        "affiliation",
-        "timestamp",
-        "computer"
-      ]
-    },
     "Person": {
       "title": "Person",
       "type": "object",

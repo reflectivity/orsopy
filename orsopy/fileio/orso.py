@@ -8,7 +8,7 @@ import re
 import yaml
 from typing import List, Union, TextIO, Optional
 from dataclasses import dataclass
-from .base import (Header, Column, Creator, _possibly_open_file,
+from .base import (Header, Column, _possibly_open_file,
                    _read_header_data, _nested_update, _dict_diff)
 from .data_source import DataSource
 from .reduction import Reduction
@@ -25,7 +25,6 @@ class Orso(Header):
     """
     The Orso object collects the necessary metadata.
     """
-    creator: Creator
     data_source: DataSource
     reduction: Reduction
     columns: List[Column]
