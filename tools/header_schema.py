@@ -57,17 +57,6 @@ class Person:
 
 
 @dataclass
-class Creator:
-    name: str
-    affiliation: Union[str, List[str]]
-    timestamp: datetime.datetime
-    computer: str
-    contact: Optional[str] = field(
-        default=None, metadata={"description": "Contact (email) address"}
-    )
-
-
-@dataclass
 class Sample:
     name: str
     type: Optional[str] = field(default=None)
@@ -223,7 +212,6 @@ class sQz_column(Column):
 
 @dataclass
 class ORSOHeader:
-    creator: Creator
     data_source: DataSource
     columns: Union[
         Tuple[qz_column, R_column],

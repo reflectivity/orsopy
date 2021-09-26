@@ -14,7 +14,7 @@ from orsopy.fileio.orso import Orso, OrsoDataset
 from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
                                        Measurement, InstrumentSettings)
 from orsopy.fileio.reduction import Reduction, Software
-from orsopy.fileio.base import Person, ValueRange, Value, File, Column, Creator
+from orsopy.fileio.base import Person, ValueRange, Value, File, Column
 from orsopy.fileio.base import _validate_header_data, _read_header_data
 from orsopy import fileio as fileio
 import numpy as np
@@ -28,10 +28,6 @@ class TestOrso(unittest.TestCase):
         """
         Creation of Orso object.
         """
-        c = Creator(
-            'A Person', 'Some Uni', datetime.now(), "",
-            contact="wally@wallyland.com"
-        )
         e = Experiment(
             'Experiment 1', 'ESTIA', datetime(2021, 7, 7, 16, 31, 10),
             'neutrons'
@@ -53,10 +49,8 @@ class TestOrso(unittest.TestCase):
         )
 
         cols = [Column("Qz", unit='1/angstrom'), Column("R")]
-        value = Orso(c, ds, redn, cols, 0)
+        value = Orso(ds, redn, cols, 0)
 
-        assert value.creator.name == "A Person"
-        assert value.creator.contact == "wally@wallyland.com"
         ds = value.data_source
         dsm = ds.measurement
         assert ds.owner.name == 'A Person'
@@ -84,10 +78,6 @@ class TestOrso(unittest.TestCase):
         """
         Creation of Orso object with a non-zero data_set.
         """
-        c = Creator(
-            'A Person', 'Some Uni', datetime.now(), "",
-            contact="wally@wallyland.com"
-        )
         e = Experiment(
             'Experiment 1', 'ESTIA', datetime(2021, 7, 7, 16, 31, 10),
             'neutrons'
@@ -109,7 +99,7 @@ class TestOrso(unittest.TestCase):
         )
 
         cols = [Column("Qz", unit='1/angstrom'), Column("R")]
-        value = Orso(c, ds, redn, cols, 1)
+        value = Orso(ds, redn, cols, 1)
 
         dsm = value.data_source.measurement
         assert value.data_source.owner.name == 'A Person'
@@ -119,10 +109,10 @@ class TestOrso(unittest.TestCase):
         assert value.data_set == 1
 
         # check that data_set can also be a string.
-        value = Orso(c, ds, redn, cols, 'fokdoks')
+        value = Orso(ds, redn, cols, 'fokdoks')
         assert value.data_set == 'fokdoks'
         # don't want class construction coercing a str to an int
-        value = Orso(c, ds, redn, cols, '1')
+        value = Orso(ds, redn, cols, '1')
         assert value.data_set == '1'
 
     def test_write_read(self):
@@ -148,12 +138,6 @@ class TestOrso(unittest.TestCase):
         ds2 = fileio.OrsoDataset(info2, data)
 
         info3 = fileio.Orso(
-            creator=fileio.Creator(
-                name="Artur Glavic",
-                affiliation="Paul Scherrer Institut",
-                timestamp=datetime.now(),
-                computer="localhost",
-            ),
             data_source=fileio.DataSource(
                 sample=fileio.Sample(
                     name="My Sample",
@@ -261,8 +245,7 @@ class TestFunctions(unittest.TestCase):
         """
         empty = Orso.empty()
         req = (
-            'creator:\n  name: null\n  affiliation: null\n  timestamp: null\n'
-            '  computer: null\ndata_source:\n  owner:\n    name: null\n'
+            'data_source:\n  owner:\n    name: null\n'
             '    affiliation: null\n  experiment:\n    title: null\n'
             '    instrument: null\n    date: null\n    probe: null\n'
             '  sample:\n    name: null\n  measurement:\n'
