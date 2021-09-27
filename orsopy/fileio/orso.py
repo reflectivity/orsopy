@@ -31,9 +31,8 @@ class Orso(Header):
 
     __repr__ = Header._staggered_repr
 
-    def __init__(self, creator: Creator, data_source: DataSource, reduction: Reduction,
+    def __init__(self, data_source: DataSource, reduction: Reduction,
                  columns: List[Column], data_set: Optional[Union[int, str]] = None, **user_data):
-        self.creator = creator
         self.data_source = data_source
         self.reduction = reduction
         self.columns = columns
