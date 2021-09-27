@@ -226,6 +226,23 @@ class TestOrso(unittest.TestCase):
         ls = fileio.load_orso("test2.ort")
         assert ls[0].info.user_data == info.user_data
 
+        # create from dictionary
+        info2 = fileio.Orso(**info.to_dict())
+        assert info2 == info
+
+        # user data in sub-key
+        info.data_source.test_entry = 'test'
+        fileio.save_orso([ds], "test2.ort")
+        ls = fileio.load_orso("test2.ort")
+        assert ls[0].info.user_data == info.user_data
+
+        # create with keyword argument
+        assert not hasattr(info2.data_source, 'test_entry')
+        ds_dict = info.data_source.to_dict()
+        assert 'test_entry' in ds_dict
+        info2.data_source = fileio.DataSource(**ds_dict)
+        assert hasattr(info2.data_source, 'test_entry')
+
     def test_extra_elements(self):
         # if there are extra elements present in the ORT file they should still
         # be loadable. They won't be there as dataclass fields, but they'll be
