@@ -9,7 +9,9 @@ from collections.abc import Mapping
 from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
 import typing
 from inspect import isclass
-from dataclasses import field, dataclass, fields, _process_class
+from dataclasses import field, dataclass, fields, \
+    _set_new_attribute, _field_init, _create_fn, _init_param, \
+    _FIELD, _FIELDS, _FIELD_INITVAR, MISSING, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME
 import datetime
 import pathlib
 import warnings
@@ -43,6 +45,48 @@ yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:timestamp
     yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:str'])
 
 
+def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
+    """
+    _init_fn from dataclasses adapted to accept additional keywords.
+    See dataclasses source for comments on code.
+    """
+    seen_default = False
+    for f in fieldsarg:
+        if f.init:
+            if not (f.default is MISSING and f.default_factory is MISSING):
+                seen_default = True
+            elif seen_default:
+                raise TypeError(f'non-default argument {f.name!r} '
+                                'follows default argument')
+
+    locals = {f'_type_{f.name}': f.type for f in fieldsarg}
+    locals.update({
+        'MISSING': MISSING,
+        '_HAS_DEFAULT_FACTORY': _HAS_DEFAULT_FACTORY,
+    })
+
+    body_lines = []
+    for f in fieldsarg:
+        line = _field_init(f, frozen, locals, self_name)
+        if line:
+            body_lines.append(line)
+
+    if has_post_init:
+        params_str = ','.join(f.name for f in fieldsarg
+                              if f._field_type is _FIELD_INITVAR)
+        body_lines.append(f'{self_name}.{_POST_INIT_NAME}({params_str})')
+
+    # processing of additional user keyword arguments
+    body_lines += ['for k,v in user_kwds.items():', '    setattr(self, k, v)']
+
+    return _create_fn('__init__',
+                      [self_name] + [_init_param(f) for f in fieldsarg if f.init] + ['**user_kwds'],
+                      body_lines,
+                      locals=locals,
+                      globals=globals,
+                      return_type=None)
+
+
 class HeaderMeta(type):
     """
     Metaclass for Header.
@@ -65,7 +109,18 @@ class HeaderMeta(type):
             for base in bases:
                 if hasattr(base, '_orso_optionals'):
                     attrs['_orso_optionals'] += getattr(base, '_orso_optionals')
-            return dataclass(type.__new__(cls, name, bases, attrs, **kwargs), repr=False)
+            out = dataclass(type.__new__(cls, name, bases, attrs, **kwargs), repr=False, init=False)
+            fieldsarg = getattr(out, _FIELDS)
+
+            # Generate custom __init__ method that allows arbitrary extra keyword arguments
+            has_post_init = hasattr(out, _POST_INIT_NAME)
+            # Include InitVars and regular fields (so, not ClassVars).
+            flds = [f for f in fieldsarg.values()
+                    if f._field_type in (_FIELD, _FIELD_INITVAR)]
+            init_fun = _custom_init_fn(flds, False, has_post_init, 'self', globals())
+            _set_new_attribute(out, '__init__', init_fun)
+
+            return out
         else:
             return type.__new__(cls, name, bases, attrs, **kwargs)
 
