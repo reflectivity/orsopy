@@ -5,12 +5,11 @@ The reduction elements for the ORSO header
 # author: Andrew R. McCluskey (arm61)
 
 from typing import Optional, List, Union
-from dataclasses import field, dataclass
+from dataclasses import field
 import datetime
 from .base import Header, Person
 
 
-@dataclass(repr=False)
 class Software(Header):
     """Description of the reduction software."""
     name: str
@@ -18,7 +17,6 @@ class Software(Header):
     platform: Optional[str] = None
 
 
-@dataclass(repr=False)
 class Reduction(Header):
     """A description of the reduction that has been performed."""
     software: Union[Software, str]

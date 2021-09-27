@@ -20,7 +20,6 @@ ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
                   "| YAML encoding | https://www.reflectometry.org/")
 
 
-@dataclass(repr=False, init=False)
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.

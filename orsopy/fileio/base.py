@@ -9,7 +9,7 @@ from collections.abc import Mapping
 from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
 import typing
 from inspect import isclass
-from dataclasses import field, dataclass, fields
+from dataclasses import field, dataclass, fields, _process_class
 import datetime
 import pathlib
 import warnings
@@ -50,7 +50,8 @@ class HeaderMeta(type):
     """
 
     def __new__(cls, name, bases, attrs, **kwargs):
-        if '__annotations__' in attrs:
+        if '__annotations__' in attrs and \
+                len([k for k in attrs['__annotations__'].keys() if not k.startswith('_')]) > 0:
             # only applies to dataclass children of Header
             # add optional comment attribute, needs to come last
             attrs['__annotations__']['comment'] = Optional[str]
@@ -64,7 +65,9 @@ class HeaderMeta(type):
             for base in bases:
                 if hasattr(base, '_orso_optionals'):
                     attrs['_orso_optionals'] += getattr(base, '_orso_optionals')
-        return type.__new__(cls, name, bases, attrs, **kwargs)
+            return dataclass(type.__new__(cls, name, bases, attrs, **kwargs), repr=False)
+        else:
+            return type.__new__(cls, name, bases, attrs, **kwargs)
 
 
 class Header(metaclass=HeaderMeta):
@@ -280,7 +283,6 @@ class Header(metaclass=HeaderMeta):
         return out
 
 
-@dataclass(repr=False)
 class Value(Header):
     """A value or list of values with an optional unit."""
 
@@ -290,7 +292,6 @@ class Value(Header):
     )
 
 
-@dataclass(repr=False)
 class ValueRange(Header):
     """A range or list of ranges with mins, maxs, and an optional unit."""
 
@@ -301,7 +302,6 @@ class ValueRange(Header):
     )
 
 
-@dataclass(repr=False)
 class ValueVector(Header):
     """A vector or list of vectors with an optional unit.
 
@@ -325,7 +325,6 @@ class ValueVector(Header):
     )
 
 
-@dataclass(repr=False)
 class Person(Header):
     """Information about a person, including name, affilation(s), and email."""
 
@@ -336,7 +335,6 @@ class Person(Header):
     )
 
 
-@dataclass(repr=False)
 class Creator(Header):
     name: str
     affiliation: Union[str, List[str]]
@@ -347,7 +345,6 @@ class Creator(Header):
     )
 
 
-@dataclass(repr=False)
 class Column(Header):
     """Information about a data column"""
 
@@ -360,7 +357,6 @@ class Column(Header):
     )
 
 
-@dataclass(repr=False)
 class File(Header):
     """A file with a last modified timestamp."""
 
