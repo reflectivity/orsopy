@@ -44,11 +44,7 @@ class Orso(Header):
         # some recreation does not work when using the attribute directly so it's wrapped in a property
         self._user_data = user_data
 
-    @property
-    def user_data(self):
-        return self._user_data
-
-    @user_data.setter
+    @Header.user_data.setter
     def user_data(self, value):
         if not type(value) is dict:
             raise ValueError("user_data has to be a dictionary")

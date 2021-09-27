@@ -77,7 +77,7 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
         body_lines.append(f'{self_name}.{_POST_INIT_NAME}({params_str})')
 
     # processing of additional user keyword arguments
-    body_lines += ['for k,v in user_kwds.items():', '    setattr(self, k, v)']
+    body_lines += ['self._user_data = user_kwds', 'for k,v in user_kwds.items():', '    setattr(self, k, v)']
 
     return _create_fn('__init__',
                       [self_name] + [_init_param(f) for f in fieldsarg if f.init] + ['**user_kwds'],
@@ -156,6 +156,10 @@ class Header(metaclass=HeaderMeta):
 
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
+
+    @property
+    def user_data(self):
+        return self._user_data
 
     @staticmethod
     def _resolve_type(hint, item):
