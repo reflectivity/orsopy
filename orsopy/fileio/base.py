@@ -400,16 +400,6 @@ class Person(Header):
     )
 
 
-class Creator(Header):
-    name: str
-    affiliation: Union[str, List[str]]
-    timestamp: datetime.datetime
-    computer: str
-    contact: Optional[str] = field(
-        default=None, metadata={"description": "Contact (email) address"}
-    )
-
-
 class Column(Header):
     """Information about a data column"""
 
