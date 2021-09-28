@@ -1,7 +1,16 @@
 Modules
-======
+=======
+
+fileio
+------
+
+The role of the :code:`fileio` module is to enable the creation of and parsing from ORSO reduced data files. 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   orsopy.fileio
+   orsopy.fileio.base
+   orsopy.fileio.data_source
+   orsopy.fileio.measurement
+   orsopy.fileio.reduction
+   orsopy.fileio.orso

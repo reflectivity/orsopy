@@ -1,8 +1,5 @@
-orsopy.fileio
-=============
-
 orsopy.fileio.base
-------------------
+==================
 
 .. automodule:: orsopy.fileio.base
    :members:

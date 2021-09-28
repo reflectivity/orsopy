@@ -47,8 +47,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'orsopy'
-copyright = "2021, Andrew R. McCluskey"
-author = "Andrew R. McCluskey"
+copyright = "2021, ORSO"
+author = "ORSO"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
