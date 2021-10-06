@@ -56,7 +56,7 @@ class Orso(Header):
         :param other_dict: Contains updated header information
         :type other_dict: dict
 
-        :return: A new `Orso` object constructed from self, and the 
+        :return: A new `Orso` object constructed from self, and the
             updated header information.
         :rtype: orsopy.fileio.Orso
         """
@@ -136,10 +136,10 @@ def save_orso(
         comment: Optional[str] = None
 ) -> None:
     """
-    Saves an ORSO file. Each of the datasets must have a unique 
-    `OrsoDataset.info.data_set` attribute. If that attribute is not 
-    set, it is given an integer value corresponding to it's position 
-    in the list. 
+    Saves an ORSO file. Each of the datasets must have a unique
+    `OrsoDataset.info.data_set` attribute. If that attribute is not
+    set, it is given an integer value corresponding to it's position
+    in the list.
 
     :param datasets: List of OrsoDataset to save into the Orso file
     :type datasests: List
