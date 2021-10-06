@@ -53,16 +53,12 @@ class Orso(Header):
         Constructs another `Orso` instance from self, and a dict
         containing updated header information.
 
-        Parameters
-        ----------
-        other_dict: dict
-            Contains updated header information
+        :param other_dict: Contains updated header information
+        :type other_dict: dict
 
-        Returns
-        -------
-        new_orso: Orso
-            A new `Orso` object constructed from self, and the
+        :return: A new `Orso` object constructed from self, and the 
             updated header information.
+        :rtype: orsopy.fileio.Orso
         """
         # recreate info from difference dictionary
         output = self.to_dict()
@@ -74,13 +70,11 @@ class Orso(Header):
         A dictionary containing the difference in header information between
         two Orso objects.
 
-        Parameters
-        ----------
-        other: Orso
+        :param other: Other header to diff with
+        :type other: orsopy.fileio.Orso
 
-        Returns
-        -------
-        out_dict: dict
+        :return: Dictioonary of the header information difference
+        :rtype: dict
         """
         # return a dictionary of differences to other object
         my_dict = self.to_dict()
@@ -92,14 +86,12 @@ class Orso(Header):
 @dataclass
 class OrsoDataset:
     """
-    Parameters
-    ----------
-    info: Orso
-        The header information for the reflectivity measurement.
-    data: np.ndarray
-        The numerical data associated with the reflectivity measurement.
+    :param info: The header information for the reflectivity measurement
+    :type info: orsopy.fileio.Orso
+    :param data: The numerical data associated with the reflectivity measurement.
         The data has shape `(npnts, ncols)`, where
         `ncols == len(self.info.columns)`.
+    :type np.ndarray:
     """
     info: Orso
     data: np.ndarray
@@ -144,21 +136,18 @@ def save_orso(
         comment: Optional[str] = None
 ) -> None:
     """
-    Saves an ORSO file.
+    Saves an ORSO file. Each of the datasets must have a unique 
+    `OrsoDataset.info.data_set` attribute. If that attribute is not 
+    set, it is given an integer value corresponding to it's position 
+    in the list. 
 
-    Parameters
-    ----------
-    datasets: List
-        List of OrsoDataset to save into the Orso file.
-    fname: file-like or str
-        The Orso file to save
-    comment: str, Optional
-        Comment to write at top of Orso file.
-
-    Each of the datasets must have a unique `OrsoDataset.info.data_set`
-    attribute. If that attribute is not set, it is given an integer value
-    corresponding to it's position in the list. If more than one dataset has
-    the same attribute value then a Va
+    :param datasets: List of OrsoDataset to save into the Orso file
+    :type datasests: List
+    :param fname: The Orso file to save
+    :type fname: file-like or str
+    :param comment: Comment to write at the top of Orso file
+    :type comment: str, Optional
+    :raises ValueError: If the OrsoDataset.info.data_set values are not unique
     """
     for idx, dataset in enumerate(datasets):
         info = dataset.info
@@ -190,16 +179,12 @@ def save_orso(
 
 def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
     """
-    Parameters
-    ----------
-    fname: file-like or str
-        The Orso file to load
+    :param fname: The Orso file to load
+    :type fname: file-like or str
 
-    Returns
-    -------
-    ods: List
-        List of OrsoDataset corresponding to each dataset contained within the
+    :return: List of OrsoDataset corresponding to each dataset contained within the
         ORT file.
+    :rtype: List
     """
     dct_list, datas, version = _read_header_data(fname)
     ods = []
