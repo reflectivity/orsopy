@@ -11,6 +11,5 @@ The role of the :code:`fileio` module is to enable the creation of and parsing f
 
    orsopy.fileio.base
    orsopy.fileio.data_source
-   orsopy.fileio.measurement
    orsopy.fileio.reduction
    orsopy.fileio.orso
