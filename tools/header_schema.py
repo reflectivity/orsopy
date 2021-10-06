@@ -224,7 +224,8 @@ class ORSOHeader:
 
 
 if GENERATE_SCHEMA:
-    schema = ORSOHeader.__pydantic_model__.schema()
+    schema = {"$schema": "http://json-schema.org/draft-07/schema#"}
+    schema.update(ORSOHeader.__pydantic_model__.schema())
     print(schema)
     import json
 
