@@ -103,13 +103,17 @@ class Header(metaclass=_HeaderMeta):
     @staticmethod
     def _resolve_type(hint: type, item: Any) -> Any:
         """
-        Try and determine the type for a given item and populate the
-        attribute appropriately.
+        This function (recursively for :py:class:`Union` and
+        :py:class`Optional` objects) populates different attributes,
+        including constructing :py:class:`Header` object. Once the given
+        object is created it is returned. If it is not possible to
+        determine the correct object type :code:`None` is returned.
 
-        :param hint: Field type.
-        :param item: Unresolved item to populate attribute.
+        :param hint: The type of the given field.
+        :param item: An unresolved item to populate attribute.
 
-        :return: Object to populate attribute.
+        :return: Correctly resolved object with required type for orso
+            compatibility.
         """
         if isclass(hint):
             # simple type that we can work with, no Union or List/Dict
