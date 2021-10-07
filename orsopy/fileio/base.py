@@ -6,7 +6,7 @@ Implementation of the base classes for the ORSO header.
 import os.path
 from copy import deepcopy
 from collections.abc import Mapping
-from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal, TextIO, Generator
+from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal, TextIO, Generator, Any
 import typing
 from inspect import isclass
 from dataclasses import field, dataclass, fields
@@ -31,7 +31,8 @@ yaml.emitter.Emitter.process_tag = _noop
 
 def __datetime_representer(dumper, data):
     """
-    Ensures that datetime objects are represented correctly."""
+    Ensures that datetime objects are represented correctly.
+    """
     value = data.isoformat("T")
     return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
 
@@ -43,10 +44,10 @@ yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:timestamp
     yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:str'])
 
 
-class HeaderMeta(type):
+class _HeaderMeta(type):
     """
-    Metaclass for Header.
-    Creates a dataclass with an additional comment attribute.
+    Metaclass for :py:class:`Header`.
+    Creates a :py:attr:`dataclass` with an additional comment attribute.
     """
 
     def __new__(cls, name, bases, attrs, **kwargs):
@@ -67,7 +68,7 @@ class HeaderMeta(type):
         return type.__new__(cls, name, bases, attrs, **kwargs)
 
 
-class Header(metaclass=HeaderMeta):
+class Header(metaclass=_HeaderMeta):
     """
     The super class for all of the items in the orso module.
     """
@@ -100,7 +101,16 @@ class Header(metaclass=HeaderMeta):
             self._check_unit(self.unit)
 
     @staticmethod
-    def _resolve_type(hint, item):
+    def _resolve_type(hint: type, item: Any) -> Any:
+        """
+        Try and determine the type for a given item and populate the
+        attribute appropriately.
+
+        :param hint: Field type.
+        :param item: Unresolved item to populate attribute.
+
+        :return: Object to populate attribute.
+        """
         if isclass(hint):
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
@@ -169,10 +179,12 @@ class Header(metaclass=HeaderMeta):
         return None
 
     @classmethod
-    def empty(cls):
+    def empty(cls) -> 'Header':
         """
         Create an empty instance of this item containing
-        all non-option attributes as None
+        all non-option attributes as :code:`None`.
+
+        :return: Empty class.
         """
         attr_items = {}
         for fld in fields(cls):
@@ -191,16 +203,22 @@ class Header(metaclass=HeaderMeta):
         return cls(**attr_items)
 
     @staticmethod
-    def asdict(header):
+    def asdict(header: 'Header') -> dict:
+        """
+        Static method for :py:func:`to_dict`.
+
+        :param header: Object to convert to dictionary.
+
+        :return: Dictionary result.
+        """
         return header.to_dict()
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Produces a clean dictionary of the Header object, removing
-        any optional attributes with the value `None`.
+        any optional attributes with the value :code:`None`.
 
-        :return: Cleaned dictionary
-        :rtype: dict
+        :return: Cleaned dictionary.
         """
         out_dict = {}
         for i, value in self.__dict__.items():
@@ -225,31 +243,32 @@ class Header(metaclass=HeaderMeta):
                 out_dict[i] = _todict(value)
         return out_dict
 
-    def to_yaml(self):
+    def to_yaml(self) -> str:
         """
         Return the yaml string for the Header item
 
         :return: Yaml string
-        :rtype: str
         """
         return yaml.dump(self.to_dict(), sort_keys=False)
 
     @staticmethod
-    def _check_unit(unit):
+    def _check_unit(unit: str):
         """
         Check if the unit is valid, in future this could include
         recommendations.
 
-        :param unit: Value to check if it is a value unit
-        :type unit: str
-        :raises: ValueError is the unit is not ASCII text
+        :param unit: Value to check if it is a value unit.
+
+        :raises: ValueError is the unit is not ASCII text.
         """
         if unit is not None:
             if not unit.isascii():
                 raise ValueError("The unit must be in ASCII text.")
 
     def __repr__(self):
-        # representation that does not show empty arguments
+        """
+        Representation that does not show empty arguments.
+        """
         out = f'{self.__class__.__name__}('
         for fi in fields(self):
             if fi.name in self._orso_optionals and getattr(self, fi.name) is None:
@@ -282,7 +301,9 @@ class Header(metaclass=HeaderMeta):
 
 @dataclass(repr=False)
 class Value(Header):
-    """A value or list of values with an optional unit."""
+    """
+    A value or list of values with an optional unit.
+    """
 
     magnitude: Union[float, List[float]]
     unit: Optional[str] = field(
@@ -292,7 +313,9 @@ class Value(Header):
 
 @dataclass(repr=False)
 class ValueRange(Header):
-    """A range or list of ranges with mins, maxs, and an optional unit."""
+    """
+    A range or list of ranges with mins, maxs, and an optional unit.
+    """
 
     min: Union[float, List[float]]
     max: Union[float, List[float]]
@@ -303,18 +326,17 @@ class ValueRange(Header):
 
 @dataclass(repr=False)
 class ValueVector(Header):
-    """A vector or list of vectors with an optional unit.
-
+    """
+    A vector or list of vectors with an optional unit.
     For vectors relating to the sample, such as polarisation,
-    the follow is defined:
+    the follow definitions are used.
 
-    * x is defined as parallel to the radiation beam, positive going\
-        with the beam direction
-
-    * y is defined from the other two based on the right hand rule
-
-    * z is defined as normal to the sample surface, positive direction\
-        in scattering direction
+    :param x: is defined as parallel to the radiation beam, positive going
+        with the beam direction.
+    :param y: is defined from the other two based on the right hand rule.
+    :param z: is defined as normal to the sample surface, positive direction
+        in scattering direction.
+    :param unit: SI unit string. 
     """
 
     x: Union[float, List[float]]
@@ -327,7 +349,10 @@ class ValueVector(Header):
 
 @dataclass(repr=False)
 class Person(Header):
-    """Information about a person, including name, affilation(s), and email."""
+    """
+    Information about a person, including name, affilation(s), and contact
+    information.
+    """
 
     name: str
     affiliation: Union[str, List[str]]
@@ -338,7 +363,9 @@ class Person(Header):
 
 @dataclass(repr=False)
 class Column(Header):
-    """Information about a data column"""
+    """
+    Information about a data column.
+    """
 
     name: str
     unit: Optional[str] = field(
@@ -351,7 +378,9 @@ class Column(Header):
 
 @dataclass(repr=False)
 class File(Header):
-    """A file with a last modified timestamp."""
+    """
+    A file with file path and a last modified timestamp.
+    """
 
     file: str
     timestamp: Optional[datetime.datetime] = field(
@@ -364,6 +393,9 @@ class File(Header):
     )
 
     def __post_init__(self):
+        """
+        Assigns a timestamp for file creation if not defined.
+        """
         Header.__post_init__(self)
         if self.timestamp is None:
             fname = pathlib.Path(self.file)
@@ -373,28 +405,24 @@ class File(Header):
                 )
 
 
-def _read_header_data(file, validate=False) -> Tuple[dict, list, str]:
+def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple[dict, list, str]:
     """
     Reads the header and data contained within an ORSO file, parsing it into
     json dictionaries and numerical arrays.
 
     Parameters
     ----------
-    file: str or file-like
-
-    validate: bool
-        Validates the file against the ORSO json schema.
+    :param file: File to read.
+    :param validate: Validates the file against the ORSO json schema.
         Requires that the jsonschema package be installed.
 
-    Returns
-    -------
-    dct_list, data_sets, version: list, list, str
-        `dct_list` is a list of json dicts containing the parsed yaml header.
-        This has to be processed further.
-        `data_sets` is a Python list containing numpy arrays holding the
-        reflectometry data in the file. It's contained in a list because each
-        of the datasets may have a different number of columns.
-        `version` is the ORSO version string.
+    :return: The tuple contains:
+        - First item is a list of json dicts containing the parsed yaml
+        header. This has to be processed further.
+        - Second item is a Python list containing numpy arrays holding the
+        reflectometry data in the file. It's contained in a list because
+        each of the datasets may have a different number of columns.
+        - Final item is the ORSO version string.
     """
 
     with _possibly_open_file(file, "r") as fi:
@@ -473,10 +501,14 @@ def _validate_header_data(dct_list: List[dict]):
 
     Obtain these dct_list by loading from _read_header_data first.
 
-    Parameters
-    ----------
-    dct_list : List[dict]
-        dicts corresponding to parsed yaml headers from the ORT file.
+    :param dct_list: Dicts corresponding to parsed yaml headers from the ORT file.
+
+    :raises ValueError: When the first four columns are not named correctly
+        (i.e. :code:`'Qz'`, :code:`'R'`, :code:`'sR'`, :code:`'sQz'`).
+    :raises ValueError: When the units for the :code:`'Qz'` column is not
+        :code:`'1/angstrom'`.
+    :raises ValueError: When the units for columns :code:`'Qz'` and
+        :code:`'sQz'` are not the same.
     """
     import jsonschema
     req_cols = ["Qz", "R", "sR", "sQz"]
@@ -545,14 +577,15 @@ def _possibly_open_file(f: Union[TextIO, str], mode: str = "wb") -> Generator[Te
         g.close()
 
 
-def _todict(obj, classkey=None) -> dict:
+def _todict(obj: Any, classkey: Any = None) -> dict:
     """
     Recursively converts an object to a dict representation
     https://stackoverflow.com/questions/1036409
     Licenced under CC BY-SA 4.0
 
     :param obj: Object to convert to dict representation.
-    
+    :param classkey: Key to be assigned to class objects.
+
     :return: Dictionary representation of object.
     """
     if isinstance(obj, dict):
@@ -578,8 +611,15 @@ def _todict(obj, classkey=None) -> dict:
         return obj
 
 
-def _nested_update(d, u):
-    # nested dictionary update.
+def _nested_update(d: dict, u: dict) -> dict:
+    """
+    Nested dictionary update.
+
+    :param d: Dictionary to be updated.
+    :param u: Dictionary where updates should come from.
+
+    :return: Updated dictionary.
+    """
     for k, v in u.items():
         if isinstance(d, Mapping):
             if isinstance(v, Mapping):
@@ -592,8 +632,16 @@ def _nested_update(d, u):
     return d
 
 
-def _dict_diff(old, new):
-    # recursive find differences between two dictionaries
+def _dict_diff(old: dict, new: dict) -> dict:
+    """
+    Recursive find differences between two dictionaries.
+
+    :param old: Original dictionary.
+    :param new: New dictionary to find differences in.
+
+    :return: Dictionary containing values present in :py:attr:`new`
+        that are not in :py:attr:`old`.
+    """
     out = {}
     for key, value in new.items():
         if key in old:

@@ -32,7 +32,7 @@ class Orso(Header):
     :param columns: Information about the columns of data that will
         be contained in the file.
     :param data_set: An identified for the data set, i.e. if there is
-        more than one data set in the object. Optional.
+        more than one data set in the object.
     """
     data_source: DataSource
     reduction: Reduction

@@ -19,17 +19,17 @@ class Experiment(Header):
     :param title: Proposal or project title.
     :param instrument: Reflectometer identifier.
     :param start_date: Start date for the experiment.
-    :param probe: Radiation probe, either :code:`"neutrons"` or
-        :code:`"x-rays"`. Optional.
-    :param facility: Facility where the experiment was performed. Optional.
-    :param proposalID: Identifier for experiment at a facility. Optional.
+    :param probe: Radiation probe, either :code:`'neutrons'` or
+        :code:`'x-rays'`.
+    :param facility: Facility where the experiment was performed.
+    :param proposalID: Identifier for experiment at a facility.
     :param doi: Digital object identifier for the experiment, possibly
-        provided by the facility. Optional.
+        provided by the facility.
     """
     title: str
     instrument: str
     start_date: str
-    probe: Union[Literal["neutrons", "x-rays"]]
+    probe: str
     facility: Optional[str] = None
     proposalID: Optional[str] = None
     doi: Optional[str] = None
@@ -46,13 +46,12 @@ class Sample(Header):
         each side should be one of :code:`'solid/liquid'`,
         :code:`'liquid/solid'`, :code:`'gas/liquid'`,
         :code:`'liquid/liquid'`, :code:`'solid/gas'`, :code:`'gas/solid'`.
-        Optional.
     :param composition: Notes on the nominal composition of the sample e.g.
         :code:`Si | SiO2 (20 angstrom) | Fe (200 angstrom) |
-        air (beam side)`. Optional.
-    :param description: Further details of the sample, e.g. size. Optional.
-    :param environment: Name of the sample environment device(s). Optional.
-    :param sample_parameters: Dictionary of sample parameters. Optional.
+        air (beam side)`.
+    :param description: Further details of the sample, e.g. size.
+    :param environment: Name of the sample environment device(s).
+    :param sample_parameters: Dictionary of sample parameters.
     """
     name: str
     category: Optional[str] = None
@@ -96,9 +95,9 @@ class InstrumentSettings(Header):
     :param polarization: Radiation polarization as one of
         :code:`'unpolarized'`, :code:`'p'`, :code:`'m'`, :code:`'pp'`,
         :code:`'pm'`, :code:`'mp'`, :code:`'mm'`, or a
-        :py:class:`orsopy.fileio.base.ValueVector`. Optional.
+        :py:class:`orsopy.fileio.base.ValueVector`.
     :param configuration: Description of the instreument configuration (full
-        polarized/liquid surface/etc). Optional.
+        polarized/liquid surface/etc).
     """
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
@@ -125,10 +124,9 @@ class Measurement(Header):
 
     :param instrument_settings: Instrumentation details.
     :param data_files: Raw data files produced in the measurement.
-    :param references: Raw reference files used in the reduction. Optional.
+    :param references: Raw reference files used in the reduction.
     :param scheme: Measurement scheme (one of :code:`'angle-dispersive'`,
         :code:`'energy-dispersive'`/:code:`'angle- and energy-dispersive'`).
-        Optional.
     """
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
