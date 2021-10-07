@@ -336,7 +336,7 @@ class ValueVector(Header):
     :param y: is defined from the other two based on the right hand rule.
     :param z: is defined as normal to the sample surface, positive direction
         in scattering direction.
-    :param unit: SI unit string. 
+    :param unit: SI unit string.
     """
 
     x: Union[float, List[float]]
