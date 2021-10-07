@@ -245,7 +245,7 @@
 #   experiment:
 #     title: Main experiment
 #     instrument: Reflectometer
-#     start_date: '2021-10-06'
+#     start_date: '2021-10-07'
 #     probe: x-rays
 #   sample:
 #     name: My Sample
