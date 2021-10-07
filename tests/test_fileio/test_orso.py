@@ -141,13 +141,13 @@ class TestOrso(unittest.TestCase):
             data_source=fileio.DataSource(
                 sample=fileio.Sample(
                     name="My Sample",
-                    type="solid",
+                    category="solid",
                     description="Something descriptive",
                 ),
                 experiment=fileio.Experiment(
                     title="Main experiment",
                     instrument="Reflectometer",
-                    date=datetime.now(),
+                    start_date=datetime.now().strftime("%Y-%m-%d"),
                     probe="x-rays",
                 ),
                 owner=fileio.Person("someone", "important"),
@@ -217,7 +217,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.owner.name is None
         assert ds.experiment.title is None
         assert ds.experiment.instrument is None
-        assert ds.experiment.date is None
+        assert ds.experiment.start_date is None
         assert ds.experiment.probe is None
         assert ds.sample.name is None
         assert ds.measurement.instrument_settings.incident_angle.magnitude is None
@@ -247,7 +247,7 @@ class TestFunctions(unittest.TestCase):
         req = (
             'data_source:\n  owner:\n    name: null\n'
             '    affiliation: null\n  experiment:\n    title: null\n'
-            '    instrument: null\n    date: null\n    probe: null\n'
+            '    instrument: null\n    start_date: null\n    probe: null\n'
             '  sample:\n    name: null\n  measurement:\n'
             '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
             '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'

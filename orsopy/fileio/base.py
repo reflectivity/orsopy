@@ -6,7 +6,7 @@ Implementation of the base classes for the ORSO header.
 import os.path
 from copy import deepcopy
 from collections.abc import Mapping
-from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
+from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal, TextIO, Generator
 import typing
 from inspect import isclass
 from dataclasses import field, dataclass, fields
@@ -521,24 +521,18 @@ def _validate_header_data(dct_list: List[dict]):
 
 
 @contextmanager
-def _possibly_open_file(f, mode="wb"):
+def _possibly_open_file(f: Union[TextIO, str], mode: str = "wb") -> Generator[TextIO, None, None]:
     """
     Context manager for files.
-    Parameters
-    ----------
-    f : file-like or str
-        If `f` is a file, then yield the file. If `f` is a str then open the
-        file and yield the newly opened file.
-        On leaving this context manager the file is closed, if it was opened
-        by this context manager (i.e. `f` was a string).
-    mode : str, optional
-        mode is an optional string that specifies the mode in which the file
-        is opened.
-    Yields
-    ------
-    g : file-like
-        On leaving the context manager the file is closed, if it was opened by
-        this context manager.
+
+    :param f: If `f` is a file, then yield the file. If `f` is a str then
+        open the file and yield the newly opened file. On leaving this
+        context manager the file is closed, if it was opened by this
+        context manager (i.e. `f` was a string).
+    :param modes: An optional string that specifies the mode in which
+        the file is opened.
+    :yields: On leaving the context manager the file is closed, if it
+        was opened by this context manager.
     """
     close_file = False
     if (hasattr(f, "read") and hasattr(f, "write")) or f is None:
@@ -551,11 +545,15 @@ def _possibly_open_file(f, mode="wb"):
         g.close()
 
 
-def _todict(obj, classkey=None):
+def _todict(obj, classkey=None) -> dict:
     """
     Recursively converts an object to a dict representation
     https://stackoverflow.com/questions/1036409
     Licenced under CC BY-SA 4.0
+
+    :param obj: Object to convert to dict representation.
+    
+    :return: Dictionary representation of object.
     """
     if isinstance(obj, dict):
         data = {}

@@ -4,20 +4,31 @@ Implementation of the data_source for the ORSO header.
 
 # author: Andrew R. McCluskey (arm61)
 
-import enum
+# import enum
 from typing import Optional, Dict, List, Union, Literal
 from dataclasses import field, dataclass
-import datetime
 
 from .base import File, Header, ValueRange, Value, ValueVector, Person
 
 
 @dataclass(repr=False)
 class Experiment(Header):
-    """A definition of the experiment performed."""
+    """
+    A definition of the experiment performed.
+
+    :param title: Proposal or project title.
+    :param instrument: Reflectometer identifier.
+    :param start_date: Start date for the experiment.
+    :param probe: Radiation probe, either :code:`"neutrons"` or
+        :code:`"x-rays"`. Optional.
+    :param facility: Facility where the experiment was performed. Optional.
+    :param proposalID: Identifier for experiment at a facility. Optional.
+    :param doi: Digital object identifier for the experiment, possibly
+        provided by the facility. Optional.
+    """
     title: str
     instrument: str
-    date: datetime.datetime
+    start_date: str
     probe: Union[Literal["neutrons", "x-rays"]]
     facility: Optional[str] = None
     proposalID: Optional[str] = None
@@ -26,9 +37,25 @@ class Experiment(Header):
 
 @dataclass(repr=False)
 class Sample(Header):
-    """A description of the sample measured."""
+    """
+    A description of the sample measured.
+
+    :param name: An identified for the individual sample or the subject and
+        state being measured.
+    :param category: Simple sample description, front (beam side) / back,
+        each side should be one of :code:`'solid/liquid'`,
+        :code:`'liquid/solid'`, :code:`'gas/liquid'`,
+        :code:`'liquid/liquid'`, :code:`'solid/gas'`, :code:`'gas/solid'`.
+        Optional.
+    :param composition: Notes on the nominal composition of the sample e.g.
+        :code:`Si | SiO2 (20 angstrom) | Fe (200 angstrom) |
+        air (beam side)`. Optional.
+    :param description: Further details of the sample, e.g. size. Optional.
+    :param environment: Name of the sample environment device(s). Optional.
+    :param sample_parameters: Dictionary of sample parameters. Optional.
+    """
     name: str
-    type: Optional[str] = None
+    category: Optional[str] = None
     composition: Optional[str] = None
     description: Optional[Union[str, List[str]]] = None
     environment: Optional[Union[str, List[str]]] = None
@@ -61,15 +88,26 @@ class Sample(Header):
 
 @dataclass(repr=False)
 class InstrumentSettings(Header):
-    """Settings associated with the instrumentation."""
+    """
+    Settings associated with the instrumentation.
+
+    :param incident_angle: Angle (range) of incidence.
+    :param wavelength: Neutron/x-ray wavelenght (range).
+    :param polarization: Radiation polarization as one of
+        :code:`'unpolarized'`, :code:`'p'`, :code:`'m'`, :code:`'pp'`,
+        :code:`'pm'`, :code:`'mp'`, :code:`'mm'`, or a
+        :py:class:`orsopy.fileio.base.ValueVector`. Optional.
+    :param configuration: Description of the instreument configuration (full
+        polarized/liquid surface/etc). Optional.
+    """
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Literal['unpolarized', 'p', 'm', 'mm', 'mp', 'pm', 'pp'],
-                                 ValueVector]] = field(
+    polarization: Optional[Union[str, ValueVector]] = field(
         default='unpolarized',
         metadata={
             'description':
-                'Polarization described as unpolarized/ p / m / pp / pm / mp / mm / vector'
+                'Polarization described as unpolarized/ p '
+                '/ m / pp / pm / mp / mm / vector'
         })
     configuration: Optional[str] = field(
         default=None,
@@ -82,24 +120,36 @@ class InstrumentSettings(Header):
 
 @dataclass(repr=False)
 class Measurement(Header):
-    """The measurement elements for the header."""
+    """
+    The measurement elements for the header.
+
+    :param instrument_settings: Instrumentation details.
+    :param data_files: Raw data files produced in the measurement.
+    :param references: Raw reference files used in the reduction. Optional.
+    :param scheme: Measurement scheme (one of :code:`'angle-dispersive'`,
+        :code:`'energy-dispersive'`/:code:`'angle- and energy-dispersive'`).
+        Optional.
+    """
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
     references: Optional[List[Union[File, str]]] = None
-    scheme: Optional[Union[
-        Literal[
-            "angle- and energy-dispersive",
-            "angle-dispersive",
-            "energy-dispersive",
-        ]
-    ]] = None
+    scheme: Optional[str] = None
 
     __repr__ = Header._staggered_repr
 
 
 @dataclass(repr=False)
 class DataSource(Header):
-    """The data_source object definition."""
+    """
+    The data_source object definition.
+
+    :param owner: This refers to the actual owner of the data set, i.e. the
+        main proposer or the person doing the measurement on a lab
+        reflectometer.
+    :param experiment: Details of the experimental.
+    :param sample: Sample information.
+    :param measurement: Measurement specifics.
+    """
     owner: Person
     experiment: Experiment
     sample: Sample

@@ -20,11 +20,10 @@ class TestExperiment(unittest.TestCase):
         """
         value = data_source.Experiment('My First Experiment',
                                        'A Lab Instrument',
-                                       datetime(1992, 7, 14, 10, 10,
-                                                10), 'x-rays')
+                                       datetime(1992, 7, 14).strftime("%Y-%m-%d"), 'x-rays')
         assert value.title == "My First Experiment"
         assert value.instrument == 'A Lab Instrument'
-        assert value.date == datetime(1992, 7, 14, 10, 10, 10)
+        assert value.start_date == '1992-07-14'
         assert value.probe == 'x-rays'
         assert value.facility is None
         assert value.proposalID is None
@@ -36,11 +35,10 @@ class TestExperiment(unittest.TestCase):
         """
         value = data_source.Experiment('My First Experiment',
                                        'A Lab Instrument',
-                                       datetime(1992, 7, 14, 10, 10,
-                                                10), 'x-rays')
+                                       datetime(1992, 7, 14).strftime("%Y-%m-%d"), 'x-rays')
         assert value.to_yaml() == 'title: My First Experiment\n'\
-            + 'instrument: A Lab Instrument\ndate: 1992-07-14T'\
-            + '10:10:10\nprobe: x-rays\n'
+            + 'instrument: A Lab Instrument\nstart_date: \'1992-07-14\''\
+            + '\nprobe: x-rays\n'
 
     def test_creation_optionals(self):
         """
@@ -48,14 +46,14 @@ class TestExperiment(unittest.TestCase):
         """
         value = data_source.Experiment('My First Neutron Experiment',
                                        'TAS8',
-                                       datetime(1992, 7, 14, 10, 10, 10),
+                                       datetime(1992, 7, 14).strftime("%Y-%m-%d"),
                                        'neutrons',
                                        facility='Risoe',
                                        proposalID='abc123',
                                        doi='10.0000/abc1234')
         assert value.title == "My First Neutron Experiment"
         assert value.instrument == 'TAS8'
-        assert value.date == datetime(1992, 7, 14, 10, 10, 10)
+        assert value.start_date == '1992-07-14'
         assert value.probe == 'neutrons'
         assert value.facility == 'Risoe'
         assert value.proposalID == 'abc123'
@@ -67,15 +65,15 @@ class TestExperiment(unittest.TestCase):
         """
         value = data_source.Experiment('My First Neutron Experiment',
                                        'TAS8',
-                                       datetime(1992, 7, 14, 10, 10, 10),
+                                       datetime(1992, 7, 14).strftime("%Y-%m-%d"),
                                        'neutrons',
                                        facility='Risoe',
                                        proposalID='abc123',
                                        doi='10.0000/abc1234')
         assert value.to_yaml() == (
             'title: My First Neutron Experiment\n'
-            'instrument: TAS8\ndate: 1992-07-14T'
-            '10:10:10\nprobe: neutrons\nfacility: Risoe\nproposalID: '
+            'instrument: TAS8\nstart_date: \'1992-07-14\''
+            '\nprobe: neutrons\nfacility: Risoe\nproposalID: '
             'abc123\ndoi: 10.0000/abc1234\n'
         )
 
@@ -90,7 +88,7 @@ class TestSample(unittest.TestCase):
         """
         value = data_source.Sample('A Perfect Sample')
         assert value.name == 'A Perfect Sample'
-        assert value.type is None
+        assert value.category is None
         assert value.composition is None
         assert value.description is None
         assert value.environment is None
@@ -108,12 +106,12 @@ class TestSample(unittest.TestCase):
         """
         value = data_source.Sample(
             'A Perfect Sample',
-            type='solid/gas',
+            category='solid/gas',
             composition='Si | SiO2(20 A) | Fe(200 A) | air(beam side)',
             description='The sample is without flaws',
             environment='Temperature cell')
         assert value.name == 'A Perfect Sample'
-        assert value.type == 'solid/gas'
+        assert value.category == 'solid/gas'
         assert value.composition == 'Si | SiO2(20 A) | '\
             + 'Fe(200 A) | air(beam side)'
         assert value.description == 'The sample is without flaws'
@@ -125,11 +123,11 @@ class TestSample(unittest.TestCase):
         """
         value = data_source.Sample(
             'A Perfect Sample',
-            type='solid/gas',
+            category='solid/gas',
             composition='Si | SiO2(20 A) | Fe(200 A) | air(beam side)',
             description='The sample is without flaws',
             environment='Temperature cell')
-        assert value.to_yaml() == 'name: A Perfect Sample\ntype: '\
+        assert value.to_yaml() == 'name: A Perfect Sample\ncategory: '\
             + 'solid/gas\ncomposition: Si | SiO2(20 A) | Fe(200 A) | air'\
             + '(beam side)\ndescription: The sample is without flaws\n'\
             + 'environment: Temperature cell\n'
@@ -156,14 +154,14 @@ class TestDataSource(unittest.TestCase):
         value = data_source.DataSource(
             base.Person('A Person', 'Some Uni'),
             data_source.Experiment('My First Experiment', 'A Lab Instrument',
-                                   datetime(1992, 7, 14, 10, 10, 10), 'x-rays'),
+                                   datetime(1992, 7, 14).strftime("%Y-%m-%d"), 'x-rays'),
             data_source.Sample('A Perfect Sample'),
             m)
         assert value.owner.name == 'A Person'
         assert value.owner.affiliation == 'Some Uni'
         assert value.experiment.title == 'My First Experiment'
         assert value.experiment.instrument == 'A Lab Instrument'
-        assert value.experiment.date == datetime(1992, 7, 14, 10, 10, 10)
+        assert value.experiment.start_date == '1992-07-14'
         assert value.experiment.probe == 'x-rays'
         assert value.sample.name == 'A Perfect Sample'
 

@@ -7,7 +7,7 @@
 #     experiment:
 #         facility: Paul Scherrer Institut, SINQ
 #         ID: 2020 0304
-#         date: 2021-05-12 - 2021-05-15
+#         start_date: 2021-05-12
 #         title: Generation of input for formatting purposes
 #         instrument: Amor
 #         probe: neutrons

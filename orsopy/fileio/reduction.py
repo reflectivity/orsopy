@@ -12,7 +12,13 @@ from .base import Header, Person
 
 @dataclass(repr=False)
 class Software(Header):
-    """Description of the reduction software."""
+    """
+    Software description.
+
+    :param name: Software name.
+    :param version: Version identified for the software. Optional.
+    :param platform: Operating system. Optional.
+    """
     name: str
     version: Optional[str] = None
     platform: Optional[str] = None
@@ -20,7 +26,18 @@ class Software(Header):
 
 @dataclass(repr=False)
 class Reduction(Header):
-    """A description of the reduction that has been performed."""
+    """
+    A description of the reduction that has been performed.
+
+    :param software: Software used for reduction.
+    :param timestep: Datetime of reduced file creation. Optional.
+    :param creator: The person or routine who created the reduced file.
+        Optional.
+    :param computer: Name of the reduction machine. Optional.
+    :param call: Command line call or similar. Optional.
+    :param script: Path to reduction script or notebook. Optional.
+    :param binary: Path to full reduction information file. Optional.
+    """
     software: Union[Software, str]
     timestamp: Optional[datetime.datetime] = field(
         default=None,

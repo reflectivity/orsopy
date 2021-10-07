@@ -4,7 +4,6 @@ Implementation of the top level class for the ORSO header.
 
 # author: Andrew R. McCluskey (arm61)
 
-import re
 import yaml
 from typing import List, Union, TextIO, Optional
 from dataclasses import dataclass
@@ -24,6 +23,16 @@ ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.
+
+    :param data_source: Information about the origin and ownership of
+        the raw data.
+    :param reduction: Details of the data reduction that has been
+        performed the content of this section should contain enough
+        information to rerun the reduction.
+    :param columns: Information about the columns of data that will
+        be contained in the file.
+    :param data_set: An identified for the data set, i.e. if there is
+        more than one data set in the object. Optional.
     """
     data_source: DataSource
     reduction: Reduction
@@ -36,6 +45,8 @@ class Orso(Header):
         """
         An information string that explains what each of the columns
         in a dataset corresponds to.
+
+        :return: Explanatory string.
         """
         out = '# '
         for ci in self.columns:
@@ -50,15 +61,13 @@ class Orso(Header):
 
     def from_difference(self, other_dict: dict) -> 'Orso':
         """
-        Constructs another `Orso` instance from self, and a dict
+        Constructs another :py:class:`Orso` instance from self, and a dict
         containing updated header information.
 
-        :param other_dict: Contains updated header information
-        :type other_dict: dict
+        :param other_dict: Contains updated header information.
 
-        :return: A new `Orso` object constructed from self, and the
+        :return: A new :py:class:`Orso` object constructed from self, and the
             updated header information.
-        :rtype: orsopy.fileio.Orso
         """
         # recreate info from difference dictionary
         output = self.to_dict()
@@ -68,13 +77,11 @@ class Orso(Header):
     def to_difference(self, other: 'Orso') -> dict:
         """
         A dictionary containing the difference in header information between
-        two Orso objects.
+        two :py:class:`Orso` objects.
 
-        :param other: Other header to diff with
-        :type other: orsopy.fileio.Orso
+        :param other: Other header to diff with.
 
-        :return: Dictioonary of the header information difference
-        :rtype: dict
+        :return: Dictionary of the header information difference.
         """
         # return a dictionary of differences to other object
         my_dict = self.to_dict()
@@ -87,11 +94,10 @@ class Orso(Header):
 class OrsoDataset:
     """
     :param info: The header information for the reflectivity measurement
-    :type info: orsopy.fileio.Orso
-    :param data: The numerical data associated with the reflectivity measurement.
-        The data has shape `(npnts, ncols)`, where
-        `ncols == len(self.info.columns)`.
-    :type np.ndarray:
+    :param data: The numerical data associated with the reflectivity
+        measurement. The data has shape :code:`(npnts, ncols)`.
+
+    :raises ValueError: When :code:`ncols != len(self.info.columns)`.
     """
     info: Orso
     data: np.ndarray
@@ -105,14 +111,22 @@ class OrsoDataset:
     def header(self) -> str:
         """
         The header string for the ORSO file.
+
+        :return: Header string.
         """
         out = self.info.to_yaml()
         out += self.info.column_header()
         return out
 
     def diff_header(self, other: 'OrsoDataset') -> str:
-        # return a header string that only contains changes to other
-        # OrsoDataset ensure that data_set is the first entry
+        """
+        Return a header string that only contains changes to other
+        :py:class:`OrsoDataset` ensure that data_set is the first entry.
+
+        :param other: Other :py:class:`OrsoDataset` to compare against.
+
+        :return: Header string with only changes.
+        """
         out_dict = {"data_set": None}
 
         _diff = self.info.to_difference(other.info)
@@ -123,7 +137,12 @@ class OrsoDataset:
         out += self.info.column_header()
         return out
 
-    def save(self, fname):
+    def save(self, fname: Union[TextIO, str]):
+        """
+        Save the :py:class:`OrsoDataset`.
+
+        :param fname: The file name to save to.
+        """
         return save_orso([self], fname)
 
     def __eq__(self, other: 'OrsoDataset'):
@@ -137,17 +156,16 @@ def save_orso(
 ) -> None:
     """
     Saves an ORSO file. Each of the datasets must have a unique
-    `OrsoDataset.info.data_set` attribute. If that attribute is not
+    :py:attr:`OrsoDataset.info.data_set` attribute. If that attribute is not
     set, it is given an integer value corresponding to it's position
     in the list.
 
-    :param datasets: List of OrsoDataset to save into the Orso file
-    :type datasests: List
-    :param fname: The Orso file to save
-    :type fname: file-like or str
-    :param comment: Comment to write at the top of Orso file
-    :type comment: str, Optional
-    :raises ValueError: If the OrsoDataset.info.data_set values are not unique
+    :param datasets: List of OrsoDataset to save into the Orso file.
+    :param fname: The file name to save to.
+    :param comment: Comment to write at the top of Orso file.
+
+    :raises ValueError: If the :py:attr:`OrsoDataset.info.data_set`
+        values are not unique.
     """
     for idx, dataset in enumerate(datasets):
         info = dataset.info
@@ -179,12 +197,10 @@ def save_orso(
 
 def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
     """
-    :param fname: The Orso file to load
-    :type fname: file-like or str
+    :param fname: The Orso file to load.
 
-    :return: List of OrsoDataset corresponding to each dataset contained within the
-        ORT file.
-    :rtype: List
+    :return: :py:class:`OrsoDataset` objects for each dataset contained
+        within the ORT file.
     """
     dct_list, datas, version = _read_header_data(fname)
     ods = []
