@@ -64,6 +64,9 @@
           "additionalItems": {
             "$ref": "#/definitions/Column"
           }
+        },
+        {
+          "type": "null"
         }
       ]
     },

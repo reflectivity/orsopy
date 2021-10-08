@@ -562,6 +562,7 @@ properties:
       - $ref: '#/definitions/sR_column'
       - $ref: '#/definitions/sQz_column'
       type: array
+    - type: 'null'
   comment:
     anyOf:
     - type: string
