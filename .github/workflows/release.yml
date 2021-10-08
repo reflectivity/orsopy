@@ -32,7 +32,7 @@ jobs:
       with:
         name: dist
         path: |
-          dist
+          dist/orsopy*
 
   check-version:
     if: github.event_name != 'workflow_dispatch'
@@ -68,7 +68,7 @@ jobs:
         name: dist
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "dist/orsopy*.tar.gz,dist/orsopy*.whl"
+        artifacts: "orsopy*.tar.gz,orsopy*.whl"
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true
 
@@ -78,11 +78,17 @@ jobs:
     needs: [check-version]
 
     steps:
-    - uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.9
+    - uses: actions/download-artifact@v2
+      with:
+        name: dist
+    - name: Move assets
+      run: |
+        mkdir dist
+        mv orsopy*.tar.gz orsopy*.whl dist/
     - name: Upload to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
