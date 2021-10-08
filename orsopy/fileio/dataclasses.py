@@ -1,5 +1,6 @@
 import os
 from typing import Dict, Any
+from dataclasses import field, fields
 
 if os.environ.get("GENERATE_SCHEMA", False) == "True":
     import functools
@@ -37,5 +38,3 @@ if os.environ.get("GENERATE_SCHEMA", False) == "True":
     dataclass = functools.partial(_dataclass, config=Config)
 else:
     from dataclasses import dataclass
-
-from dataclasses import field, fields

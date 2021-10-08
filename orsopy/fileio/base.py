@@ -22,6 +22,7 @@ import numpy as np
 
 from .dataclasses import field, dataclass, fields
 
+
 def _noop(self, *args, **kw):
     pass
 
@@ -348,10 +349,12 @@ class Column(Header):
         default=None, metadata={"dimension": "A description of the column"}
     )
 
+
 @dataclass
 class qz_column(Column):
     name: Literal["Qz"]
     unit: Literal["1/angstrom", "1/nm"]
+
 
 @dataclass
 class R_column(Column):
@@ -367,6 +370,7 @@ class sR_column(Column):
 class sQz_column(Column):
     name: Literal["sQz"]
     unit: Literal["1/angstrom", "1/nm"]
+
 
 @dataclass(repr=False)
 class File(Header):

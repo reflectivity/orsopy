@@ -202,6 +202,7 @@ class TestOrso(unittest.TestCase):
             'resolution'
         )
 
+
 EMPTY_YAML = """\
 data_source:
   owner:
@@ -227,6 +228,7 @@ reduction:
     name: null
 columns: null
 """
+
 
 class TestFunctions(unittest.TestCase):
     """
@@ -269,5 +271,4 @@ class TestFunctions(unittest.TestCase):
         TODO: Fix once correct format is known.
         """
         empty = Orso.empty()
-        
         assert empty.to_yaml() == EMPTY_YAML
