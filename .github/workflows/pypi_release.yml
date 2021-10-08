@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "*"
+
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -29,7 +30,7 @@ jobs:
     - name: Archive files
       uses: actions/upload-artifact@v2
       with:
-        name: ubuntu-20-dist
+        name: dist
         path: |
           dist/orsopy*.whl
           dist/orsopy*.tar.gz
