@@ -181,7 +181,7 @@ class Header(metaclass=HeaderMeta):
                 continue
             elif isclass(fld.type) and issubclass(fld.type, Header):
                 attr_items[fld.name] = fld.type.empty()
-            elif get_origin(fld.type) is Union and issubclass(get_args(fld.type)[0], Header):
+            elif get_origin(fld.type) is Union and isclass(get_args(fld.type)[0]) and issubclass(get_args(fld.type)[0], Header):
                 attr_items[fld.name] = get_args(fld.type)[0].empty()
             elif get_origin(fld.type) is list and isclass(get_args(fld.type)[0]) \
                     and issubclass(get_args(fld.type)[0], Header):
@@ -514,16 +514,15 @@ def _validate_header_data(dct_list: List[dict]):
         # dataclasses that does that. It is possible but it requires extra
         # column objects like Qz_column, R_column, etc.
         cols = dct["columns"]
+        # If dct was created with Orso.empty() the Orso.columns attribute
+        # will be None. In which case don't both validating column
+        # names and units.
+        if cols is None:
+            continue
 
         ncols = min(4, len(cols))
         col_names = [col['name'] for col in cols]
         units = [col.get('unit') for col in cols]
-
-        # If dct was created with Orso.empty() the Orso.columns attribute
-        # will be [{"name": None}]. In which case don't both validating column
-        # names and units.
-        if len(col_names) == 1 and col_names[0] is None:
-            continue
 
         if col_names[:ncols] != req_cols[:ncols]:
             raise ValueError(
