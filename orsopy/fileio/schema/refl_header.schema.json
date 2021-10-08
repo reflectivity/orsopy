@@ -945,6 +945,57 @@
         "software"
       ]
     },
+    "Column": {
+      "title": "Column",
+      "type": "object",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "description": "SI unit string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dimension": {
+          "dimension": "A description of the column",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
     "qz_column": {
       "title": "qz_column",
       "type": "object",
