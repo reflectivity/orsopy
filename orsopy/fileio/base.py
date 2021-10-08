@@ -409,7 +409,7 @@ class File(Header):
                 )
 
 
-def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple[dict, list, str]:
+def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple[List[dict], list, str]:
     """
     Reads the header and data contained within an ORSO file, parsing it into
     json dictionaries and numerical arrays.
