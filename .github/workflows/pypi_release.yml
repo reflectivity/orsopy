@@ -16,13 +16,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
     - name: Install dependencies
       run: |
         sudo apt update
         sudo apt install python3 python3-setuptools python3-pip python3-yaml
+        pip3 install build
     - name: Build PyPI package
       run: |
-        pip3 install build
         python3 -m build
     - name: Archive files
       uses: actions/upload-artifact@v2
