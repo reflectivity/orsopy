@@ -14,9 +14,9 @@
 #     sample:
 #         name: Ni1000
 #         description:
-#             - amb: air
-#             - layer: Ni, thickness 100 nm
-#             - sub: Si
+#             - "amb: air"
+#             - "layer: Ni, thickness 100 nm"
+#             - "sub: Si"
 #     measurement:
 #         scheme: angle- and energy-dispersive
 #         instrument_settings:
