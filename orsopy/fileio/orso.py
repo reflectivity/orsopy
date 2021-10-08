@@ -29,6 +29,7 @@ class Orso(Header):
     data_source: DataSource
     reduction: Reduction
     columns: Union[
+        List[Column],
         Tuple[qz_column, R_column],
         Tuple[qz_column, R_column, sR_column],
         Tuple[qz_column, R_column, sR_column, sQz_column],
@@ -88,7 +89,7 @@ class Orso(Header):
         return out_dict
 
 
-@dataclass
+@dataclass(init=False)
 class OrsoDataset:
     """
     :param info: The header information for the reflectivity measurement
@@ -100,6 +101,10 @@ class OrsoDataset:
     """
     info: Orso
     # data: np.ndarray
+
+    def __init__(self, info: Orso, data: np.ndarray):
+        self.info = info
+        self.data = data
 
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):

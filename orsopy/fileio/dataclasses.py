@@ -23,6 +23,11 @@ if os.environ.get("GENERATE_SCHEMA", False) == "True":
                     # special handling for columns: allow additional Column
                     # items after 4 predefined spots.
                     if prop == 'columns':
+                        # remove the List[Columns] generic type that is needed for python validation
+                        value['anyOf'].pop(0)
+                        # add generic Column for additionalItems
+                        # TODO: when updating to metaschema >= 2020-12, "additionalItems" becomes "items"
+                        # (and "items" becomes "prefixItems")
                         value['anyOf'][-1]['additionalItems'] = {"$ref": "#/definitions/Column"}
                     else:
                         value['anyOf'].append({'type': 'null'})
