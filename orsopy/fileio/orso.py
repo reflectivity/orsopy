@@ -6,9 +6,10 @@ Implementation of the top level class for the ORSO header.
 
 import re
 import yaml
-from typing import List, Union, TextIO, Optional
-from dataclasses import dataclass
+from typing import List, Union, TextIO, Optional, Tuple
+from .dataclasses import dataclass
 from .base import (Header, Column, _possibly_open_file,
+                   qz_column, R_column, sR_column, sQz_column,
                    _read_header_data, _nested_update, _dict_diff)
 from .data_source import DataSource
 from .reduction import Reduction
@@ -27,7 +28,11 @@ class Orso(Header):
     """
     data_source: DataSource
     reduction: Reduction
-    columns: List[Column]
+    columns: Union[
+        Tuple[qz_column, R_column],
+        Tuple[qz_column, R_column, sR_column],
+        Tuple[qz_column, R_column, sR_column, sQz_column],
+    ]
     data_set: Optional[Union[int, str]] = None
 
     __repr__ = Header._staggered_repr
@@ -94,7 +99,7 @@ class OrsoDataset:
     :type np.ndarray:
     """
     info: Orso
-    data: np.ndarray
+    # data: np.ndarray
 
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):

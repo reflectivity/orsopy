@@ -9,7 +9,6 @@ from collections.abc import Mapping
 from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
 import typing
 from inspect import isclass
-from dataclasses import field, dataclass, fields
 import datetime
 import pathlib
 import warnings
@@ -21,6 +20,7 @@ import re
 
 import numpy as np
 
+from .dataclasses import field, dataclass, fields
 
 def _noop(self, *args, **kw):
     pass
@@ -348,6 +348,25 @@ class Column(Header):
         default=None, metadata={"dimension": "A description of the column"}
     )
 
+@dataclass
+class qz_column(Column):
+    name: Literal["Qz"]
+    unit: Literal["1/angstrom", "1/nm"]
+
+@dataclass
+class R_column(Column):
+    name: Literal["R"]
+
+
+@dataclass
+class sR_column(Column):
+    name: Literal["sR"]
+
+
+@dataclass
+class sQz_column(Column):
+    name: Literal["sQz"]
+    unit: Literal["1/angstrom", "1/nm"]
 
 @dataclass(repr=False)
 class File(Header):
