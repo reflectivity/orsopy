@@ -101,7 +101,16 @@ class InstrumentSettings(Header):
     """
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Literal['unpolarized', 'p', 'm', 'mm', 'mp', 'pm', 'pp'], ValueVector]] = field(
+    polarization: Optional[
+        Union[
+            Literal[
+                'unpolarized',
+                'p',
+                'm',
+                'mm',
+                'mp',
+                'pm',
+                'pp'], ValueVector]] = field(
         default='unpolarized',
         metadata={
             'description':
@@ -131,7 +140,12 @@ class Measurement(Header):
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
     references: Optional[List[Union[File, str]]] = None
-    scheme: Optional[Union[Literal['angle- and energy-dispersive', 'angle-dispersive', 'energy-dispersive']]] = None
+    scheme: Optional[
+        Union[
+            Literal[
+                'angle- and energy-dispersive',
+                'angle-dispersive',
+                'energy-dispersive']]] = None
 
     __repr__ = Header._staggered_repr
 
