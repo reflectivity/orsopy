@@ -47,8 +47,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'orsopy'
-copyright = "2021, Andrew R. McCluskey"
-author = "Andrew R. McCluskey"
+copyright = "2021, ORSO"
+author = "ORSO"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -97,7 +97,7 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
 
 
 # -- Options for HTMLHelp output ---------------------------------------
