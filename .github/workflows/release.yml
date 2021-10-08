@@ -32,8 +32,7 @@ jobs:
       with:
         name: dist
         path: |
-          dist/orsopy*.whl
-          dist/orsopy*.tar.gz
+          dist
 
   check-version:
     if: github.event_name != 'workflow_dispatch'
@@ -69,7 +68,7 @@ jobs:
         name: dist
     - uses: ncipollo/release-action@v1
       with:
-        artifacts: "orsopy*.tar.gz,orsopy*.whl"
+        artifacts: "dist/orsopy*.tar.gz,dist/orsopy*.whl"
         token: ${{ secrets.GITHUB_TOKEN }}
         allowUpdates: true
 
