@@ -29,8 +29,7 @@ if os.environ.get("GENERATE_SCHEMA", False) == "True":
                         # TODO: when updating to metaschema >= 2020-12, "additionalItems" becomes "items"
                         # (and "items" becomes "prefixItems")
                         value['anyOf'][-1]['additionalItems'] = {"$ref": "#/definitions/Column"}
-                    else:
-                        value['anyOf'].append({'type': 'null'})
+                    value['anyOf'].append({'type': 'null'})
                 # only one $ref e.g. from other model
                 elif '$ref' in value:
                     value['anyOf'] = [{'$ref': value.pop('$ref')}]
