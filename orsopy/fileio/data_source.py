@@ -29,7 +29,7 @@ class Experiment(Header):
     title: str
     instrument: str
     start_date: str
-    probe: str
+    probe: Union[Literal['neutrons', 'x-rays']]
     facility: Optional[str] = None
     proposalID: Optional[str] = None
     doi: Optional[str] = None
@@ -101,7 +101,7 @@ class InstrumentSettings(Header):
     """
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[str, ValueVector]] = field(
+    polarization: Optional[Union[Literal['unpolarized', 'p', 'm', 'mm', 'mp', 'pm', 'pp'], ValueVector]] = field(
         default='unpolarized',
         metadata={
             'description':
@@ -131,7 +131,7 @@ class Measurement(Header):
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
     references: Optional[List[Union[File, str]]] = None
-    scheme: Optional[str] = None
+    scheme: Optional[Union[Literal['angle- and energy-dispersive', 'angle-dispersive', 'energy-dispersive']]] = None
 
     __repr__ = Header._staggered_repr
 
