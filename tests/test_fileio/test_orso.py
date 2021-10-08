@@ -202,6 +202,31 @@ class TestOrso(unittest.TestCase):
             'resolution'
         )
 
+EMPTY_YAML = """\
+data_source:
+  owner:
+    name: null
+    affiliation: null
+  experiment:
+    title: null
+    instrument: null
+    date: null
+    probe: null
+  sample:
+    name: null
+  measurement:
+    instrument_settings:
+      incident_angle:
+        magnitude: null
+      wavelength:
+        magnitude: null
+      polarization: unpolarized
+    data_files: null
+reduction:
+  software:
+    name: null
+columns: null
+"""
 
 class TestFunctions(unittest.TestCase):
     """
@@ -232,7 +257,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert empty.reduction.corrections is None
         assert empty.reduction.creator is None
-        assert empty.columns == [Column.empty()]
+        assert empty.columns is None
         assert empty.data_set is None
         dct = empty.to_dict()
         _validate_header_data([dct])
@@ -244,14 +269,5 @@ class TestFunctions(unittest.TestCase):
         TODO: Fix once correct format is known.
         """
         empty = Orso.empty()
-        req = (
-            'data_source:\n  owner:\n    name: null\n'
-            '    affiliation: null\n  experiment:\n    title: null\n'
-            '    instrument: null\n    date: null\n    probe: null\n'
-            '  sample:\n    name: null\n  measurement:\n'
-            '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
-            '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
-            '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            'columns:\n- name: null\n'
-        )
-        assert empty.to_yaml() == req
+        
+        assert empty.to_yaml() == EMPTY_YAML
