@@ -5,7 +5,7 @@ The reduction elements for the ORSO header
 # author: Andrew R. McCluskey (arm61)
 
 from typing import Optional, List, Union
-from dataclasses import field, dataclass
+from .dataclasses import field, dataclass
 import datetime
 from .base import Header, Person
 

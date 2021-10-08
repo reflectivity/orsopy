@@ -6,7 +6,7 @@ Implementation of the data_source for the ORSO header.
 
 import enum
 from typing import Optional, Dict, List, Union, Literal
-from dataclasses import field, dataclass
+from .dataclasses import field, dataclass
 import datetime
 
 from .base import File, Header, ValueRange, Value, ValueVector, Person
