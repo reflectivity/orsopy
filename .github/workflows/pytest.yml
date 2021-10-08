@@ -43,6 +43,7 @@ jobs:
           coverage run -m pytest
 
       - name: Coveralls
-        uses: AndreMiras/coveralls-python-action@develop
+        run: |
+          coveralls --service=github
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
