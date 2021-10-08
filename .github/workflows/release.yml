@@ -24,6 +24,11 @@ jobs:
         sudo apt update
         sudo apt install python3 python3-setuptools python3-pip python3-yaml
         pip3 install build
+    - name: Check version
+      run: |
+        PY_VERSION="$(python3 -c "import orsopy;print(orsopy.__version__)")"
+        GIT_VERSION="$(git describe --tags| cut -d 'v' -f 2)"
+        if  [ $PY_VERSION == $GIT_VERSION ]; then echo "$PY_VERSION OK" ; else echo "$PY_VERSION is not $GIT_VERSION" ; fi
     - name: Build PyPI package
       run: |
         python3 -m build
