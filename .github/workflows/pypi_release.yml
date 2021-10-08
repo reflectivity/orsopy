@@ -1,10 +1,10 @@
 # This action releases orsopy on PyPI for every version tagged commit (e.g. v0.0.1)
-name: PyPI Release
+name: PyPI/Github Release
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - "*"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
