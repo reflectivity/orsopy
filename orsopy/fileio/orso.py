@@ -5,7 +5,7 @@ Implementation of the top level class for the ORSO header.
 # author: Andrew R. McCluskey (arm61)
 
 import yaml
-from typing import List, Union, TextIO, Optional
+from typing import List, Union, TextIO, Optional, Any
 from dataclasses import dataclass
 from .base import (Header, Column, _possibly_open_file,
                    _read_header_data, _nested_update, _dict_diff)
