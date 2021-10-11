@@ -9,7 +9,9 @@ from collections.abc import Mapping
 from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
 import typing
 from inspect import isclass
-from dataclasses import field, dataclass, fields
+from dataclasses import field, dataclass, fields, \
+    _set_new_attribute, _field_init, _create_fn, _init_param, \
+    _FIELD, _FIELDS, _FIELD_INITVAR, MISSING, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME
 import datetime
 import pathlib
 import warnings
@@ -43,6 +45,48 @@ yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:timestamp
     yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:str'])
 
 
+def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
+    """
+    _init_fn from dataclasses adapted to accept additional keywords.
+    See dataclasses source for comments on code.
+    """
+    seen_default = False
+    for f in fieldsarg:
+        if f.init:
+            if not (f.default is MISSING and f.default_factory is MISSING):
+                seen_default = True
+            elif seen_default:
+                raise TypeError(f'non-default argument {f.name!r} '
+                                'follows default argument')
+
+    locals = {f'_type_{f.name}': f.type for f in fieldsarg}
+    locals.update({
+        'MISSING': MISSING,
+        '_HAS_DEFAULT_FACTORY': _HAS_DEFAULT_FACTORY,
+    })
+
+    body_lines = []
+    for f in fieldsarg:
+        line = _field_init(f, frozen, locals, self_name)
+        if line:
+            body_lines.append(line)
+
+    if has_post_init:
+        params_str = ','.join(f.name for f in fieldsarg
+                              if f._field_type is _FIELD_INITVAR)
+        body_lines.append(f'{self_name}.{_POST_INIT_NAME}({params_str})')
+
+    # processing of additional user keyword arguments
+    body_lines += ['for k,v in user_kwds.items():', '    setattr(self, k, v)']
+
+    return _create_fn('__init__',
+                      [self_name] + [_init_param(f) for f in fieldsarg if f.init] + ['**user_kwds'],
+                      body_lines,
+                      locals=locals,
+                      globals=globals,
+                      return_type=None)
+
+
 class HeaderMeta(type):
     """
     Metaclass for Header.
@@ -50,7 +94,8 @@ class HeaderMeta(type):
     """
 
     def __new__(cls, name, bases, attrs, **kwargs):
-        if '__annotations__' in attrs:
+        if '__annotations__' in attrs and \
+                len([k for k in attrs['__annotations__'].keys() if not k.startswith('_')]) > 0:
             # only applies to dataclass children of Header
             # add optional comment attribute, needs to come last
             attrs['__annotations__']['comment'] = Optional[str]
@@ -64,7 +109,20 @@ class HeaderMeta(type):
             for base in bases:
                 if hasattr(base, '_orso_optionals'):
                     attrs['_orso_optionals'] += getattr(base, '_orso_optionals')
-        return type.__new__(cls, name, bases, attrs, **kwargs)
+            out = dataclass(type.__new__(cls, name, bases, attrs, **kwargs), repr=False, init=False)
+            fieldsarg = getattr(out, _FIELDS)
+
+            # Generate custom __init__ method that allows arbitrary extra keyword arguments
+            has_post_init = hasattr(out, _POST_INIT_NAME)
+            # Include InitVars and regular fields (so, not ClassVars).
+            flds = [f for f in fieldsarg.values()
+                    if f._field_type in (_FIELD, _FIELD_INITVAR)]
+            init_fun = _custom_init_fn(flds, False, has_post_init, 'self', globals())
+            _set_new_attribute(out, '__init__', init_fun)
+
+            return out
+        else:
+            return type.__new__(cls, name, bases, attrs, **kwargs)
 
 
 class Header(metaclass=HeaderMeta):
@@ -98,6 +156,16 @@ class Header(metaclass=HeaderMeta):
 
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
+
+    @property
+    def user_data(self):
+        out_dict = {}
+        fnames = [f.name for f in fields(self)]
+        for key, value in self.__dict__.items():
+            if key.startswith("_") or key in fnames:
+                continue
+            out_dict[key] = value
+        return out_dict
 
     @staticmethod
     def _resolve_type(hint, item):
@@ -280,7 +348,6 @@ class Header(metaclass=HeaderMeta):
         return out
 
 
-@dataclass(repr=False)
 class Value(Header):
     """A value or list of values with an optional unit."""
 
@@ -290,7 +357,6 @@ class Value(Header):
     )
 
 
-@dataclass(repr=False)
 class ValueRange(Header):
     """A range or list of ranges with mins, maxs, and an optional unit."""
 
@@ -301,7 +367,6 @@ class ValueRange(Header):
     )
 
 
-@dataclass(repr=False)
 class ValueVector(Header):
     """A vector or list of vectors with an optional unit.
 
@@ -325,7 +390,6 @@ class ValueVector(Header):
     )
 
 
-@dataclass(repr=False)
 class Person(Header):
     """Information about a person, including name, affilation(s), and email."""
 
@@ -336,7 +400,6 @@ class Person(Header):
     )
 
 
-@dataclass(repr=False)
 class Column(Header):
     """Information about a data column"""
 
@@ -349,7 +412,6 @@ class Column(Header):
     )
 
 
-@dataclass(repr=False)
 class File(Header):
     """A file with a last modified timestamp."""
 

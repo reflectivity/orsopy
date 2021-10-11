@@ -6,13 +6,12 @@ Implementation of the data_source for the ORSO header.
 
 import enum
 from typing import Optional, Dict, List, Union, Literal
-from dataclasses import field, dataclass
+from dataclasses import field
 import datetime
 
 from .base import File, Header, ValueRange, Value, ValueVector, Person
 
 
-@dataclass(repr=False)
 class Experiment(Header):
     """A definition of the experiment performed."""
     title: str
@@ -24,7 +23,6 @@ class Experiment(Header):
     doi: Optional[str] = None
 
 
-@dataclass(repr=False)
 class Sample(Header):
     """A description of the sample measured."""
     name: str
@@ -59,7 +57,6 @@ class Sample(Header):
 #     pp = "++"
 
 
-@dataclass(repr=False)
 class InstrumentSettings(Header):
     """Settings associated with the instrumentation."""
     incident_angle: Union[Value, ValueRange]
@@ -80,7 +77,6 @@ class InstrumentSettings(Header):
     __repr__ = Header._staggered_repr
 
 
-@dataclass(repr=False)
 class Measurement(Header):
     """The measurement elements for the header."""
     instrument_settings: InstrumentSettings
@@ -97,7 +93,6 @@ class Measurement(Header):
     __repr__ = Header._staggered_repr
 
 
-@dataclass(repr=False)
 class DataSource(Header):
     """The data_source object definition."""
     owner: Person
