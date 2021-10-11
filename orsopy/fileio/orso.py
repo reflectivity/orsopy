@@ -132,7 +132,7 @@ class OrsoDataset:
     :raises ValueError: When :code:`ncols != len(self.info.columns)`.
     """
     info: Orso
-    data: np.ndarray
+    data: Any
 
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):
