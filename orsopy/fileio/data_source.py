@@ -11,7 +11,6 @@ from dataclasses import field, dataclass
 from .base import File, Header, ValueRange, Value, ValueVector, Person
 
 
-@dataclass(repr=False)
 class Experiment(Header):
     """
     A definition of the experiment performed.
@@ -35,7 +34,6 @@ class Experiment(Header):
     doi: Optional[str] = None
 
 
-@dataclass(repr=False)
 class Sample(Header):
     """
     A description of the sample measured.
@@ -85,7 +83,6 @@ class Sample(Header):
 #     pp = "++"
 
 
-@dataclass(repr=False)
 class InstrumentSettings(Header):
     """
     Settings associated with the instrumentation.
@@ -126,7 +123,6 @@ class InstrumentSettings(Header):
     __repr__ = Header._staggered_repr
 
 
-@dataclass(repr=False)
 class Measurement(Header):
     """
     The measurement elements for the header.
@@ -150,7 +146,6 @@ class Measurement(Header):
     __repr__ = Header._staggered_repr
 
 
-@dataclass(repr=False)
 class DataSource(Header):
     """
     The data_source object definition.

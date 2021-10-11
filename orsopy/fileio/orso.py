@@ -14,12 +14,12 @@ from .reduction import Reduction
 
 import numpy as np
 
+
 ORSO_VERSION = '0.1'
 ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
                   "| YAML encoding | https://www.reflectometry.org/")
 
 
-@dataclass(repr=False)
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.
@@ -40,6 +40,27 @@ class Orso(Header):
     data_set: Optional[Union[int, str]] = None
 
     __repr__ = Header._staggered_repr
+
+    def __init__(self, data_source: DataSource, reduction: Reduction,
+                 columns: List[Column], data_set: Optional[Union[int, str]] = None, **user_data):
+        self.data_source = data_source
+        self.reduction = reduction
+        self.columns = columns
+        self.data_set = data_set
+        self.__post_init__()
+        # additional keywords used to add fields to the file header
+        # some recreation does not work when using the attribute directly so it's wrapped in a property
+        self._user_data = user_data
+
+    @property
+    def user_data(self):
+        return self._user_data
+
+    @user_data.setter
+    def user_data(self, value):
+        if not type(value) is dict:
+            raise ValueError("user_data has to be a dictionary")
+        self._user_data = value
 
     def column_header(self) -> str:
         """
@@ -89,6 +110,17 @@ class Orso(Header):
         out_dict = _dict_diff(my_dict, other_dict)
         return out_dict
 
+    def to_dict(self):
+        """
+        Adds the user data to the returned dictionary.
+        """
+        out = super().to_dict()
+        out.update(self._user_data)
+        # put columns at the end of the dictionary
+        cols = out.pop('columns')
+        out['columns'] = cols
+        return out
+
 
 @dataclass
 class OrsoDataset:
@@ -104,9 +136,7 @@ class OrsoDataset:
 
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):
-            raise ValueError(
-                "Data has to have the same number of columns as header"
-            )
+            raise ValueError("Data has to have the same number of columns as header")
 
     def header(self) -> str:
         """
@@ -152,8 +182,7 @@ class OrsoDataset:
 def save_orso(
         datasets: List[OrsoDataset],
         fname: Union[TextIO, str],
-        comment: Optional[str] = None
-) -> None:
+        comment: Optional[str] = None) -> None:
     """
     Saves an ORSO file. Each of the datasets must have a unique
     :py:attr:`OrsoDataset.info.data_set` attribute. If that attribute is not
@@ -170,16 +199,14 @@ def save_orso(
     for idx, dataset in enumerate(datasets):
         info = dataset.info
         data_set = info.data_set
-        if (data_set is None or (
-                isinstance(data_set, str) and len(data_set) == 0)):
+        if (data_set is None or (isinstance(data_set, str) and len(data_set) == 0)):
             # it's not set, or is zero length string
             info.data_set = idx
 
     dsets = [dataset.info.data_set for dataset in datasets]
     if len(set(dsets)) != len(dsets):
         raise ValueError(
-            "All `OrsoDataset.info.data_set` values must be unique"
-        )
+            "All `OrsoDataset.info.data_set` values must be unique")
 
     with _possibly_open_file(fname, 'w') as f:
         header = f"{ORSO_DESIGNATE}\n"

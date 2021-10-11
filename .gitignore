@@ -4,4 +4,8 @@ test.ort
 .pytest_cache
 .idea
 .DS_Store
+test*.ort
 **/__pycache__
+orsopy.egg-info
+dist
+build
