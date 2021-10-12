@@ -45,7 +45,7 @@ definitions:
     properties:
       ID:
         type: string
-      date:
+      start_date:
         description: timestamp string, formatted as ISO 8601 datetime
         format: date-time
         type: string

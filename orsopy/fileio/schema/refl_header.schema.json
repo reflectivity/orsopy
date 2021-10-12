@@ -176,7 +176,7 @@
             }
           ]
         },
-        "date": {
+        "start_date": {
           "format": "date-time",
           "anyOf": [
             {
@@ -236,7 +236,7 @@
       "required": [
         "title",
         "instrument",
-        "date",
+        "start_date",
         "probe"
       ]
     },

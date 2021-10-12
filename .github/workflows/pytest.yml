@@ -37,3 +37,13 @@ jobs:
         run: |
           flake8 --ignore=F401,E501 --count --show-source --statistics orsopy
           flake8 --ignore=F401,E501 --count --show-source --statistics tests
+      
+      - name: Test with coverage
+        run: |
+          coverage run -m pytest
+
+      - name: Coveralls
+        run: |
+          coveralls --service=github
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

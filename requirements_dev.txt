@@ -8,4 +8,8 @@ numpy>=1.19.0
 
 pytest>=6.2.4
 pyyaml>=5.4.1
+sphinx-autodoc-typehints
 jsonschema>=3.2.0
+typing_extensions
+coverage
+coveralls
