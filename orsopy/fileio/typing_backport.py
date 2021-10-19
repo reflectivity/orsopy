@@ -5,10 +5,12 @@ the typing_extensions module to be installed.
 from typing import List, Tuple
 from typing_extensions import Literal
 
+
 def get_args(annotation):
     if annotation.__class__ is Literal.__class__:
         return annotation.__values__
     return getattr(annotation, '__args__', ())
+
 
 def get_origin(annotation):
     atype = type(annotation)

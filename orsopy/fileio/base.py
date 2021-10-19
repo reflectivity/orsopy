@@ -26,6 +26,7 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
+
 def _noop(self, *args, **kw):
     pass
 
