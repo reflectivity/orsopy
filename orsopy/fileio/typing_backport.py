@@ -2,6 +2,7 @@
 Module for compatibility with Python <3.8. Requires
 the typing_extensions module to be installed.
 """
+from typing import List, Tuple
 from typing_extensions import Literal
 
 def get_args(annotation):
