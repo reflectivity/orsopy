@@ -141,13 +141,13 @@ class TestOrso(unittest.TestCase):
             data_source=fileio.DataSource(
                 sample=fileio.Sample(
                     name="My Sample",
-                    type="solid",
+                    category="solid",
                     description="Something descriptive",
                 ),
                 experiment=fileio.Experiment(
                     title="Main experiment",
                     instrument="Reflectometer",
-                    date=datetime.now(),
+                    start_date=datetime.now().strftime("%Y-%m-%d"),
                     probe="x-rays",
                 ),
                 owner=fileio.Person("someone", "important"),
@@ -191,6 +191,42 @@ class TestOrso(unittest.TestCase):
         with pytest.raises(ValueError):
             fileio.save_orso([ds, ds2], 'test_data_set.ort')
 
+    def test_user_data(self):
+        # test write and read of userdata
+        info = fileio.Orso.empty()
+        info.columns = [
+            fileio.Column("Qz", "1/angstrom"),
+            fileio.Column("R"),
+            fileio.Column("sR"),
+        ]
+
+        data = np.zeros((100, 3))
+        data[:] = np.arange(100.0)[:, None]
+        dct = {"ci": "1", "foo": ["bar", 1, 2, 3.5]}
+        info.user_data = dct
+        ds = fileio.OrsoDataset(info, data)
+
+        fileio.save_orso([ds], "test2.ort")
+        ls = fileio.load_orso("test2.ort")
+        assert ls[0].info.user_data == info.user_data
+
+        # create from dictionary
+        info2 = fileio.Orso(**info.to_dict())
+        assert info2 == info
+
+        # user data in sub-key
+        info.data_source.test_entry = 'test'
+        fileio.save_orso([ds], "test2.ort")
+        ls = fileio.load_orso("test2.ort")
+        assert ls[0].info.user_data == info.user_data
+
+        # create with keyword argument
+        assert not hasattr(info2.data_source, 'test_entry')
+        ds_dict = info.data_source.to_dict()
+        assert 'test_entry' in ds_dict
+        info2.data_source = fileio.DataSource(**ds_dict)
+        assert hasattr(info2.data_source, 'test_entry')
+
     def test_extra_elements(self):
         # if there are extra elements present in the ORT file they should still
         # be loadable. They won't be there as dataclass fields, but they'll be
@@ -217,7 +253,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.owner.name is None
         assert ds.experiment.title is None
         assert ds.experiment.instrument is None
-        assert ds.experiment.date is None
+        assert ds.experiment.start_date is None
         assert ds.experiment.probe is None
         assert ds.sample.name is None
         assert ds.measurement.instrument_settings.incident_angle.magnitude is None
@@ -247,7 +283,7 @@ class TestFunctions(unittest.TestCase):
         req = (
             'data_source:\n  owner:\n    name: null\n'
             '    affiliation: null\n  experiment:\n    title: null\n'
-            '    instrument: null\n    date: null\n    probe: null\n'
+            '    instrument: null\n    start_date: null\n    probe: null\n'
             '  sample:\n    name: null\n  measurement:\n'
             '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
             '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'

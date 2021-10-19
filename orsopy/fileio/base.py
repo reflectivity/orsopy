@@ -6,9 +6,11 @@ Implementation of the base classes for the ORSO header.
 import os.path
 from copy import deepcopy
 from collections.abc import Mapping
-from typing import Optional, Union, List, Tuple
+from typing import Optional, Union, List, Tuple, TextIO, Generator, Any
 from inspect import isclass
-from dataclasses import field, dataclass, fields
+from dataclasses import field, dataclass, fields, \
+    _set_new_attribute, _field_init, _create_fn, _init_param, \
+    _FIELD, _FIELDS, _FIELD_INITVAR, MISSING, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME
 import datetime
 import pathlib
 import warnings
@@ -36,7 +38,8 @@ yaml.emitter.Emitter.process_tag = _noop
 
 def __datetime_representer(dumper, data):
     """
-    Ensures that datetime objects are represented correctly."""
+    Ensures that datetime objects are represented correctly.
+    """
     value = data.isoformat("T")
     return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
 
@@ -48,14 +51,57 @@ yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:timestamp
     yaml.constructor.SafeConstructor.yaml_constructors[u'tag:yaml.org,2002:str'])
 
 
-class HeaderMeta(type):
+def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
     """
-    Metaclass for Header.
-    Creates a dataclass with an additional comment attribute.
+    _init_fn from dataclasses adapted to accept additional keywords.
+    See dataclasses source for comments on code.
+    """
+    seen_default = False
+    for f in fieldsarg:
+        if f.init:
+            if not (f.default is MISSING and f.default_factory is MISSING):
+                seen_default = True
+            elif seen_default:
+                raise TypeError(f'non-default argument {f.name!r} '
+                                'follows default argument')
+
+    locals = {f'_type_{f.name}': f.type for f in fieldsarg}
+    locals.update({
+        'MISSING': MISSING,
+        '_HAS_DEFAULT_FACTORY': _HAS_DEFAULT_FACTORY,
+    })
+
+    body_lines = []
+    for f in fieldsarg:
+        line = _field_init(f, frozen, locals, self_name)
+        if line:
+            body_lines.append(line)
+
+    if has_post_init:
+        params_str = ','.join(f.name for f in fieldsarg
+                              if f._field_type is _FIELD_INITVAR)
+        body_lines.append(f'{self_name}.{_POST_INIT_NAME}({params_str})')
+
+    # processing of additional user keyword arguments
+    body_lines += ['for k,v in user_kwds.items():', '    setattr(self, k, v)']
+
+    return _create_fn('__init__',
+                      [self_name] + [_init_param(f) for f in fieldsarg if f.init] + ['**user_kwds'],
+                      body_lines,
+                      locals=locals,
+                      globals=globals,
+                      return_type=None)
+
+
+class _HeaderMeta(type):
+    """
+    Metaclass for :py:class:`Header`.
+    Creates a :py:attr:`dataclass` with an additional comment attribute.
     """
 
     def __new__(cls, name, bases, attrs, **kwargs):
-        if '__annotations__' in attrs:
+        if '__annotations__' in attrs and \
+                len([k for k in attrs['__annotations__'].keys() if not k.startswith('_')]) > 0:
             # only applies to dataclass children of Header
             # add optional comment attribute, needs to come last
             attrs['__annotations__']['comment'] = Optional[str]
@@ -69,10 +115,23 @@ class HeaderMeta(type):
             for base in bases:
                 if hasattr(base, '_orso_optionals'):
                     attrs['_orso_optionals'] += getattr(base, '_orso_optionals')
-        return type.__new__(cls, name, bases, attrs, **kwargs)
+            out = dataclass(type.__new__(cls, name, bases, attrs, **kwargs), repr=False, init=False)
+            fieldsarg = getattr(out, _FIELDS)
+
+            # Generate custom __init__ method that allows arbitrary extra keyword arguments
+            has_post_init = hasattr(out, _POST_INIT_NAME)
+            # Include InitVars and regular fields (so, not ClassVars).
+            flds = [f for f in fieldsarg.values()
+                    if f._field_type in (_FIELD, _FIELD_INITVAR)]
+            init_fun = _custom_init_fn(flds, False, has_post_init, 'self', globals())
+            _set_new_attribute(out, '__init__', init_fun)
+
+            return out
+        else:
+            return type.__new__(cls, name, bases, attrs, **kwargs)
 
 
-class Header(metaclass=HeaderMeta):
+class Header(metaclass=_HeaderMeta):
     """
     The super class for all of the items in the orso module.
     """
@@ -104,8 +163,31 @@ class Header(metaclass=HeaderMeta):
         if hasattr(self, 'unit'):
             self._check_unit(self.unit)
 
+    @property
+    def user_data(self):
+        out_dict = {}
+        fnames = [f.name for f in fields(self)]
+        for key, value in self.__dict__.items():
+            if key.startswith("_") or key in fnames:
+                continue
+            out_dict[key] = value
+        return out_dict
+
     @staticmethod
-    def _resolve_type(hint, item):
+    def _resolve_type(hint: type, item: Any) -> Any:
+        """
+        This function (recursively for :py:class:`Union` and
+        :py:class`Optional` objects) populates different attributes,
+        including constructing :py:class:`Header` object. Once the given
+        object is created it is returned. If it is not possible to
+        determine the correct object type :code:`None` is returned.
+
+        :param hint: The type of the given field.
+        :param item: An unresolved item to populate attribute.
+
+        :return: Correctly resolved object with required type for orso
+            compatibility.
+        """
         if isclass(hint) and not getattr(hint, '__origin__', None) in [List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
@@ -184,10 +266,12 @@ class Header(metaclass=HeaderMeta):
         return None
 
     @classmethod
-    def empty(cls):
+    def empty(cls) -> 'Header':
         """
         Create an empty instance of this item containing
-        all non-option attributes as None
+        all non-option attributes as :code:`None`.
+
+        :return: Empty class.
         """
         attr_items = {}
         for fld in fields(cls):
@@ -206,16 +290,22 @@ class Header(metaclass=HeaderMeta):
         return cls(**attr_items)
 
     @staticmethod
-    def asdict(header):
+    def asdict(header: 'Header') -> dict:
+        """
+        Static method for :py:func:`to_dict`.
+
+        :param header: Object to convert to dictionary.
+
+        :return: Dictionary result.
+        """
         return header.to_dict()
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         """
         Produces a clean dictionary of the Header object, removing
-        any optional attributes with the value `None`.
+        any optional attributes with the value :code:`None`.
 
-        :return: Cleaned dictionary
-        :rtype: dict
+        :return: Cleaned dictionary.
         """
         out_dict = {}
         for i, value in self.__dict__.items():
@@ -240,31 +330,32 @@ class Header(metaclass=HeaderMeta):
                 out_dict[i] = _todict(value)
         return out_dict
 
-    def to_yaml(self):
+    def to_yaml(self) -> str:
         """
         Return the yaml string for the Header item
 
         :return: Yaml string
-        :rtype: str
         """
         return yaml.dump(self.to_dict(), sort_keys=False)
 
     @staticmethod
-    def _check_unit(unit):
+    def _check_unit(unit: str):
         """
         Check if the unit is valid, in future this could include
         recommendations.
 
-        :param unit: Value to check if it is a value unit
-        :type unit: str
-        :raises: ValueError is the unit is not ASCII text
+        :param unit: Value to check if it is a value unit.
+
+        :raises: ValueError is the unit is not ASCII text.
         """
         if unit is not None:
             # raise UnicodeError if not ascii
             unit.encode('ascii')
 
     def __repr__(self):
-        # representation that does not show empty arguments
+        """
+        Representation that does not show empty arguments.
+        """
         out = f'{self.__class__.__name__}('
         for fi in fields(self):
             if fi.name in self._orso_optionals and getattr(self, fi.name) is None:
@@ -295,9 +386,10 @@ class Header(metaclass=HeaderMeta):
         return out
 
 
-@dataclass(repr=False)
 class Value(Header):
-    """A value or list of values with an optional unit."""
+    """
+    A value or list of values with an optional unit.
+    """
 
     magnitude: Union[float, List[float]]
     unit: Optional[str] = field(
@@ -305,9 +397,10 @@ class Value(Header):
     )
 
 
-@dataclass(repr=False)
 class ValueRange(Header):
-    """A range or list of ranges with mins, maxs, and an optional unit."""
+    """
+    A range or list of ranges with mins, maxs, and an optional unit.
+    """
 
     min: Union[float, List[float]]
     max: Union[float, List[float]]
@@ -316,20 +409,18 @@ class ValueRange(Header):
     )
 
 
-@dataclass(repr=False)
 class ValueVector(Header):
-    """A vector or list of vectors with an optional unit.
-
+    """
+    A vector or list of vectors with an optional unit.
     For vectors relating to the sample, such as polarisation,
-    the follow is defined:
+    the follow definitions are used.
 
-    * x is defined as parallel to the radiation beam, positive going\
-        with the beam direction
-
-    * y is defined from the other two based on the right hand rule
-
-    * z is defined as normal to the sample surface, positive direction\
-        in scattering direction
+    :param x: is defined as parallel to the radiation beam, positive going
+        with the beam direction.
+    :param y: is defined from the other two based on the right hand rule.
+    :param z: is defined as normal to the sample surface, positive direction
+        in scattering direction.
+    :param unit: SI unit string.
     """
 
     x: Union[float, List[float]]
@@ -340,9 +431,11 @@ class ValueVector(Header):
     )
 
 
-@dataclass(repr=False)
 class Person(Header):
-    """Information about a person, including name, affilation(s), and email."""
+    """
+    Information about a person, including name, affilation(s), and contact
+    information.
+    """
 
     name: str
     affiliation: Union[str, List[str]]
@@ -351,9 +444,10 @@ class Person(Header):
     )
 
 
-@dataclass(repr=False)
 class Column(Header):
-    """Information about a data column"""
+    """
+    Information about a data column.
+    """
 
     name: str
     unit: Optional[str] = field(
@@ -364,9 +458,10 @@ class Column(Header):
     )
 
 
-@dataclass(repr=False)
 class File(Header):
-    """A file with a last modified timestamp."""
+    """
+    A file with file path and a last modified timestamp.
+    """
 
     file: str
     timestamp: Optional[datetime.datetime] = field(
@@ -379,6 +474,9 @@ class File(Header):
     )
 
     def __post_init__(self):
+        """
+        Assigns a timestamp for file creation if not defined.
+        """
         Header.__post_init__(self)
         if self.timestamp is None:
             fname = pathlib.Path(self.file)
@@ -388,28 +486,24 @@ class File(Header):
                 )
 
 
-def _read_header_data(file, validate=False) -> Tuple[dict, list, str]:
+def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple[List[dict], list, str]:
     """
     Reads the header and data contained within an ORSO file, parsing it into
     json dictionaries and numerical arrays.
 
     Parameters
     ----------
-    file: str or file-like
-
-    validate: bool
-        Validates the file against the ORSO json schema.
+    :param file: File to read.
+    :param validate: Validates the file against the ORSO json schema.
         Requires that the jsonschema package be installed.
 
-    Returns
-    -------
-    dct_list, data_sets, version: list, list, str
-        `dct_list` is a list of json dicts containing the parsed yaml header.
-        This has to be processed further.
-        `data_sets` is a Python list containing numpy arrays holding the
-        reflectometry data in the file. It's contained in a list because each
-        of the datasets may have a different number of columns.
-        `version` is the ORSO version string.
+    :return: The tuple contains:
+        - First item is a list of json dicts containing the parsed yaml
+        header. This has to be processed further.
+        - Second item is a Python list containing numpy arrays holding the
+        reflectometry data in the file. It's contained in a list because
+        each of the datasets may have a different number of columns.
+        - Final item is the ORSO version string.
     """
 
     with _possibly_open_file(file, "r") as fi:
@@ -488,10 +582,14 @@ def _validate_header_data(dct_list: List[dict]):
 
     Obtain these dct_list by loading from _read_header_data first.
 
-    Parameters
-    ----------
-    dct_list : List[dict]
-        dicts corresponding to parsed yaml headers from the ORT file.
+    :param dct_list: Dicts corresponding to parsed yaml headers from the ORT file.
+
+    :raises ValueError: When the first four columns are not named correctly
+        (i.e. :code:`'Qz'`, :code:`'R'`, :code:`'sR'`, :code:`'sQz'`).
+    :raises ValueError: When the units for the :code:`'Qz'` column is not
+        :code:`'1/angstrom'`.
+    :raises ValueError: When the units for columns :code:`'Qz'` and
+        :code:`'sQz'` are not the same.
     """
     import jsonschema
     req_cols = ["Qz", "R", "sR", "sQz"]
@@ -536,24 +634,18 @@ def _validate_header_data(dct_list: List[dict]):
 
 
 @contextmanager
-def _possibly_open_file(f, mode="wb"):
+def _possibly_open_file(f: Union[TextIO, str], mode: str = "wb") -> Generator[TextIO, None, None]:
     """
     Context manager for files.
-    Parameters
-    ----------
-    f : file-like or str
-        If `f` is a file, then yield the file. If `f` is a str then open the
-        file and yield the newly opened file.
-        On leaving this context manager the file is closed, if it was opened
-        by this context manager (i.e. `f` was a string).
-    mode : str, optional
-        mode is an optional string that specifies the mode in which the file
-        is opened.
-    Yields
-    ------
-    g : file-like
-        On leaving the context manager the file is closed, if it was opened by
-        this context manager.
+
+    :param f: If `f` is a file, then yield the file. If `f` is a str then
+        open the file and yield the newly opened file. On leaving this
+        context manager the file is closed, if it was opened by this
+        context manager (i.e. `f` was a string).
+    :param modes: An optional string that specifies the mode in which
+        the file is opened.
+    :yields: On leaving the context manager the file is closed, if it
+        was opened by this context manager.
     """
     close_file = False
     if (hasattr(f, "read") and hasattr(f, "write")) or f is None:
@@ -566,11 +658,16 @@ def _possibly_open_file(f, mode="wb"):
         g.close()
 
 
-def _todict(obj, classkey=None):
+def _todict(obj: Any, classkey: Any = None) -> dict:
     """
     Recursively converts an object to a dict representation
     https://stackoverflow.com/questions/1036409
     Licenced under CC BY-SA 4.0
+
+    :param obj: Object to convert to dict representation.
+    :param classkey: Key to be assigned to class objects.
+
+    :return: Dictionary representation of object.
     """
     if isinstance(obj, dict):
         data = {}
@@ -595,8 +692,15 @@ def _todict(obj, classkey=None):
         return obj
 
 
-def _nested_update(d, u):
-    # nested dictionary update.
+def _nested_update(d: dict, u: dict) -> dict:
+    """
+    Nested dictionary update.
+
+    :param d: Dictionary to be updated.
+    :param u: Dictionary where updates should come from.
+
+    :return: Updated dictionary.
+    """
     for k, v in u.items():
         if isinstance(d, Mapping):
             if isinstance(v, Mapping):
@@ -609,8 +713,16 @@ def _nested_update(d, u):
     return d
 
 
-def _dict_diff(old, new):
-    # recursive find differences between two dictionaries
+def _dict_diff(old: dict, new: dict) -> dict:
+    """
+    Recursive find differences between two dictionaries.
+
+    :param old: Original dictionary.
+    :param new: New dictionary to find differences in.
+
+    :return: Dictionary containing values present in :py:attr:`new`
+        that are not in :py:attr:`old`.
+    """
     out = {}
     for key, value in new.items():
         if key in old:

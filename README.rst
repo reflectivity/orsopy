@@ -12,7 +12,9 @@ orsopy
         :target: https://orsopy.readthedocs.io/en/latest/?version=latest
         :alt: Documentation Status
 
-
+.. image:: https://coveralls.io/repos/github/reflectivity/orsopy/badge.svg?branch=main
+        :target: https://coveralls.io/github/reflectivity/orsopy?branch=main
+        :alt: Coverage Level
 
 orsopy is a Python implementation of ORSO functionality, this includes `reduced data file formats`_.
 
