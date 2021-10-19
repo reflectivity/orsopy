@@ -6,8 +6,7 @@ Implementation of the base classes for the ORSO header.
 import os.path
 from copy import deepcopy
 from collections.abc import Mapping
-from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal
-import typing
+from typing import Optional, Union, List, Tuple
 from inspect import isclass
 from dataclasses import field, dataclass, fields
 import datetime
@@ -21,6 +20,11 @@ import re
 
 import numpy as np
 
+# typing stuff introduced in python 3.8
+try:
+    from typing import Literal, get_args, get_origin
+except ImportError:
+    from .typing_backport import Literal, get_args, get_origin
 
 def _noop(self, *args, **kw):
     pass
