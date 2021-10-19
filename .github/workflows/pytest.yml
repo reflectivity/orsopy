@@ -59,7 +59,7 @@ jobs:
 
       - name: Install orsopy
         run: |
-          pip install .
+          pip install . --ignore-requires-python
 
       - name: Test with pytest
         run: |
