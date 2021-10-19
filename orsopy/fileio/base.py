@@ -114,6 +114,16 @@ class Header(metaclass=HeaderMeta):
                 # convert str to datetime
                 try:
                     return datetime.datetime.fromisoformat(item)
+                except AttributeError: # python 3.6
+                    try:
+                        item=item.split('+', 1)[0]
+                        if '.' in item:
+                            return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S.%f")
+                        else:
+                            return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S")
+                    except ValueError:
+                        # string wasn't ISO8601 format
+                        return None
                 except ValueError:
                     # string wasn't ISO8601 format
                     return None
