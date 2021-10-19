@@ -115,6 +115,10 @@ class TestOrso(unittest.TestCase):
         value = Orso(ds, redn, cols, '1')
         assert value.data_set == '1'
 
+    def test_repr(self):
+        ds = fileio.Orso.empty()
+        repr(ds)
+
     def test_write_read(self):
         # test write and read of multiple datasets
         info = fileio.Orso.empty()
