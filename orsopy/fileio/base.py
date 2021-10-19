@@ -105,7 +105,7 @@ class Header(metaclass=HeaderMeta):
 
     @staticmethod
     def _resolve_type(hint, item):
-        if isclass(hint):
+        if isclass(hint) and not getattr(hint, '__origin__', None) in [List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
@@ -249,8 +249,8 @@ class Header(metaclass=HeaderMeta):
         :raises: ValueError is the unit is not ASCII text
         """
         if unit is not None:
-            if not unit.isascii():
-                raise ValueError("The unit must be in ASCII text.")
+            # raise UnicodeError if not ascii
+            unit.encode('ascii')
 
     def __repr__(self):
         # representation that does not show empty arguments
