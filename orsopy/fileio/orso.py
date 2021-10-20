@@ -182,7 +182,8 @@ class OrsoDataset:
 def save_orso(
         datasets: List[OrsoDataset],
         fname: Union[TextIO, str],
-        comment: Optional[str] = None) -> None:
+        comment: Optional[str] = None,
+        data_separator: str = '') -> None:
     """
     Saves an ORSO file. Each of the datasets must have a unique
     :py:attr:`OrsoDataset.info.data_set` attribute. If that attribute is not
@@ -218,6 +219,8 @@ def save_orso(
         np.savetxt(f, ds1.data, header=header, fmt='%-22.16e')
 
         for dsi in datasets[1:]:
+            # write an optional spacer string between dataset e.g. \n
+            f.write(data_separator)
             hi = ds1.diff_header(dsi)
             np.savetxt(f, dsi.data, header=hi, fmt='%-22.16e')
 
