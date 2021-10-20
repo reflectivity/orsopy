@@ -177,6 +177,14 @@ class TestOrso(unittest.TestCase):
         assert ls2 == ds2
         assert ls3 == ds3
 
+        # test empty lines between datasets
+        fileio.save_orso([ds, ds2, ds3], "test.ort", data_separator='\n\n')
+
+        ls1, ls2, ls3 = fileio.load_orso("test.ort")
+        assert ls1 == ds
+        assert ls2 == ds2
+        assert ls3 == ds3
+
         _read_header_data("test.ort", validate=True)
 
     def test_unique_dataset(self):
