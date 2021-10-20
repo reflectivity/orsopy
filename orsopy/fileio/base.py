@@ -517,7 +517,7 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
         for i, line in enumerate(fi.readlines()):
             if not line.startswith("#"):
                 # ignore empty lines
-                if line.strip()!='':
+                if line.strip() != '':
                     _ds_lines.append(line)
                 continue
 
