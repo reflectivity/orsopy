@@ -200,7 +200,7 @@ def save_orso(
     # check for valid seperator characters
     if any([si not in [' ', '\t', '\n', '\r'] for si in data_separator]):
         raise ValueError("data_separator can only contain new lines and spaces")
-    
+
     for idx, dataset in enumerate(datasets):
         info = dataset.info
         data_set = info.data_set
