@@ -6,8 +6,7 @@ Implementation of the base classes for the ORSO header.
 import os.path
 from copy import deepcopy
 from collections.abc import Mapping
-from typing import Optional, Union, List, Tuple, get_args, get_origin, Literal, TextIO, Generator, Any
-import typing
+from typing import Optional, Union, List, Tuple, TextIO, Generator, Any
 from inspect import isclass
 from dataclasses import field, dataclass, fields, \
     _set_new_attribute, _field_init, _create_fn, _init_param, \
@@ -22,6 +21,12 @@ from contextlib import contextmanager
 import re
 
 import numpy as np
+
+# typing stuff introduced in python 3.8
+try:
+    from typing import Literal, get_args, get_origin
+except ImportError:
+    from .typing_backport import Literal, get_args, get_origin
 
 
 def _noop(self, *args, **kw):
@@ -183,7 +188,7 @@ class Header(metaclass=_HeaderMeta):
         :return: Correctly resolved object with required type for orso
             compatibility.
         """
-        if isclass(hint):
+        if isclass(hint) and not getattr(hint, '__origin__', None) in [List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
@@ -191,6 +196,16 @@ class Header(metaclass=_HeaderMeta):
                 # convert str to datetime
                 try:
                     return datetime.datetime.fromisoformat(item)
+                except AttributeError:  # python 3.6
+                    try:
+                        item = item.split('+', 1)[0]
+                        if '.' in item:
+                            return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S.%f")
+                        else:
+                            return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S")
+                    except ValueError:
+                        # string wasn't ISO8601 format
+                        return None
                 except ValueError:
                     # string wasn't ISO8601 format
                     return None
@@ -334,8 +349,8 @@ class Header(metaclass=_HeaderMeta):
         :raises: ValueError is the unit is not ASCII text.
         """
         if unit is not None:
-            if not unit.isascii():
-                raise ValueError("The unit must be in ASCII text.")
+            # raise UnicodeError if not ascii
+            unit.encode('ascii')
 
     def __repr__(self):
         """
