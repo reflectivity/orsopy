@@ -198,7 +198,7 @@ def save_orso(
         values are not unique.
     """
     # check for valid seperator characters
-    if any([si not in [' ', '\t', '\n', '\r'] for si in data_separator]):
+    if not data_separator.isspace():
         raise ValueError("data_separator can only contain new lines and spaces")
 
     for idx, dataset in enumerate(datasets):
