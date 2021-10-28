@@ -187,6 +187,10 @@ class TestOrso(unittest.TestCase):
 
         _read_header_data("test.ort", validate=True)
 
+        with pytest.raises(ValueError):
+            # test wrong data_separator characters
+            fileio.save_orso([ds, ds2, ds3], "test.ort", data_separator='\na\n')
+
     def test_unique_dataset(self):
         # checks that data_set is unique on saving of OrsoDatasets
         info = Orso.empty()
@@ -202,6 +206,9 @@ class TestOrso(unittest.TestCase):
 
         with pytest.raises(ValueError):
             fileio.save_orso([ds, ds2], 'test_data_set.ort')
+
+        with pytest.raises(ValueError):
+            OrsoDataset(info, np.empty((2, 5)))
 
     def test_user_data(self):
         # test write and read of userdata
