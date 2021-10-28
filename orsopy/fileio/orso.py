@@ -193,6 +193,7 @@ def save_orso(
     :param datasets: List of OrsoDataset to save into the Orso file.
     :param fname: The file name to save to.
     :param comment: Comment to write at the top of Orso file.
+    :param data_separator: Optinal string of newline characters to separate multiple datasets.
 
     :raises ValueError: If the :py:attr:`OrsoDataset.info.data_set`
         values are not unique.
