@@ -24,6 +24,10 @@ jobs:
         sudo apt update
         sudo apt install python3 python3-setuptools python3-pip python3-yaml
         pip3 install build
+    - name: Add slddb package
+      run: |
+        git clone https://github.com/reflectivity/slddb.git slddb_source
+        mv slddb_source/slddb orsopy/
     - name: Build PyPI package
       run: |
         python3 -m build
