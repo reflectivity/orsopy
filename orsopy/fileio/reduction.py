@@ -7,9 +7,10 @@ The reduction elements for the ORSO header
 from typing import Optional, List, Union
 from dataclasses import field
 import datetime
-from .base import Header, Person
+from .base import orsodataclass, Header, Person
 
 
+@orsodataclass
 class Software(Header):
     """
     Software description.
@@ -23,6 +24,7 @@ class Software(Header):
     platform: Optional[str] = None
 
 
+@orsodataclass
 class Reduction(Header):
     """
     A description of the reduction that has been performed.
