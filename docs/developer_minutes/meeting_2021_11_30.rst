@@ -29,7 +29,7 @@ Minutes
 Actions
 -------
 
-- Move the ``slddb` code to the ``orsopy`` repository (AG).
+- Move the ``slddb`` code to the ``orsopy`` repository (AG).
 - Mirror the relevant documentation for finding problems in the ``slddb`` in the ``orsopy`` documentation (AG). 
       
 
