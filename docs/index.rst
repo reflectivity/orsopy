@@ -12,6 +12,7 @@ Welcome to orsopy's documentation!
    contributing
    authors
    history
+   documents
 
 Indices and tables
 ==================
