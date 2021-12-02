@@ -3,12 +3,14 @@ Developer Meeting 2021-11-31
 ============================
 
 Present: Andrew Caruana (AC), Artur Glavic (AG),  Brian Maranville (BM), Andrew McCluskey (minutes author, AM)), and Andrew Nelson (AN).
+
 Apologies: Max Skoda and Jochen Stahn (sound not working on zoom).
 
 Minutes
 -------
 
 1. Should we bring ``slddb`` (`slddb link`_) into the main ``orsopy`` package and if so how should this be achieved?
+
   - The original purpose of ``orsopy`` is a place for all code related to ORSO packages, not just to serve the ``fileio`` functionality. 
     However, it is important to be careful in future when selecting what should and should not be included in the package. 
   - There was a discussion regarding the differences between ``slddb`` and the ``periodictable`` package. 
@@ -18,8 +20,10 @@ Minutes
     This removed BM's original worries regarding merging the projects. 
   - AN commented that it is important to be clear on the process that would change the value of a member of the database. 
     It was suggested that the documentation on this process which is present on the ``slddb`` web interface about_ page, could be mirrored in the ``orsopy`` documentation. 
-  - It was broadly agreed that bringing the ``slddb`` python code into ``orsopy`` was a good idea and it should be done by adding the package as a second submodule, i.e. ``orsopy.slddb``. 
+  - It was broadly agreed that bringing the ``slddb`` python code into ``orsopy`` was a good idea and it should be done by adding the package as a second submodule, i.e. ``orsopy.slddb``.
+
 2. Should there be a standard formatting that we agree to in ``orsopy`` and if so what should the rules be?
+
   - AN introduced the motivation for collaborative projects towards having a common code style (via formatting rules). 
   - It was broadly agreed that a common style is beneficial, however, AG would like to see it applied in a soft fashion, i.e. a pull request does not fail for the wrong style (this could be offputting to new contributors). 
   - AN and AM both felt strongly that incorrectly formatted could should not be able to be merged, however, agree that it should be clear **why** the tests have failed. 
