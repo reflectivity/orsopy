@@ -3,6 +3,7 @@ Data downloaded from Henke tables at https://henke.lbl.gov/optical_constants/asf
 """
 nan = float("nan")
 
+# fmt: off
 XRAY_SCATTERING_FACTORS = {
     'H':                                                                            [
         [0.01, 0.0101617, 0.0103261, 0.0104931, 0.0106628, 0.0108353, 0.0110106, 0.0111886, 0.0113696, 0.0115535,

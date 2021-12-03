@@ -8,7 +8,6 @@ from .material import Formula
 
 
 class Comparator(ABC):
-
     def __init__(self, value, key=None):
         self.key = key
         self.value = value
@@ -36,22 +35,22 @@ class GenericComparator(Comparator):
 
     def query_string(self):
         if type(self.value) in (list, tuple):
-            if len(self.value)==0:
-                return ''
-            qstr = '('
-            qstr += ' AND '.join([f'{self.key} LIKE ?' for _ in self.value])
-            qstr += ')'
+            if len(self.value) == 0:
+                return ""
+            qstr = "("
+            qstr += " AND ".join([f"{self.key} LIKE ?" for _ in self.value])
+            qstr += ")"
             return qstr
         elif type(self.value) is str:
-            return f'{self.key} LIKE ?'
+            return f"{self.key} LIKE ?"
         else:
-            return f'{self.key} == ?'
+            return f"{self.key} == ?"
 
     def query_args(self):
         if type(self.value) in (list, tuple):
             return [f"%%'{vi}'%%" for vi in self.value]
         elif type(self.value) is str:
-            return [f'%%{self.value}%%']
+            return [f"%%{self.value}%%"]
         else:
             return [self.value]
 
@@ -62,7 +61,7 @@ class ExactString(Comparator):
     """
 
     def query_string(self):
-        return f'{self.key} == ?'
+        return f"{self.key} == ?"
 
     def query_args(self):
         return [self.value]
@@ -74,15 +73,15 @@ class FormulaComparator(Comparator):
     """
 
     def query_string(self):
-        if type(self.value) is str and self.value.startswith('~'):
-            return f'{self.key} LIKE ?'
+        if type(self.value) is str and self.value.startswith("~"):
+            return f"{self.key} LIKE ?"
         else:
-            return f'{self.key} == ?'
+            return f"{self.key} == ?"
 
     def query_args(self):
-        if type(self.value) is str and self.value.startswith('~'):
+        if type(self.value) is str and self.value.startswith("~"):
             formula = Formula(self.value[1:])
-            return [f'%%{formula}%%']
+            return [f"%%{formula}%%"]
         else:
             formula = Formula(self.value)
             return [str(formula)]
@@ -97,16 +96,16 @@ class FuzzyFloat(Comparator):
         try:
             float(self.value)
         except ValueError:
-            return f'({self.key} >= ? and {self.key} <= ?)'
+            return f"({self.key} >= ? and {self.key} <= ?)"
         else:
-            return f'{self.key} == ?'
+            return f"{self.key} == ?"
 
     def query_args(self):
         svalue = str(self.value)
-        if svalue.startswith('~'):
+        if svalue.startswith("~"):
             value = float(svalue[1:])
-            return [value*0.9, value*1.1]
-        elif len(svalue.split('-'))==2:
-            return list(map(float, svalue.split('-')))
+            return [value * 0.9, value * 1.1]
+        elif len(svalue.split("-")) == 2:
+            return list(map(float, svalue.split("-")))
         else:
             return [float(self.value)]

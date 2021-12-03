@@ -3,6 +3,7 @@ Data downloaded from NIST Standard Reference Database at https://physics.nist.go
 """
 nan = float("nan")
 
+# fmt: off
 XRAY_SCATTERING_FACTORS = {
     'H':                                                                                                          [
         [0.01069, 0.01142761, 0.01221612, 0.01305903, 0.013328, 0.013532, 0.0135864, 0.013668, 0.013872, 0.0139601,

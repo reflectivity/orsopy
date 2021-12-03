@@ -5,6 +5,7 @@ A.-J. Dianoux, G. Lander, Eds. Old City Publishing, Philidelphia, PA. pp 1.1-1 t
 Imported from python periodictable package
 """
 
+# fmt: off
 NEUTRON_SCATTERING_LENGTHS = {
     'n':       (-37+0j),
     (0, 1):    (-37+0j),
