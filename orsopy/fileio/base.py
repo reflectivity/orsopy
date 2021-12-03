@@ -66,9 +66,7 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
                 raise TypeError(f"non-default argument {f.name!r} " "follows default argument")
 
     locals = {f"_type_{f.name}": f.type for f in fieldsarg}
-    locals.update(
-        {"MISSING": MISSING, "_HAS_DEFAULT_FACTORY": _HAS_DEFAULT_FACTORY,}
-    )
+    locals.update({"MISSING": MISSING, "_HAS_DEFAULT_FACTORY": _HAS_DEFAULT_FACTORY})
 
     body_lines = []
     for f in fieldsarg:
