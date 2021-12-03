@@ -270,29 +270,6 @@ class SLDDB:
         self.create_table()
         self.db.commit()
 
-    def add_elements(self):
-        import periodictable
-
-        for element in periodictable.elements:
-            # noinspection PyUnresolvedReferences
-            if element is periodictable.n or element.density is None:
-                continue
-            state = "solid"
-            if "T=-" in element.density_caveat:
-                state = "liquid"
-            self.add_material(
-                element.name.capitalize(),
-                element.symbol,
-                commit=False,
-                description=element.density_caveat,
-                density=element.density,
-                physical_state=state,
-                data_origin="textbook",
-                ref_website="https://github.com/pkienzle/periodictable",
-                reference="Python module periodictable, \ndata source: ILL Neutron Data Booklet",
-            )
-        self.db.commit()
-
     def update_fields(self):
         # add columns not currently available
         c = self.db.cursor()
