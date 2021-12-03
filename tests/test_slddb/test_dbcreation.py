@@ -1,5 +1,5 @@
-import unittest
 import sys
+import unittest
 
 from numpy import ndarray, testing
 
@@ -100,5 +100,5 @@ class TestCreateDB(unittest.TestCase):
         self.db.create_database()
 
     def test_backup(self):
-        if sys.version_info.minor>6:
+        if sys.version_info.minor > 6:
             self.db.backup(":memory:")
