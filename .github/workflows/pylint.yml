@@ -27,5 +27,5 @@ jobs:
 
       - name: Lint
         run: |
-          flake8 --max-line-length=120 --ignore=F401,W503 --count --show-source --statistics orsopy
-          flake8 --max-line-length=120 --ignore=F401,W503 --count --show-source --statistics tests
+          flake8 --max-line-length=120 --ignore=F401,W503,E203 --count --show-source --statistics orsopy
+          flake8 --max-line-length=120 --ignore=F401,W503,E203 --count --show-source --statistics tests
