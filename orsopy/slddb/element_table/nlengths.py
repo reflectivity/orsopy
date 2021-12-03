@@ -4,6 +4,7 @@ Neutron scattering lengths and cross sections
 Isotope	conc	Coh b	Inc b	Coh xs	Inc xs	Scatt xs	Abs xs
 """
 
+# flake8: noqa
 # fmt: off
 NEUTRON_SCATTERING_LENGTHS = {
     'H':       (-3.739+0j),

@@ -7,6 +7,7 @@ The relative atomic masses of the isotopes data were published by M. Wang, G. Au
 M. MacCormick, X. Xu1, and B. Pfeiffer in The AME2012 Atomic Mass Evaluation.
 """
 
+# flake8: noqa
 # fmt: off
 ATOMIC_WEIGHTS = {
     (1, 1):     1.00782503223,

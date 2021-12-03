@@ -30,7 +30,7 @@ class TestWebAPI(unittest.TestCase):
         with open(os.path.join(cls.path, "slddb.zip"), "wb") as f:
             try:
                 f.write(res.read())
-            except:
+            except Exception:
                 cls.server_available = False
                 print("Server unreachable to download python api")
                 return
@@ -63,7 +63,7 @@ class TestWebAPI(unittest.TestCase):
             global api
             try:
                 api.db.db.close()
-            except:
+            except Exception:
                 pass
             del api
         except NameError:

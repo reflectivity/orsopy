@@ -151,7 +151,7 @@ class TestConverter(unittest.TestCase):
 
     def test_non_sqtype(self):
         with self.assertRaises(TypeError):
-            conv = CType(str, array)
+            CType(str, array)
 
     def test_limited_float(self):
         conv = CLimited(float, float, -3.0, 5.4)
@@ -173,7 +173,7 @@ class TestConverter(unittest.TestCase):
     def test_array_general(self):
         conv = CArray()
         a = array([1, 2, 4, 5, 6])
-        b = array([[1, 2,], [3, 4,]])
+        b = array([[1, 2], [3, 4]])
 
         self.assertTrue(type(conv.revert(conv.convert(a))) is ndarray)
 
@@ -190,7 +190,7 @@ class TestConverter(unittest.TestCase):
         testing.assert_array_equal(a, conv.revert(conv.convert(a)))
 
         with self.assertRaises(ValueError):
-            b = array([[1, 2,], [3, 4,]])
+            b = array([[1, 2], [3, 4]])
             conv.revert(conv.convert(b))
 
     def test_array_shape(self):
@@ -203,7 +203,7 @@ class TestConverter(unittest.TestCase):
             a = array([[1, 2, 4], [5, 6, 7]])
             conv.convert(a)
 
-        b = array([[1, 2,], [3, 4,]])
+        b = array([[1, 2], [3, 4]])
         testing.assert_array_equal(b, conv.revert(conv.convert(b)))
 
     def test_class(self):
@@ -212,7 +212,7 @@ class TestConverter(unittest.TestCase):
                 pass
 
         with self.assertRaises(TypeError):
-            t = Test()
+            Test()
 
     def test_validate(self):
         conv = CType(float, float)

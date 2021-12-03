@@ -92,7 +92,7 @@ class CifImporter(Importer):
             self.name = block["_chemical_name_mineral"]
 
         if all(
-            [ii in block for ii in ["_journal_name_full", "_journal_volume", "_journal_year", "_publ_author_name",]]
+            [ii in block for ii in ["_journal_name_full", "_journal_volume", "_journal_year", "_publ_author_name"]]
         ):
             authors = ", ".join(block["_publ_author_name"])
             journal = block["_journal_name_full"]

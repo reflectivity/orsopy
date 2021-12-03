@@ -29,13 +29,13 @@ class TestFormula(unittest.TestCase):
 
     def test_invalid(self):
         with self.assertRaises(ValueError):
-            f = Formula("z")
+            Formula("z")
         with self.assertRaises(ValueError):
-            f = Formula("")
+            Formula("")
         with self.assertRaises(ValueError):
-            f = Formula("(Fe(BO)2)3")
+            Formula("(Fe(BO)2)3")
         with self.assertRaises(ValueError):
-            f = Formula("(FeBO23")
+            Formula("(FeBO23")
 
     def test_merge(self):
         f1 = Formula("NaCl")

@@ -1,17 +1,16 @@
 import unittest
 
-from numpy import isnan
 from numpy.testing import assert_array_equal
 
 from orsopy.slddb.constants import Cu_kalpha, Cu_kalpha1, Mo_kalpha, Mo_kalpha1
 from orsopy.slddb.element_table import Element, element
+from orsopy.slddb.element_table.nlengths import NEUTRON_SCATTERING_LENGTHS
 # reference data uses Henke tables
 from orsopy.slddb.element_table.xray_henke import XRAY_SCATTERING_FACTORS
 from orsopy.slddb.material import Formula, Material
 
 element.XRAY_SCATTERING_FACTORS = XRAY_SCATTERING_FACTORS
 # import other n_lengths for coverage
-from orsopy.slddb.element_table.nlengths import NEUTRON_SCATTERING_LENGTHS
 
 # calculated using NIST calculator at https://www.ncnr.nist.gov/resources/activation/
 REFERENCE_RESULTS = {
@@ -62,11 +61,11 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(m1.formula, Formula([("Ni", 1.0)]))
 
     def test_creation(self):
-        m1 = Material([(Element("Ni"), 1.0)], dens=1.0)
-        m2 = Material("Ni", dens=1.0)
-        m3 = Material(Formula("Ni"), dens=1.0)
+        Material([(Element("Ni"), 1.0)], dens=1.0)
+        Material("Ni", dens=1.0)
+        Material(Formula("Ni"), dens=1.0)
         with self.assertRaises(TypeError):
-            m4 = Material(123.4, dens=1.0)
+            Material(123.4, dens=1.0)
 
     def test_combine(self):
         m1 = Material([(Element("Ni"), 1.0)], fu_volume=1.0)
@@ -96,11 +95,11 @@ class TestMaterial(unittest.TestCase):
 
     def test_fail(self):
         with self.assertRaises(ValueError):
-            m1 = Material([(Element("Ni"), 1.0)])
+            Material([(Element("Ni"), 1.0)])
         with self.assertRaises(ValueError):
-            m2 = Material([(Element("Pu"), 1.0)], dens=20.0)
+            Material([(Element("Pu"), 1.0)], dens=20.0)
         with self.assertRaises(ValueError):
-            m3 = Material([(Element("Po"), 1.0)], dens=20.0)
+            Material([(Element("Po"), 1.0)], dens=20.0)
         mok = Material("Ni", dens=1.0)
         with self.assertRaises(ValueError):
             -1 * mok
@@ -240,7 +239,7 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(m1.deuterate(0.5).formula, m4.formula)
         self.assertAlmostEqual(m1.deuterate(0.5).fu_dens, m4.fu_dens)
         self.assertEqual(m3.edeuterated.formula, Formula("DHxO"))
-        m5 = Material("HHxO", fu_dens=m1.fu_dens).edeuterated  # check the case of name=None
+        Material("HHxO", fu_dens=m1.fu_dens).edeuterated  # check the case of name=None
 
     def test_exchange(self):
         m1 = Material("H2O", dens=1.0)

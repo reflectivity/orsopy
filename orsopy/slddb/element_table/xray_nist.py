@@ -3,6 +3,7 @@ Data downloaded from NIST Standard Reference Database at https://physics.nist.go
 """
 nan = float("nan")
 
+# flake8: noqa
 # fmt: off
 XRAY_SCATTERING_FACTORS = {
     'H':                                                                                                          [
