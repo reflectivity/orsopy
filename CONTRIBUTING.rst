@@ -81,7 +81,7 @@ Ready to contribute? Here's how to set up `orsopy` for local development.
 
     $ black -l 120 orsopy tests
     $ isort -l 120 --lbt 1 orsopy tests
-    $ python setup.py test or pytest
+    $ pytest
 
    To get flake8 and tox, just pip install them into your virtualenv.
 
