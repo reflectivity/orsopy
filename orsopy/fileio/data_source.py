@@ -2,10 +2,7 @@
 Implementation of the data_source for the ORSO header.
 """
 
-# author: Andrew R. McCluskey (arm61)
-
-from dataclasses import dataclass, field
-# import enum
+from dataclasses import field
 from typing import Dict, List, Optional, Union
 
 from .base import File, Header, Person, Value, ValueRange, ValueVector, orsodataclass

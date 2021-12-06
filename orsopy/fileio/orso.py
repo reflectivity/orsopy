@@ -2,8 +2,6 @@
 Implementation of the top level class for the ORSO header.
 """
 
-# author: Andrew R. McCluskey (arm61)
-
 from dataclasses import dataclass
 from typing import Any, List, Optional, TextIO, Union
 

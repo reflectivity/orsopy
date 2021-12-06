@@ -4,7 +4,6 @@ Implementation of the base classes for the ORSO header.
 
 import datetime
 import json
-# author: Andrew R. McCluskey (arm61)
 import os.path
 import pathlib
 import re

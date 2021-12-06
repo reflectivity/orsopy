@@ -2,8 +2,6 @@
 The reduction elements for the ORSO header
 """
 
-# author: Andrew R. McCluskey (arm61)
-
 import datetime
 
 from dataclasses import field
