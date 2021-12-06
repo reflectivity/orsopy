@@ -48,7 +48,9 @@ Minutes
   - AN raised the issue of "best practice" for contributing (i.e. forking the repo and working on a feature branch there). 
     This is currently mentioned in the `contributing guidelines`_ but these should be improved to include more information, i.e. AC would like an easy reminder for "how to catch up a fork". 
   - BM asked about who was an admin on the PyPI page, currently this is just AM and AG. 
-    However, anyone is welcome. 
+    However, anyone is welcome.
+  - BM also raised (after the fact, https://github.com/reflectivity/orsopy/pull/63) the importance of not using ``force push`` except in extraordinary circumstances. 
+    This has been supported by AN and should be included in the contributing guidelines. 
 
 Actions
 -------
@@ -61,6 +63,7 @@ Actions
 - Document process associated with releases (AM)
 - Improving the contributing guidelines to be more accessible to new developers and link from readthedocs page (AM) 
 - Contact AM or AG if you want to be an admin on the PyPI page (all)
+- Add a comment about not using ``force push`` in the contributing guidelines. 
       
 
 .. _`slddb link`: https://github.com/reflectivity/slddb
