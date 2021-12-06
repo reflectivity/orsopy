@@ -37,6 +37,13 @@ def add_column_ordering(schema: Dict, column_order: List[str] = COLUMN_ORDER):
     """
     Add constraints for the order of column names
     (note: modifies schema dict in-place)
+
+    NOTE: this is done here, instead of in the type definition of Orso.columns
+    because this type of constraint is not possible at the moment with python typing:
+    specifying the first N elements of a Tuple or List but allowing additional
+    elements to be something else.
+    On the other hand, it is possible in JSON schema using "items" and "additionalItems"
+    (or in more recent versions of the schema language, "prefixItems" and "items")
     """
     columns = {}
     for cname in column_order:
