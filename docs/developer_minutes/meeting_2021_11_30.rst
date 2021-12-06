@@ -1,0 +1,72 @@
+============================
+Developer Meeting 2021-11-31
+============================
+
+**Present**: Andrew Caruana (AC), Artur Glavic (AG),  Brian Maranville (BM), Andrew McCluskey (minutes author, AM)), and Andrew Nelson (AN).
+
+**Apologies**: Max Skoda and Jochen Stahn (sound not working on zoom).
+
+Minutes
+-------
+
+1. Should we bring ``slddb`` (`slddb link`_) into the main ``orsopy`` package and if so how should this be achieved?
+
+  - The original purpose of ``orsopy`` is a place for all code related to ORSO packages, not just to serve the ``fileio`` functionality. 
+    However, it is important to be careful in future when selecting what should and should not be included in the package. 
+  - There was a discussion regarding the differences between ``slddb`` and the ``periodictable`` package. 
+    AG noted that the primary purpose of ``slddb`` is to be a database for scattering length densities which is the maiin distinction. 
+    Additionally, AG identified the value to packaging ``slddb`` within ``orsopy`` that analysis packages would only require a single dependency to access the benefits of both. 
+  - The importance of not adding a database to the ``orsopy`` package was raised by BM, however, AG pointed out that the Python package for accessing the database as already well divorced from the database. 
+    This removed BM's original worries regarding merging the projects. 
+  - AN commented that it is important to be clear on the process that would change the value of a member of the database. 
+    It was suggested that the documentation on this process which is present on the ``slddb`` web interface about_ page, could be mirrored in the ``orsopy`` documentation. 
+  - It was broadly agreed that bringing the ``slddb`` python code into ``orsopy`` was a good idea and it should be done by adding the package as a second submodule, i.e. ``orsopy.slddb``.
+
+2. Should there be a standard formatting that we agree to in ``orsopy`` and if so what should the rules be?
+
+  - AN introduced the motivation for collaborative projects towards having a common code style (via formatting rules). 
+  - It was broadly agreed that a common style is beneficial, however, AG would like to see it applied in a soft fashion, i.e. a pull request does not fail for the wrong style (this could be offputting to new contributors). 
+  - AN and AM both felt strongly that incorrectly formatted could should not be able to be merged, however, agree that it should be clear **why** the tests have failed.
+  - AC and AG both noted that there should be documentation explaining how to get autoformatter working in common IDEs (i.e. PyCharm and VSCode). 
+  - There was agreement that we can try using ``black`` autoformatting with a line length of 120.  
+
+3. How should we manage releases? 
+
+  - There was an initial clarification of the difference between versions of ``orsopy`` the Python package and the ORSO file format. 
+    It was made clear that these are distinct, i.e. a version number bump in ``orsopy`` is not the same as a change to the file format version. 
+  - Initially there was the suggestion of releasing with every PR, however it was worried that this might have a saturation effect. 
+  - AM suggested that when a given developer feel that a new micro-version increment is necessary, they should open a PR containing solely a bump to the version number and a complete update of the CHANGELOG. 
+    Then the discussion in this PR will focus on (1) if a new release is necessary and (2) if the CHANGELOG is upto date. 
+    This approach will also allow new features that someone would like in a given release (i.e. in a another PR that is in review) to be expedited if necessary. 
+  - This process was generally seen as acceptable and should be implemented, and more importantly documented. 
+
+4. General governance
+
+  - AM raised the question of if we should include code review and approval requirements on pull requests. 
+    It was felt that currently this should not be introduced, as so far we are working in a rather dynamic fashion and this could be limited, furthermore we have been polite so far with asking for code review when it is necessary. 
+    However, it was accepted that once stable, code review should be required. 
+  - AN raised the issue of "best practice" for contributing (i.e. forking the repo and working on a feature branch there). 
+    This is currently mentioned in the `contributing guidelines`_ but these should be improved to include more information, i.e. AC would like an easy reminder for "how to catch up a fork". 
+  - BM asked about who was an admin on the PyPI page, currently this is just AM and AG. 
+    However, anyone is welcome.
+  - BM also raised (after the fact, https://github.com/reflectivity/orsopy/pull/63) the importance of not using ``force push`` except in extraordinary circumstances. 
+    This has been supported by AN and should be included in the contributing guidelines. 
+
+Actions
+-------
+
+- Move the ``slddb`` code to the ``orsopy`` repository (AG).
+- Mirror the relevant documentation for finding problems in the ``slddb`` in the ``orsopy`` documentation (AG). 
+- Add configuration for ``black`` to the ``orsopy`` repository (AM)
+- Add format checking to the CI scripts, ideally in a way that it is clear how to resolve problems (AM)
+- Add documentation to ``orsopy`` making clear the different between ``orsopy`` version and the file format version. 
+- Document process associated with releases (AM)
+- Improving the contributing guidelines to be more accessible to new developers and link from readthedocs page (AM) 
+- Contact AM or AG if you want to be an admin on the PyPI page (all)
+- Add a comment about not using ``force push`` in the contributing guidelines. 
+      
+
+.. _`slddb link`: https://github.com/reflectivity/slddb
+.. _`periodictable link`: https://periodictable.readthedocs.io/en/latest/
+.. _about: https://slddb.esss.dk/slddb/about
+.. _`contributing guidelines`: https://github.com/reflectivity/orsopy/blob/main/CONTRIBUTING.rst
