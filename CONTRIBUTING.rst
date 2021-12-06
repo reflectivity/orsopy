@@ -77,10 +77,11 @@ Ready to contribute? Here's how to set up `orsopy` for local development.
    Now you can make your changes locally.
 
 5. When you're done making changes, auto format the code and check that your changes pass the unit
-   tests::
+   tests and confirms to PEP 8::
 
     $ black -l 120 orsopy tests
     $ isort -l 120 --lbt 1 orsopy tests
+    $ flake8 --max-line-length=120 --ignore=F401,W503 --count --show-source --statistics orsopy tests
     $ pytest
 
    To get flake8 and tox, just pip install them into your virtualenv.
