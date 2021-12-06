@@ -2,74 +2,63 @@
 Tests for fileio module
 """
 
-# author: Andrew R. McCluskey (arm61)
-
-import unittest
-from datetime import datetime
 import os.path
+import unittest
 
+from datetime import datetime
+
+import numpy as np
 import pytest
 import yaml
-from orsopy.fileio.orso import Orso, OrsoDataset
-from orsopy.fileio.data_source import (DataSource, Experiment, Sample,
-                                       Measurement, InstrumentSettings)
-from orsopy.fileio.reduction import Reduction, Software
-from orsopy.fileio.base import Person, ValueRange, Value, File, Column
-from orsopy.fileio.base import _validate_header_data, _read_header_data
+
 from orsopy import fileio as fileio
-import numpy as np
+from orsopy.fileio.base import Column, File, Person, Value, ValueRange, _read_header_data, _validate_header_data
+from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Sample
+from orsopy.fileio.orso import Orso, OrsoDataset
+from orsopy.fileio.reduction import Reduction, Software
 
 
 class TestOrso(unittest.TestCase):
     """
     Testing the Orso class.
     """
+
     def test_creation(self):
         """
         Creation of Orso object.
         """
-        e = Experiment(
-            'Experiment 1', 'ESTIA', datetime(2021, 7, 7, 16, 31, 10),
-            'neutrons'
-        )
-        s = Sample('The sample')
-        inst = InstrumentSettings(
-            Value(4.0, 'deg'), ValueRange(2., 12., 'angstrom')
-        )
-        df = [File('README.rst', None)]
+        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutrons")
+        s = Sample("The sample")
+        inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"))
+        df = [File("README.rst", None)]
         m = Measurement(inst, df, scheme="angle-dispersive")
-        p = Person('A Person', 'Some Uni')
+        p = Person("A Person", "Some Uni")
         ds = DataSource(p, e, s, m)
 
-        soft = Software('orsopy', '0.0.1', 'macOS-10.15')
-        p2 = Person('Andrew McCluskey', 'European Spallation Source')
-        redn = Reduction(
-            soft, datetime(2021, 7, 14, 10, 10, 10),
-            p2, ['footprint', 'background']
-        )
+        soft = Software("orsopy", "0.0.1", "macOS-10.15")
+        p2 = Person("Andrew McCluskey", "European Spallation Source")
+        redn = Reduction(soft, datetime(2021, 7, 14, 10, 10, 10), p2, ["footprint", "background"])
 
-        cols = [Column("Qz", unit='1/angstrom'), Column("R")]
+        cols = [Column("Qz", unit="1/angstrom"), Column("R")]
         value = Orso(ds, redn, cols, 0)
 
         ds = value.data_source
         dsm = ds.measurement
-        assert ds.owner.name == 'A Person'
-        assert dsm.data_files[0].file == 'README.rst'
+        assert ds.owner.name == "A Person"
+        assert dsm.data_files[0].file == "README.rst"
         assert dsm.instrument_settings.incident_angle.magnitude == 4.0
         assert dsm.instrument_settings.wavelength.min == 2.0
         assert dsm.instrument_settings.wavelength.max == 12.0
-        assert value.reduction.software.name == 'orsopy'
+        assert value.reduction.software.name == "orsopy"
         assert value.reduction.software.version == "0.0.1"
         assert value.reduction.timestamp == datetime(2021, 7, 14, 10, 10, 10)
-        assert value.columns[0].name == 'Qz'
-        assert value.columns[1].name == 'R'
+        assert value.columns[0].name == "Qz"
+        assert value.columns[1].name == "R"
         assert value.data_set == 0
 
         h = value.to_yaml()
         h = "\n".join(
-            ["# ORSO reflectivity data file | 0.1 standard | YAML encoding"
-             " | https://www.reflectometry.org/",
-             h]
+            ["# ORSO reflectivity data file | 0.1 standard | YAML encoding" " | https://www.reflectometry.org/", h]
         )
         g = yaml.safe_load_all(h)
         _validate_header_data([next(g)])
@@ -78,42 +67,34 @@ class TestOrso(unittest.TestCase):
         """
         Creation of Orso object with a non-zero data_set.
         """
-        e = Experiment(
-            'Experiment 1', 'ESTIA', datetime(2021, 7, 7, 16, 31, 10),
-            'neutrons'
-        )
-        s = Sample('The sample')
-        inst = InstrumentSettings(
-            Value(4.0, 'deg'), ValueRange(2., 12., 'angstrom')
-        )
-        df = [File('README.rst', None)]
+        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutrons")
+        s = Sample("The sample")
+        inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"))
+        df = [File("README.rst", None)]
         m = Measurement(inst, df, scheme="angle-dispersive")
-        p = Person('A Person', 'Some Uni')
+        p = Person("A Person", "Some Uni")
         ds = DataSource(p, e, s, m)
 
-        soft = Software('orsopy', '0.0.1', 'macOS-10.15')
-        p2 = Person('Andrew McCluskey', 'European Spallation Source')
-        redn = Reduction(
-            soft, datetime(2021, 7, 14, 10, 10, 10), p2,
-            ['footprint', 'background']
-        )
+        soft = Software("orsopy", "0.0.1", "macOS-10.15")
+        p2 = Person("Andrew McCluskey", "European Spallation Source")
+        redn = Reduction(soft, datetime(2021, 7, 14, 10, 10, 10), p2, ["footprint", "background"])
 
-        cols = [Column("Qz", unit='1/angstrom'), Column("R")]
+        cols = [Column("Qz", unit="1/angstrom"), Column("R")]
         value = Orso(ds, redn, cols, 1)
 
         dsm = value.data_source.measurement
-        assert value.data_source.owner.name == 'A Person'
-        assert dsm.data_files[0].file == 'README.rst'
-        assert value.reduction.software.name == 'orsopy'
-        assert value.columns[0].name == 'Qz'
+        assert value.data_source.owner.name == "A Person"
+        assert dsm.data_files[0].file == "README.rst"
+        assert value.reduction.software.name == "orsopy"
+        assert value.columns[0].name == "Qz"
         assert value.data_set == 1
 
         # check that data_set can also be a string.
-        value = Orso(ds, redn, cols, 'fokdoks')
-        assert value.data_set == 'fokdoks'
+        value = Orso(ds, redn, cols, "fokdoks")
+        assert value.data_set == "fokdoks"
         # don't want class construction coercing a str to an int
-        value = Orso(ds, redn, cols, '1')
-        assert value.data_set == '1'
+        value = Orso(ds, redn, cols, "1")
+        assert value.data_set == "1"
 
     def test_repr(self):
         ds = fileio.Orso.empty()
@@ -143,11 +124,7 @@ class TestOrso(unittest.TestCase):
 
         info3 = fileio.Orso(
             data_source=fileio.DataSource(
-                sample=fileio.Sample(
-                    name="My Sample",
-                    category="solid",
-                    description="Something descriptive",
-                ),
+                sample=fileio.Sample(name="My Sample", category="solid", description="Something descriptive",),
                 experiment=fileio.Experiment(
                     title="Main experiment",
                     instrument="Reflectometer",
@@ -157,8 +134,7 @@ class TestOrso(unittest.TestCase):
                 owner=fileio.Person("someone", "important"),
                 measurement=fileio.Measurement(
                     instrument_settings=fileio.InstrumentSettings(
-                        incident_angle=fileio.Value(13.4, "deg"),
-                        wavelength=fileio.Value(5.34, "A"),
+                        incident_angle=fileio.Value(13.4, "deg"), wavelength=fileio.Value(5.34, "A"),
                     ),
                     data_files=["abc", "def", "ghi"],
                     references=["more", "files"],
@@ -170,7 +146,7 @@ class TestOrso(unittest.TestCase):
             columns=info.columns,
         )
         ds3 = fileio.OrsoDataset(info3, data)
-        fileio.save_orso([ds, ds2, ds3], "test.ort", comment='Interdiffusion')
+        fileio.save_orso([ds, ds2, ds3], "test.ort", comment="Interdiffusion")
 
         ls1, ls2, ls3 = fileio.load_orso("test.ort")
         assert ls1 == ds
@@ -178,7 +154,7 @@ class TestOrso(unittest.TestCase):
         assert ls3 == ds3
 
         # test empty lines between datasets
-        fileio.save_orso([ds, ds2, ds3], "test.ort", data_separator='\n\n')
+        fileio.save_orso([ds, ds2, ds3], "test.ort", data_separator="\n\n")
 
         ls1, ls2, ls3 = fileio.load_orso("test.ort")
         assert ls1 == ds
@@ -189,7 +165,7 @@ class TestOrso(unittest.TestCase):
 
         with pytest.raises(ValueError):
             # test wrong data_separator characters
-            fileio.save_orso([ds, ds2, ds3], "test.ort", data_separator='\na\n')
+            fileio.save_orso([ds, ds2, ds3], "test.ort", data_separator="\na\n")
 
     def test_unique_dataset(self):
         # checks that data_set is unique on saving of OrsoDatasets
@@ -205,7 +181,7 @@ class TestOrso(unittest.TestCase):
         ds2 = OrsoDataset(info2, np.empty((2, 4)))
 
         with pytest.raises(ValueError):
-            fileio.save_orso([ds, ds2], 'test_data_set.ort')
+            fileio.save_orso([ds, ds2], "test_data_set.ort")
 
         with pytest.raises(ValueError):
             OrsoDataset(info, np.empty((2, 5)))
@@ -234,17 +210,17 @@ class TestOrso(unittest.TestCase):
         assert info2 == info
 
         # user data in sub-key
-        info.data_source.test_entry = 'test'
+        info.data_source.test_entry = "test"
         fileio.save_orso([ds], "test2.ort")
         ls = fileio.load_orso("test2.ort")
         assert ls[0].info.user_data == info.user_data
 
         # create with keyword argument
-        assert not hasattr(info2.data_source, 'test_entry')
+        assert not hasattr(info2.data_source, "test_entry")
         ds_dict = info.data_source.to_dict()
-        assert 'test_entry' in ds_dict
+        assert "test_entry" in ds_dict
         info2.data_source = fileio.DataSource(**ds_dict)
-        assert hasattr(info2.data_source, 'test_entry')
+        assert hasattr(info2.data_source, "test_entry")
 
     def test_extra_elements(self):
         # if there are extra elements present in the ORT file they should still
@@ -252,16 +228,14 @@ class TestOrso(unittest.TestCase):
         # visible as attributes.
         datasets = fileio.load_orso(os.path.join("tests", "test_example.ort"))
         info = datasets[0].info
-        assert hasattr(
-            info.data_source.measurement.instrument_settings.incident_angle,
-            'resolution'
-        )
+        assert hasattr(info.data_source.measurement.instrument_settings.incident_angle, "resolution")
 
 
 class TestFunctions(unittest.TestCase):
     """
     Tests for functionality in the Orso module.
     """
+
     def test_make_empty(self):
         """
         Creation of the empty Orso object.
@@ -300,13 +274,13 @@ class TestFunctions(unittest.TestCase):
         """
         empty = Orso.empty()
         req = (
-            'data_source:\n  owner:\n    name: null\n'
-            '    affiliation: null\n  experiment:\n    title: null\n'
-            '    instrument: null\n    start_date: null\n    probe: null\n'
-            '  sample:\n    name: null\n  measurement:\n'
-            '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
-            '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
-            '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            'columns:\n- name: null\n'
+            "data_source:\n  owner:\n    name: null\n"
+            "    affiliation: null\n  experiment:\n    title: null\n"
+            "    instrument: null\n    start_date: null\n    probe: null\n"
+            "  sample:\n    name: null\n  measurement:\n"
+            "    instrument_settings:\n      incident_angle:\n        magnitude: null\n"
+            "      wavelength:\n        magnitude: null\n      polarization: unpolarized\n"
+            "    data_files: null\nreduction:\n  software:\n    name: null\n"
+            "columns:\n- name: null\n"
         )
         assert empty.to_yaml() == req

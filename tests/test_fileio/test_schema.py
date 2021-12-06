@@ -1,10 +1,12 @@
 import json
 import os.path
+
 import jsonschema
+import numpy as np
 import yaml
+
 from orsopy import fileio
 from orsopy.fileio.base import _read_header_data, _validate_header_data
-import numpy as np
 
 
 class TestSchema:
@@ -14,28 +16,20 @@ class TestSchema:
         with open(schema_pth, "r") as f:
             schema = json.load(f)
 
-        dct_list, data, version = _read_header_data(
-            os.path.join("tests", "test_example.ort"),
-            validate=True
-        )
+        dct_list, data, version = _read_header_data(os.path.join("tests", "test_example.ort"), validate=True)
         assert data[0].shape == (2, 4)
         assert version == "0.1"
 
         # d contains datetime.datetime objects, which would fail the
         # jsonschema validation, so force those to be strings.
-        modified_dct_list = [
-            json.loads(json.dumps(dct, default=str)) for dct in dct_list
-        ]
+        modified_dct_list = [json.loads(json.dumps(dct, default=str)) for dct in dct_list]
         for dct in modified_dct_list:
             jsonschema.validate(dct, schema)
 
         _validate_header_data(dct_list)
 
         # try a 2 dataset file
-        dct_list, data, version = _read_header_data(
-            os.path.join("tests", "test_example2.ort"),
-            validate=True
-        )
+        dct_list, data, version = _read_header_data(os.path.join("tests", "test_example2.ort"), validate=True)
         assert len(dct_list) == 2
         assert dct_list[1]["data_set"] == "spin_down"
         assert data[1].shape == (4, 4)
