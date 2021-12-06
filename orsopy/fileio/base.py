@@ -93,45 +93,42 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
                       return_type=None)
 
 
-class _HeaderMeta(type):
-    """
-    Metaclass for :py:class:`Header`.
-    Creates a :py:attr:`dataclass` with an additional comment attribute.
-    """
+def orsodataclass(cls: type):
+    attrs = cls.__dict__
+    bases = cls.__bases__
+    if '__annotations__' in attrs and \
+            len([k for k in attrs['__annotations__'].keys() if not k.startswith('_')]) > 0:
+        # only applies to dataclass children of Header
+        # add optional comment attribute, needs to come last
+        attrs['__annotations__']['comment'] = Optional[str]
+        setattr(cls, 'comment', field(default=None))
 
-    def __new__(cls, name, bases, attrs, **kwargs):
-        if '__annotations__' in attrs and \
-                len([k for k in attrs['__annotations__'].keys() if not k.startswith('_')]) > 0:
-            # only applies to dataclass children of Header
-            # add optional comment attribute, needs to come last
-            attrs['__annotations__']['comment'] = Optional[str]
-            attrs['comment'] = field(default=None)
+        # create the _orso_optional attribute
+        orso_optionals = []
+        for fname, ftype in attrs['__annotations__'].items():
+            if type(None) in get_args(ftype):
+                orso_optionals.append(fname)
+        for base in bases:
+            if hasattr(base, '_orso_optionals'):
+                orso_optionals += getattr(base, '_orso_optionals')
+        setattr(cls, '_orso_optionals', orso_optionals)
+        out = dataclass(cls, repr=False, init=False)
+        fieldsarg = getattr(out, _FIELDS)
 
-            # create the _orso_optional attribute
-            attrs['_orso_optionals'] = []
-            for fname, ftype in attrs['__annotations__'].items():
-                if type(None) in get_args(ftype):
-                    attrs['_orso_optionals'].append(fname)
-            for base in bases:
-                if hasattr(base, '_orso_optionals'):
-                    attrs['_orso_optionals'] += getattr(base, '_orso_optionals')
-            out = dataclass(type.__new__(cls, name, bases, attrs, **kwargs), repr=False, init=False)
-            fieldsarg = getattr(out, _FIELDS)
+        # Generate custom __init__ method that allows arbitrary extra keyword arguments
+        has_post_init = hasattr(out, _POST_INIT_NAME)
+        # Include InitVars and regular fields (so, not ClassVars).
+        flds = [f for f in fieldsarg.values()
+                if f._field_type in (_FIELD, _FIELD_INITVAR)]
+        init_fun = _custom_init_fn(flds, False, has_post_init, 'self', globals())
+        _set_new_attribute(out, '__init__', init_fun)
 
-            # Generate custom __init__ method that allows arbitrary extra keyword arguments
-            has_post_init = hasattr(out, _POST_INIT_NAME)
-            # Include InitVars and regular fields (so, not ClassVars).
-            flds = [f for f in fieldsarg.values()
-                    if f._field_type in (_FIELD, _FIELD_INITVAR)]
-            init_fun = _custom_init_fn(flds, False, has_post_init, 'self', globals())
-            _set_new_attribute(out, '__init__', init_fun)
-
-            return out
-        else:
-            return type.__new__(cls, name, bases, attrs, **kwargs)
+        return out
+    else:
+        return cls
 
 
-class Header(metaclass=_HeaderMeta):
+class Header:
     """
     The super class for all of the items in the orso module.
     """
@@ -386,6 +383,7 @@ class Header(metaclass=_HeaderMeta):
         return out
 
 
+@orsodataclass
 class Value(Header):
     """
     A value or list of values with an optional unit.
@@ -397,6 +395,7 @@ class Value(Header):
     )
 
 
+@orsodataclass
 class ValueRange(Header):
     """
     A range or list of ranges with mins, maxs, and an optional unit.
@@ -409,6 +408,7 @@ class ValueRange(Header):
     )
 
 
+@orsodataclass
 class ValueVector(Header):
     """
     A vector or list of vectors with an optional unit.
@@ -431,6 +431,7 @@ class ValueVector(Header):
     )
 
 
+@orsodataclass
 class Person(Header):
     """
     Information about a person, including name, affilation(s), and contact
@@ -444,6 +445,7 @@ class Person(Header):
     )
 
 
+@orsodataclass
 class Column(Header):
     """
     Information about a data column.
@@ -458,6 +460,7 @@ class Column(Header):
     )
 
 
+@orsodataclass
 class File(Header):
     """
     A file with file path and a last modified timestamp.

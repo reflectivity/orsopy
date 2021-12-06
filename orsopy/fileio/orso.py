@@ -7,7 +7,7 @@ Implementation of the top level class for the ORSO header.
 import yaml
 from typing import List, Union, TextIO, Optional, Any
 from dataclasses import dataclass
-from .base import (Header, Column, _possibly_open_file,
+from .base import (orsodataclass, Header, Column, _possibly_open_file,
                    _read_header_data, _nested_update, _dict_diff)
 from .data_source import DataSource
 from .reduction import Reduction
@@ -20,6 +20,7 @@ ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
                   "| YAML encoding | https://www.reflectometry.org/")
 
 
+@orsodataclass
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.
