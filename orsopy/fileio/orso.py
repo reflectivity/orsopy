@@ -2,22 +2,20 @@
 Implementation of the top level class for the ORSO header.
 """
 
-# author: Andrew R. McCluskey (arm61)
-
-import yaml
-from typing import List, Union, TextIO, Optional, Any
 from dataclasses import dataclass
-from .base import (orsodataclass, Header, Column, _possibly_open_file,
-                   _read_header_data, _nested_update, _dict_diff)
+from typing import Any, List, Optional, TextIO, Union
+
+import numpy as np
+import yaml
+
+from .base import Column, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data, orsodataclass
 from .data_source import DataSource
 from .reduction import Reduction
 
-import numpy as np
-
-
-ORSO_VERSION = '0.1'
-ORSO_DESIGNATE = (f"# ORSO reflectivity data file | {ORSO_VERSION} standard "
-                  "| YAML encoding | https://www.reflectometry.org/")
+ORSO_VERSION = "0.1"
+ORSO_DESIGNATE = (
+    f"# ORSO reflectivity data file | {ORSO_VERSION} standard " "| YAML encoding | https://www.reflectometry.org/"
+)
 
 
 @orsodataclass
@@ -35,6 +33,7 @@ class Orso(Header):
     :param data_set: An identified for the data set, i.e. if there is
         more than one data set in the object.
     """
+
     data_source: DataSource
     reduction: Reduction
     columns: List[Column]
@@ -42,8 +41,14 @@ class Orso(Header):
 
     __repr__ = Header._staggered_repr
 
-    def __init__(self, data_source: DataSource, reduction: Reduction,
-                 columns: List[Column], data_set: Optional[Union[int, str]] = None, **user_data):
+    def __init__(
+        self,
+        data_source: DataSource,
+        reduction: Reduction,
+        columns: List[Column],
+        data_set: Optional[Union[int, str]] = None,
+        **user_data,
+    ):
         self.data_source = data_source
         self.reduction = reduction
         self.columns = columns
@@ -70,7 +75,7 @@ class Orso(Header):
 
         :return: Explanatory string.
         """
-        out = '# '
+        out = "# "
         for ci in self.columns:
             if ci.unit is None:
                 out += f"{ci.name:<23}"
@@ -81,7 +86,7 @@ class Orso(Header):
                 out = out[:-4]
         return out[:-1]
 
-    def from_difference(self, other_dict: dict) -> 'Orso':
+    def from_difference(self, other_dict: dict) -> "Orso":
         """
         Constructs another :py:class:`Orso` instance from self, and a dict
         containing updated header information.
@@ -96,7 +101,7 @@ class Orso(Header):
         output = _nested_update(output, other_dict)
         return Orso(**output)
 
-    def to_difference(self, other: 'Orso') -> dict:
+    def to_difference(self, other: "Orso") -> dict:
         """
         A dictionary containing the difference in header information between
         two :py:class:`Orso` objects.
@@ -118,8 +123,8 @@ class Orso(Header):
         out = super().to_dict()
         out.update(self._user_data)
         # put columns at the end of the dictionary
-        cols = out.pop('columns')
-        out['columns'] = cols
+        cols = out.pop("columns")
+        out["columns"] = cols
         return out
 
 
@@ -132,6 +137,7 @@ class OrsoDataset:
 
     :raises ValueError: When :code:`ncols != len(self.info.columns)`.
     """
+
     info: Orso
     data: Any
 
@@ -149,7 +155,7 @@ class OrsoDataset:
         out += self.info.column_header()
         return out
 
-    def diff_header(self, other: 'OrsoDataset') -> str:
+    def diff_header(self, other: "OrsoDataset") -> str:
         """
         Return a header string that only contains changes to other
         :py:class:`OrsoDataset` ensure that data_set is the first entry.
@@ -176,15 +182,13 @@ class OrsoDataset:
         """
         return save_orso([self], fname)
 
-    def __eq__(self, other: 'OrsoDataset'):
+    def __eq__(self, other: "OrsoDataset"):
         return self.info == other.info and (self.data == other.data).all()
 
 
 def save_orso(
-        datasets: List[OrsoDataset],
-        fname: Union[TextIO, str],
-        comment: Optional[str] = None,
-        data_separator: str = '') -> None:
+    datasets: List[OrsoDataset], fname: Union[TextIO, str], comment: Optional[str] = None, data_separator: str = ""
+) -> None:
     """
     Saves an ORSO file. Each of the datasets must have a unique
     :py:attr:`OrsoDataset.info.data_set` attribute. If that attribute is not
@@ -200,35 +204,34 @@ def save_orso(
         values are not unique.
     """
     # check for valid seperator characters
-    if data_separator != '' and not data_separator.isspace():
+    if data_separator != "" and not data_separator.isspace():
         raise ValueError("data_separator can only contain new lines and spaces")
 
     for idx, dataset in enumerate(datasets):
         info = dataset.info
         data_set = info.data_set
-        if (data_set is None or (isinstance(data_set, str) and len(data_set) == 0)):
+        if data_set is None or (isinstance(data_set, str) and len(data_set) == 0):
             # it's not set, or is zero length string
             info.data_set = idx
 
     dsets = [dataset.info.data_set for dataset in datasets]
     if len(set(dsets)) != len(dsets):
-        raise ValueError(
-            "All `OrsoDataset.info.data_set` values must be unique")
+        raise ValueError("All `OrsoDataset.info.data_set` values must be unique")
 
-    with _possibly_open_file(fname, 'w') as f:
+    with _possibly_open_file(fname, "w") as f:
         header = f"{ORSO_DESIGNATE}\n"
         if comment is not None:
             header += f"# {comment}\n"
 
         ds1 = datasets[0]
         header += ds1.header()
-        np.savetxt(f, ds1.data, header=header, fmt='%-22.16e')
+        np.savetxt(f, ds1.data, header=header, fmt="%-22.16e")
 
         for dsi in datasets[1:]:
             # write an optional spacer string between dataset e.g. \n
             f.write(data_separator)
             hi = ds1.diff_header(dsi)
-            np.savetxt(f, dsi.data, header=hi, fmt='%-22.16e')
+            np.savetxt(f, dsi.data, header=hi, fmt="%-22.16e")
 
 
 def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
