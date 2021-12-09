@@ -22,7 +22,7 @@ class SLD_API:
       If connection to the server fails, a local copy of the database is used, instead.
 
       Usage:
-        from slddb import api
+        from orsopy.slddb import api
         res=api.search(fomula="Fe2O3")
         res[0]['density'] => ....
 

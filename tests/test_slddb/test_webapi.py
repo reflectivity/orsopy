@@ -24,9 +24,16 @@ class TestWebAPI(unittest.TestCase):
         try:
             res = request.urlopen("http://127.0.0.1:5000/download_api", timeout=500)
         except Exception:
-            cls.server_available = False
-            print("Server unreachable to download python api")
-            return
+            try:
+                res = request.urlopen("https://slddb.esss.dk/slddb/download_api", timeout=500)
+            except Exception:
+                cls.server_available = False
+                print("Server unreachable to download python api")
+                return
+            else:
+                server_url = "https://slddb.esss.dk/slddb/"
+        else:
+            server_url = "http://127.0.0.1:5000/"
         with open(os.path.join(cls.path, "slddb.zip"), "wb") as f:
             try:
                 f.write(res.read())
@@ -50,7 +57,7 @@ class TestWebAPI(unittest.TestCase):
 
         # overwrite local server URL
         cls._api_url = dbconfig.WEBAPI_URL
-        dbconfig.WEBAPI_URL = "http://127.0.0.1:5000/"
+        dbconfig.WEBAPI_URL = server_url
         webapi.WEBAPI_URL = dbconfig.WEBAPI_URL
         # set a temporary database file
         dbconfig.DB_FILE = os.path.join(cls.path, "slddb.db")
@@ -94,7 +101,7 @@ class TestWebAPI(unittest.TestCase):
         # test error when server does not exist
         from urllib.error import URLError
 
-        from slddb import dbconfig, webapi
+        from orsopy.slddb import dbconfig, webapi
 
         webapi.WEBAPI_URL = "http://doesnot.exist/"
         with self.assertRaises(URLError):
