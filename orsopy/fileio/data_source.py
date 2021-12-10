@@ -5,7 +5,7 @@ Implementation of the data_source for the ORSO header.
 # author: Andrew R. McCluskey (arm61)
 
 # import enum
-from typing import Any, Optional, Dict, List, Union
+from typing import Optional, Dict, List, Union
 from dataclasses import field, dataclass
 
 from .base import orsodataclass, File, Header, ValueRange, Value, ValueVector, Person
@@ -62,7 +62,7 @@ class Sample(Header):
     name: str
     category: Optional[str] = None
     composition: Optional[str] = None
-    description: Optional[Union[str, List[str], List[Any]]] = None
+    description: Optional[Union[str, List]] = None
     environment: Optional[Union[str, List[str]]] = None
     sample_parameters: Optional[Dict] = field(
         default=None,
