@@ -337,8 +337,7 @@ definitions:
       description:
         anyOf:
         - type: string
-        - items:
-            type: string
+        - items: {}
           type: array
         - type: 'null'
       environment:

@@ -270,9 +270,7 @@
             },
             {
               "type": "array",
-              "items": {
-                "type": "string"
-              }
+              "items": {}
             },
             {
               "type": "null"
