@@ -2,13 +2,10 @@
 Implementation of the data_source for the ORSO header.
 """
 
-# author: Andrew R. McCluskey (arm61)
+from dataclasses import field
+from typing import Dict, List, Optional, Union
 
-# import enum
-from typing import Optional, Dict, List, Union
-from dataclasses import field, dataclass
-
-from .base import orsodataclass, File, Header, ValueRange, Value, ValueVector, Person
+from .base import File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
 
 # typing stuff introduced in python 3.8
 try:
@@ -32,10 +29,11 @@ class Experiment(Header):
     :param doi: Digital object identifier for the experiment, possibly
         provided by the facility.
     """
+
     title: str
     instrument: str
     start_date: str
-    probe: Union[Literal['neutrons', 'x-rays']]
+    probe: Union[Literal["neutrons", "x-rays"]]
     facility: Optional[str] = None
     proposalID: Optional[str] = None
     doi: Optional[str] = None
@@ -59,17 +57,15 @@ class Sample(Header):
     :param environment: Name of the sample environment device(s).
     :param sample_parameters: Dictionary of sample parameters.
     """
+
     name: str
     category: Optional[str] = None
     composition: Optional[str] = None
     description: Optional[Union[str, List]] = None
     environment: Optional[Union[str, List[str]]] = None
     sample_parameters: Optional[Dict] = field(
-        default=None,
-        metadata={
-            'description':
-                'Using keys for parameters and Value* objects for values.'
-        })
+        default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
+    )
 
 
 # Enum does not work with yaml, if we really want this it has to be handle
@@ -105,29 +101,16 @@ class InstrumentSettings(Header):
     :param configuration: Description of the instreument configuration (full
         polarized/liquid surface/etc).
     """
+
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[
-        Union[
-            Literal[
-                'unpolarized',
-                'p',
-                'm',
-                'mm',
-                'mp',
-                'pm',
-                'pp'], ValueVector]] = field(
-        default='unpolarized',
-        metadata={
-            'description':
-                'Polarization described as unpolarized/ p '
-                '/ m / pp / pm / mp / mm / vector'
-        })
+    polarization: Optional[Union[Literal["unpolarized", "p", "m", "mm", "mp", "pm", "pp"], ValueVector]] = field(
+        default="unpolarized",
+        metadata={"description": "Polarization described as unpolarized/ p " "/ m / pp / pm / mp / mm / vector"},
+    )
     configuration: Optional[str] = field(
-        default=None,
-        metadata={
-            'description': 'half / full polarized | liquid_surface | etc'
-        })
+        default=None, metadata={"description": "half / full polarized | liquid_surface | etc"}
+    )
 
     __repr__ = Header._staggered_repr
 
@@ -143,15 +126,11 @@ class Measurement(Header):
     :param scheme: Measurement scheme (one of :code:`'angle-dispersive'`,
         :code:`'energy-dispersive'`/:code:`'angle- and energy-dispersive'`).
     """
+
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
     references: Optional[List[Union[File, str]]] = None
-    scheme: Optional[
-        Union[
-            Literal[
-                'angle- and energy-dispersive',
-                'angle-dispersive',
-                'energy-dispersive']]] = None
+    scheme: Optional[Union[Literal["angle- and energy-dispersive", "angle-dispersive", "energy-dispersive"]]] = None
 
     __repr__ = Header._staggered_repr
 
@@ -168,6 +147,7 @@ class DataSource(Header):
     :param sample: Sample information.
     :param measurement: Measurement specifics.
     """
+
     owner: Person
     experiment: Experiment
     sample: Sample
