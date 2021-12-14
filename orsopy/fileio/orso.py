@@ -53,6 +53,18 @@ class Orso(Header):
         # some recreation does not work when using the attribute directly so it's wrapped in a property
         self._user_data = user_data
 
+    @classmethod
+    def empty(cls) -> "Orso":
+        """
+        Create an empty instance of the ORSO header with
+        all non-optional attributes as :code:`None`.
+
+        :return: Empty Orso class, within minimum required columns
+        """
+        res = super(Orso, cls).empty()
+        res.columns = [Column('Qz', '1/angstrom'), Column('R')]
+        return res
+
     @property
     def user_data(self):
         return self._user_data
