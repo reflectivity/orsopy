@@ -287,7 +287,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert empty.reduction.corrections is None
         assert empty.reduction.creator is None
-        assert empty.columns == [Column.empty()]
+        assert empty.columns == [Column("Qz", "1/angstrom"), Column(name="R")]
         assert empty.data_set is None
         dct = empty.to_dict()
         _validate_header_data([dct])
@@ -307,6 +307,6 @@ class TestFunctions(unittest.TestCase):
             '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
             '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
             '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            'columns:\n- name: null\n'
+            'columns:\n- name: Qz\n  unit: 1/angstrom\n- name: R\n'
         )
         assert empty.to_yaml() == req
