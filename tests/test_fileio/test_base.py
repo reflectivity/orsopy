@@ -289,9 +289,9 @@ class TestFile(unittest.TestCase):
 
     def test_creation_for_existing_file_no_mod_time(self):
         """
-            Transformation to yaml a file that does exist without a given
-            modified date.
-            """
+        Transformation to yaml a file that does exist without a given
+        modified date.
+        """
         fname = pathlib.Path("AUTHORS.rst")
         value = base.File(str(fname.absolute()), None)
         assert value.file == str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))
@@ -299,9 +299,9 @@ class TestFile(unittest.TestCase):
 
     def test_to_yaml_for_existing_file_no_mod_time(self):
         """
-            Transformation to yaml a file that does exist without a given
-            modified date.
-            """
+        Transformation to yaml a file that does exist without a given
+        modified date.
+        """
         fname = pathlib.Path("AUTHORS.rst")
         value = base.File(str(fname.absolute()), None)
         assert (
