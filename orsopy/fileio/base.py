@@ -12,8 +12,6 @@ import warnings
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
-from dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
-                         _field_init, _init_param, _set_new_attribute, field, fields)
 from inspect import isclass
 from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
 
@@ -27,6 +25,8 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
+from ..dataclasses import (dataclass, _FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
+                         _field_init, _init_param, _set_new_attribute, field, fields)
 
 def _noop(self, *args, **kw):
     pass
@@ -91,36 +91,6 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
 
 
 def orsodataclass(cls: type):
-    if os.environ.get("GENERATE_SCHEMA", False) == "True":
-        from pydantic.dataclasses import dataclass as _dataclass
-        import functools
-        from typing import Dict, Any
-
-        class PydanticConfig:
-            """ for schema generation, otherwise unused """
-            @staticmethod
-            def schema_extra(schema: Dict[str, Any]) -> None:
-                for prop, value in schema.get('properties', {}).items():
-                    value.pop("title", None)
-
-                    # make the schema accept None as a value for any of the
-                    # Header class attributes.
-                    if 'enum' in value:
-                        value['enum'].append(None)
-
-                    if 'type' in value:
-                        value['anyOf'] = [{'type': value.pop('type')}]
-                        value['anyOf'].append({'type': 'null'})
-                    elif "anyOf" in value:
-                        value['anyOf'].append({'type': 'null'})
-                    # only one $ref e.g. from other model
-                    elif '$ref' in value:
-                        value['anyOf'] = [{'$ref': value.pop('$ref')}]
-
-        dataclass = functools.partial(_dataclass, config=PydanticConfig)
-    else:
-        from dataclasses import dataclass
-
     attrs = cls.__dict__
     bases = cls.__bases__
     if "__annotations__" in attrs and len([k for k in attrs["__annotations__"].keys() if not k.startswith("_")]) > 0:
