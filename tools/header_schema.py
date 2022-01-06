@@ -2,12 +2,38 @@
 Generates the schema for an ORSO file,
 based on the Orso class (from orsopy.fileio.orso)
 """
-import os
-from typing import Dict, List
 from copy import deepcopy
+import os
+import functools
+from typing import Dict, List, Any
+
+from pydantic.dataclasses import dataclass as _dataclass
 
 
-os.environ["GENERATE_SCHEMA"] = "True"
+class PydanticConfig:
+    """ for schema generation, otherwise unused """
+    @staticmethod
+    def schema_extra(schema: Dict[str, Any]) -> None:
+        for prop, value in schema.get('properties', {}).items():
+            value.pop("title", None)
+
+            # make the schema accept None as a value for any of the
+            # Header class attributes.
+            if 'enum' in value:
+                value['enum'].append(None)
+
+            if 'type' in value:
+                value['anyOf'] = [{'type': value.pop('type')}]
+                value['anyOf'].append({'type': 'null'})
+            elif "anyOf" in value:
+                value['anyOf'].append({'type': 'null'})
+            # only one $ref e.g. from other model
+            elif '$ref' in value:
+                value['anyOf'] = [{'$ref': value.pop('$ref')}]
+
+pydantic_dataclass = functools.partial(_dataclass, config=PydanticConfig)
+
+
 ADD_COLUMN_ORDER = True
 COLUMN_ORDER = ["Qz", "R", "sR", "sQz"]
 SCHEMA_URL = "https://raw.githubusercontent.com/reflectivity/orsopy/v{}/orsopy/fileio/schema/refl_header.schema.json"
@@ -60,8 +86,13 @@ def add_column_ordering(schema: Dict, column_order: List[str] = COLUMN_ORDER):
         "$ref": "#/definitions/Column"
     }
 
+        
 
 def main():
+    # replace the dataclass function in the local import:
+    from orsopy import dataclasses
+    dataclasses.dataclass = pydantic_dataclass
+
     import orsopy
     from orsopy.fileio.orso import Orso, ORSO_VERSION
 
