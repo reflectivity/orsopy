@@ -1,5 +1,3 @@
-Welcome to orsopy's documentation!
-======================================
 .. include:: ../README.rst
 
 .. toctree::

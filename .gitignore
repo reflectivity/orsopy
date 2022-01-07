@@ -9,3 +9,4 @@ test*.ort
 orsopy.egg-info
 dist
 build
+htmlcov
