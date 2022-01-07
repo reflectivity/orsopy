@@ -16,13 +16,13 @@ orsopy
         :target: https://coveralls.io/github/reflectivity/orsopy?branch=main
         :alt: Coverage Level
 
-:py:mod:`orsopy` is a Python library that implements ORSO functionality, which currently includes the `reduced data file format`_.
-The :py:mod:`orsopy` package is used by a range of data reduction and analysis packages for the writing and reading of reduced reflectometry data. 
+orsopy is a Python library that implements ORSO functionality, which currently includes the `reduced data file format`_.
+The orsopy package is used by a range of data reduction and analysis packages for the writing and reading of reduced reflectometry data. 
 This data is written following the `ORSO defined specification`_, enabling a metadata-rich and flexible file to be created. 
 
 `ORSO`_ is an open organisation aimed at improving the scientific techniques of neutron and X-ray reflectometry. 
-In the interest of transparency, all minutes from :py:mod:`orsopy` developer meetings are available in the `Documents`_ in the sidebar of this page. 
-If you are interested in getting involved in developing :py:mod:`orsopy`, please feel free to `contribute`_ or get in touch on the `ORSO Slack`_ (where there is a channel dedicated to :py:mod:`orsopy`).
+In the interest of transparency, all minutes from orsopy developer meetings are available in the `Documents`_ in the sidebar of this page. 
+If you are interested in getting involved in developing orsopy, please feel free to `contribute`_ or get in touch on the `ORSO Slack`_ (where there is a channel dedicated to orsopy).
 
 Features
 --------
