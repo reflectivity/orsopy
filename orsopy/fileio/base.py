@@ -7,6 +7,7 @@ import json
 import os.path
 import pathlib
 import re
+import sys
 import warnings
 
 from collections.abc import Mapping
@@ -26,6 +27,12 @@ try:
     from typing import Literal, get_args, get_origin
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
+# change of signature introduced in python 3.10.1
+if sys.version_info >= (3, 10, 1):
+    _field_init_real = _field_init
+
+    def _field_init(f, frozen, locals, self_name):
+        return _field_init_real(f, frozen, locals, self_name, False)
 
 
 def _noop(self, *args, **kw):
