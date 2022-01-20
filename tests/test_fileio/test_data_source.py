@@ -185,7 +185,10 @@ class TestInstrumentSettings(unittest.TestCase):
         """
         Creation with minimal settings.
         """
-        value = data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),)
+        value = data_source.InstrumentSettings(
+            base.Value(4.0, "deg"),
+            base.ValueRange(2.0, 12.0, "angstrom"),
+        )
         assert value.incident_angle.magnitude == 4.0
         assert value.incident_angle.unit == "deg"
         assert value.wavelength.min == 2.0
@@ -198,7 +201,10 @@ class TestInstrumentSettings(unittest.TestCase):
         """
         Transformation to yaml with minimal set.
         """
-        value = data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),)
+        value = data_source.InstrumentSettings(
+            base.Value(4.0, "deg"),
+            base.ValueRange(2.0, 12.0, "angstrom"),
+        )
         assert (
             value.to_yaml()
             == "incident_angle:\n  magnitude: "
@@ -253,7 +259,10 @@ class TestMeasurement(unittest.TestCase):
         Creation with minimal set.
         """
         value = data_source.Measurement(
-            data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
+            data_source.InstrumentSettings(
+                base.Value(4.0, "deg"),
+                base.ValueRange(2.0, 12.0, "angstrom"),
+            ),
             [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
         )
         assert value.instrument_settings.incident_angle.magnitude == 4.0
@@ -269,7 +278,10 @@ class TestMeasurement(unittest.TestCase):
         Transform to yaml with minimal set.
         """
         value = data_source.Measurement(
-            data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
+            data_source.InstrumentSettings(
+                base.Value(4.0, "deg"),
+                base.ValueRange(2.0, 12.0, "angstrom"),
+            ),
             [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
         )
         fname = pathlib.Path("README.rst")
@@ -288,7 +300,10 @@ class TestMeasurement(unittest.TestCase):
         Creation with optionals.
         """
         value = data_source.Measurement(
-            data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
+            data_source.InstrumentSettings(
+                base.Value(4.0, "deg"),
+                base.ValueRange(2.0, 12.0, "angstrom"),
+            ),
             [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
             [base.File(str(pathlib.Path().resolve().joinpath("AUTHORS.rst")), None)],
         )
@@ -307,7 +322,10 @@ class TestMeasurement(unittest.TestCase):
         Transform to yaml with optionals.
         """
         value = data_source.Measurement(
-            data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
+            data_source.InstrumentSettings(
+                base.Value(4.0, "deg"),
+                base.ValueRange(2.0, 12.0, "angstrom"),
+            ),
             [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
             [base.File(str(pathlib.Path().resolve().joinpath("AUTHORS.rst")), None)],
             "energy-dispersive",

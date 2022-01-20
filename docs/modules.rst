@@ -4,7 +4,8 @@ Modules
 fileio
 ------
 
-The role of the :code:`fileio` module is to enable the creation of and parsing from ORSO reduced data files. 
+The role of the :py:mod:`fileio` module is to enable the creation of and parsing from ORSO reduced data files.
+All public classes and functions in the :py:mod:`fileio` module are available directly from :py:mod:`fileio` without needing to specify a particular submodule.
 
 .. toctree::
    :maxdepth: 1
