@@ -266,7 +266,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert empty.reduction.corrections is None
         assert empty.reduction.creator is None
-        assert empty.columns == [Column.empty()]
+        assert empty.columns == [Column("Qz", "1/angstrom"), Column(name="R")]
         assert empty.data_set is None
         dct = empty.to_dict()
         _validate_header_data([dct])
@@ -279,13 +279,13 @@ class TestFunctions(unittest.TestCase):
         """
         empty = Orso.empty()
         req = (
-            "data_source:\n  owner:\n    name: null\n"
-            "    affiliation: null\n  experiment:\n    title: null\n"
-            "    instrument: null\n    start_date: null\n    probe: null\n"
-            "  sample:\n    name: null\n  measurement:\n"
-            "    instrument_settings:\n      incident_angle:\n        magnitude: null\n"
-            "      wavelength:\n        magnitude: null\n      polarization: unpolarized\n"
-            "    data_files: null\nreduction:\n  software:\n    name: null\n"
-            "columns:\n- name: null\n"
+            'data_source:\n  owner:\n    name: null\n'
+            '    affiliation: null\n  experiment:\n    title: null\n'
+            '    instrument: null\n    start_date: null\n    probe: null\n'
+            '  sample:\n    name: null\n  measurement:\n'
+            '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
+            '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
+            '    data_files: null\nreduction:\n  software:\n    name: null\n'
+            'columns:\n- name: Qz\n  unit: 1/angstrom\n- name: R\n'
         )
         assert empty.to_yaml() == req

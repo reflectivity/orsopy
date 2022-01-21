@@ -13,8 +13,6 @@ import warnings
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
-from dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
-                         _field_init, _init_param, _set_new_attribute, dataclass, field, fields)
 from inspect import isclass
 from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
 
@@ -27,12 +25,9 @@ try:
     from typing import Literal, get_args, get_origin
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
-# change of signature introduced in python 3.10.1
-if sys.version_info >= (3, 10, 1):
-    _field_init_real = _field_init
 
-    def _field_init(f, frozen, locals, self_name):
-        return _field_init_real(f, frozen, locals, self_name, False)
+from ..dataclasses import (dataclass, _FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING,
+                           _create_fn, _field_init, _init_param, _set_new_attribute, field, fields)
 
 
 def _noop(self, *args, **kw):
@@ -595,12 +590,6 @@ def _validate_header_data(dct_list: List[dict]):
         ncols = min(4, len(cols))
         col_names = [col["name"] for col in cols]
         units = [col.get("unit") for col in cols]
-
-        # If dct was created with Orso.empty() the Orso.columns attribute
-        # will be [{"name": None}]. In which case don't both validating column
-        # names and units.
-        if len(col_names) == 1 and col_names[0] is None:
-            continue
 
         if col_names[:ncols] != req_cols[:ncols]:
             raise ValueError("The first four columns should be named" " 'Qz', 'R', ['sR', ['sQz']]")

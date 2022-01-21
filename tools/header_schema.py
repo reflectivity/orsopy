@@ -1,236 +1,129 @@
 """
-Generates the schema for an ORSO file.
-
-Author: Brian Maranville (NIST)
+Generates the schema for an ORSO file,
+based on the Orso class (from orsopy.fileio.orso)
 """
-import datetime
-import enum
-from typing import Optional, Union, List, Literal, Dict, Any, Tuple
-from dataclasses import field
+from copy import deepcopy
+import os
+import functools
+from typing import Dict, List, Any
 
-from pydantic import Field
-
-GENERATE_SCHEMA = True
+from pydantic.dataclasses import dataclass as _dataclass
 
 
-def d(t):
-    return field(metadata={"description": t})
+class PydanticConfig:
+    """ for schema generation, otherwise unused """
+    @staticmethod
+    def schema_extra(schema: Dict[str, Any]) -> None:
+        for prop, value in schema.get('properties', {}).items():
+            value.pop("title", None)
+
+            # make the schema accept None as a value for any of the
+            # Header class attributes.
+            if 'enum' in value:
+                value['enum'].append(None)
+
+            if 'type' in value:
+                value['anyOf'] = [{'type': value.pop('type')}]
+                value['anyOf'].append({'type': 'null'})
+            elif "anyOf" in value:
+                value['anyOf'].append({'type': 'null'})
+            # only one $ref e.g. from other model
+            elif '$ref' in value:
+                value['anyOf'] = [{'$ref': value.pop('$ref')}]
+
+pydantic_dataclass = functools.partial(_dataclass, config=PydanticConfig)
 
 
-if GENERATE_SCHEMA:
-    from pydantic.dataclasses import dataclass as _dataclass
-
-    class Config:
-        @staticmethod
-        def schema_extra(schema: Dict[str, Any]) -> None:
-            for prop, value in schema.get('properties', {}).items():
-                value.pop("title", None)
-
-                # make the schema accept None as a value for any of the
-                # Header class attributes.
-                if 'enum' in value:
-                    value['enum'].append(None)
-
-                if 'type' in value:
-                    value['anyOf'] = [{'type': value.pop('type')}]
-                    value['anyOf'].append({'type': 'null'})
-                elif "anyOf" in value:
-                    value['anyOf'].append({'type': 'null'})
-                # only one $ref e.g. from other model
-                elif '$ref' in value:
-                    value['anyOf'] = [{'$ref': value.pop('$ref')}]
-
-    dataclass = _dataclass(config=Config)
-else:
-    from dataclasses import dataclass
+ADD_COLUMN_ORDER = True
+COLUMN_ORDER = ["Qz", "R", "sR", "sQz"]
+SCHEMA_URL = "https://raw.githubusercontent.com/reflectivity/orsopy/v{}/orsopy/fileio/schema/refl_header.schema.json"
 
 
-@dataclass
-class Person:
-    """Information about a person, including name, affilation(s), and email."""
-
-    name: str
-    affiliation: Union[str, List[str]]
-    contact: Optional[str] = field(
-        default=None, metadata={"description": "Contact (email) address"}
-    )
-
-
-@dataclass
-class Sample:
-    name: str
-    type: Optional[str] = field(default=None)
-    composition: Optional[str] = field(default=None)
-    description: Optional[Union[str, List[str], List[Any]]] = field(default=None)
-    environment: Optional[Union[str, List[str], List[Any]]] = field(default=None)
-
-
-@dataclass
-class Experiment:
-    title: str
-    instrument: str
-    date: Optional[datetime.datetime]
-    probe: Union[Literal["neutrons", "x-rays"]]
-    facility: Optional[str] = field(default=None)
-    proposalID: Optional[str] = field(default=None)
-    doi: Optional[str] = field(default=None)
+column_schema = {
+    "title": "<cname>",
+    "type": "object",
+    "properties": {
+        "name": {
+            "enum": [
+                "<cname>",
+            ]
+        },
+        "unit": {"enum": ["1/angstrom", "1/nm", None]},
+        "dimension": {
+            "dimension": "dimension of column",
+            "anyOf": [{"type": "string"}, {"type": "null"}],
+        },
+        "comment": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+    },
+    "required": ["name"],
+}
 
 
-# class Polarization(str, enum.Enum):
-#     """The first symbol indicates the magnetisation direction of the incident beam.
-#     An optional second symbol indicates the direction of the scattered beam, if a spin analyser is present."""
-#
-#     unpolarized = "unpolarized"
-#     p = "+"
-#     m = "-"
-#     mm = "--"
-#     mp = "-+"
-#     pm = "+-"
-#     pp = "++"
-
-
-@dataclass
-class File:
-    file: str
-    timestamp: datetime.datetime
-
-
-@dataclass
-class Value:
-    magnitude: Union[float, List[float]]
-    unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
-
-
-@dataclass
-class ValueRange:
-    min: float
-    max: float
-    unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
-    steps: Optional[int] = None
-
-
-@dataclass
-class InstrumentSettings:
-    incident_angle: Union[Value, ValueRange]
-    wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Literal['unpolarized', 'p', 'm', 'mm', 'mp', 'pm', 'pp']]] = field(
-        default='unpolarized',
-        metadata={
-            'description':
-                'Polarization described as unpolarized/ p / m / pp / pm / mp / mm / vector'
-        })
-
-
-@dataclass
-class Measurement:
-    instrument_settings: InstrumentSettings
-    data_files: List[Union[File, str]]
-    scheme: Optional[Union[
-        Literal[
-            "angle- and energy-dispersive",
-            "angle-dispersive",
-            "energy-dispersive",
-        ]
-    ]] = None
-
-
-@dataclass
-class Software:
-    """Description of the reduction software."""
-    name: str
-    version: Optional[str] = None
-    platform: Optional[str] = None
-
-
-@dataclass
-class Reduction:
-    software: Union[Software, str]
-    computer: Optional[str] = field(
-        default=None, metadata={'description': 'Computer used for reduction'}
-    )
-    call: Optional[str] = ""
-    timestamp: Optional[datetime.datetime] = field(
-        default=None,
-        metadata={
-            "description": "Timestamp string, formatted as ISO 8601 datetime"
-        })
-    creator: Optional[Person] = None
-    corrections: Optional[List[str]] = None
-    call: Optional[str] = field(
-        default=None, metadata={'description': 'The command line call used'})
-    script: Optional[str] = field(
-        default=None,
-        metadata={'description': 'Path to reduction script or notebook'})
-    binary: Optional[str] = field(
-        default=None,
-        metadata={'description': 'Path to full information file'})
-
-
-@dataclass
-class DataSource:
-    owner: Person
-    experiment: Experiment
-    sample: Sample
-    measurement: Measurement
-
-
-@dataclass
-class Column:
+def add_column_ordering(schema: Dict, column_order: List[str] = COLUMN_ORDER):
     """
-    Information on a data column.
+    Add constraints for the order of column names
+    (note: modifies schema dict in-place)
+
+    NOTE: this is done here, instead of in the type definition of Orso.columns
+    because this type of constraint is not possible at the moment with python typing:
+    specifying the first N elements of a Tuple or List but allowing additional
+    elements to be something else.
+    On the other hand, it is possible in JSON schema using "items" and "additionalItems"
+    (or in more recent versions of the schema language, "prefixItems" and "items")
     """
+    columns = {}
+    for cname in column_order:
+        cdef = deepcopy(column_schema)
+        cdef["title"] = cname
+        cdef["properties"]["name"]["enum"][0] = cname
+        columns[f"{cname}_column"] = cdef
 
-    name: str = d("The name of the column")
-    dimension: Optional[str] = ""
-    unit: Optional[str] = field(
-        default=None, metadata={"description": "SI unit string"}
-    )
-    # description: Optional[str] = field(
-    #    default=None, metadata={"description": "A description of the column"})
-
-
-@dataclass
-class qz_column(Column):
-    name: Literal["Qz"]
-    unit: Literal["1/angstrom", "1/nm"]
-
-@dataclass
-class R_column(Column):
-    name: Literal["R"]
-
-
-@dataclass
-class sR_column(Column):
-    name: Literal["sR"]
-
-
-@dataclass
-class sQz_column(Column):
-    name: Literal["sQz"]
-    unit: Literal["1/angstrom", "1/nm"]
-
-
-@dataclass
-class ORSOHeader:
-    data_source: DataSource
-    columns: Union[
-        Tuple[qz_column, R_column],
-        Tuple[qz_column, R_column, sR_column],
-        Tuple[qz_column, R_column, sR_column, sQz_column],
-        Tuple[qz_column, R_column, sR_column, sQz_column, Column],
+    schema["definitions"].update(columns)
+    schema["properties"]["columns"]["items"] = [
+        {"$ref": f"#/definitions/{cname}_column"} for cname in column_order
     ]
-    reduction: Optional[Reduction] = None
-    data_set: Union[str, int] = None
+    schema["properties"]["columns"]["additionalItems"] = {
+        "$ref": "#/definitions/Column"
+    }
 
+        
 
-if GENERATE_SCHEMA:
-    schema = {"$schema": "http://json-schema.org/draft-07/schema#"}
-    schema.update(ORSOHeader.__pydantic_model__.schema())
-    print(schema)
+def main():
+    # replace the dataclass function in the local import:
+    from orsopy import dataclasses
+    dataclasses.dataclass = pydantic_dataclass
+
+    import orsopy
+    from orsopy.fileio.orso import Orso, ORSO_VERSION
+
+    schema = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": SCHEMA_URL.format(ORSO_VERSION),
+    }
+    schema.update(Orso.__pydantic_model__.schema())
+    if ADD_COLUMN_ORDER:
+        add_column_ordering(schema)
+
+    schema_path = os.path.join(os.path.dirname(orsopy.__file__), "fileio", "schema")
+
+    # generate json schema, and write out:
+    json_output_file = os.path.join(schema_path, "refl_header.schema.json")
+    print(f"writing JSON schema: {json_output_file}")
     import json
 
-    open("refl_header.schema.json", "wt").write(json.dumps(schema, indent=2))
+    open(json_output_file, "wt").write(
+        json.dumps(schema, indent=2)
+    )
 
+    # generate yaml schema, and write out:
+    yaml_output_file = os.path.join(schema_path, "refl_header.schema.yaml")
+    print(f"writing YAML schema: {yaml_output_file}")
     import yaml
 
-    open("refl_header.schema.yaml", "w").write(yaml.dump(schema))
+    open(yaml_output_file, "w").write(
+        yaml.dump(schema)
+    )
+
+
+if __name__ == "__main__":
+    main()

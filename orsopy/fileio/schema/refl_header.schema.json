@@ -1,81 +1,13 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "ORSOHeader",
+  "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v0.1/orsopy/fileio/schema/refl_header.schema.json",
+  "title": "Orso",
   "type": "object",
   "properties": {
     "data_source": {
       "anyOf": [
         {
           "$ref": "#/definitions/DataSource"
-        }
-      ]
-    },
-    "columns": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": [
-            {
-              "$ref": "#/definitions/qz_column"
-            },
-            {
-              "$ref": "#/definitions/R_column"
-            }
-          ]
-        },
-        {
-          "type": "array",
-          "items": [
-            {
-              "$ref": "#/definitions/qz_column"
-            },
-            {
-              "$ref": "#/definitions/R_column"
-            },
-            {
-              "$ref": "#/definitions/sR_column"
-            }
-          ]
-        },
-        {
-          "type": "array",
-          "items": [
-            {
-              "$ref": "#/definitions/qz_column"
-            },
-            {
-              "$ref": "#/definitions/R_column"
-            },
-            {
-              "$ref": "#/definitions/sR_column"
-            },
-            {
-              "$ref": "#/definitions/sQz_column"
-            }
-          ]
-        },
-        {
-          "type": "array",
-          "items": [
-            {
-              "$ref": "#/definitions/qz_column"
-            },
-            {
-              "$ref": "#/definitions/R_column"
-            },
-            {
-              "$ref": "#/definitions/sR_column"
-            },
-            {
-              "$ref": "#/definitions/sQz_column"
-            },
-            {
-              "$ref": "#/definitions/Column"
-            }
-          ]
-        },
-        {
-          "type": "null"
         }
       ]
     },
@@ -86,13 +18,50 @@
         }
       ]
     },
+    "columns": {
+      "items": [
+        {
+          "$ref": "#/definitions/Qz_column"
+        },
+        {
+          "$ref": "#/definitions/R_column"
+        },
+        {
+          "$ref": "#/definitions/sR_column"
+        },
+        {
+          "$ref": "#/definitions/sQz_column"
+        }
+      ],
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "additionalItems": {
+        "$ref": "#/definitions/Column"
+      }
+    },
     "data_set": {
       "anyOf": [
+        {
+          "type": "integer"
+        },
         {
           "type": "string"
         },
         {
-          "type": "integer"
+          "type": "null"
+        }
+      ]
+    },
+    "comment": {
+      "anyOf": [
+        {
+          "type": "string"
         },
         {
           "type": "null"
@@ -102,6 +71,7 @@
   },
   "required": [
     "data_source",
+    "reduction",
     "columns"
   ],
   "definitions": {
@@ -145,6 +115,16 @@
               "type": "null"
             }
           ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -177,7 +157,6 @@
           ]
         },
         "start_date": {
-          "format": "date-time",
           "anyOf": [
             {
               "type": "string"
@@ -231,6 +210,16 @@
               "type": "null"
             }
           ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -254,7 +243,7 @@
             }
           ]
         },
-        "type": {
+        "category": {
           "anyOf": [
             {
               "type": "string"
@@ -281,12 +270,6 @@
             },
             {
               "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "array",
               "items": {}
             },
             {
@@ -306,8 +289,25 @@
               }
             },
             {
-              "type": "array",
-              "items": {}
+              "type": "null"
+            }
+          ]
+        },
+        "sample_parameters": {
+          "description": "Using keys for parameters and Value* objects for values.",
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"
@@ -349,6 +349,16 @@
               "type": "null"
             }
           ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -365,6 +375,12 @@
               "type": "number"
             },
             {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
               "type": "null"
             }
           ]
@@ -373,6 +389,12 @@
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             },
             {
               "type": "null"
@@ -390,10 +412,10 @@
             }
           ]
         },
-        "steps": {
+        "comment": {
           "anyOf": [
             {
-              "type": "integer"
+              "type": "string"
             },
             {
               "type": "null"
@@ -404,6 +426,86 @@
       "required": [
         "min",
         "max"
+      ]
+    },
+    "ValueVector": {
+      "title": "ValueVector",
+      "type": "object",
+      "properties": {
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "z": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "description": "SI unit string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
       ]
     },
     "InstrumentSettings": {
@@ -439,16 +541,39 @@
         "polarization": {
           "description": "Polarization described as unpolarized/ p / m / pp / pm / mp / mm / vector",
           "default": "unpolarized",
-          "enum": [
-            "unpolarized",
-            "p",
-            "m",
-            "mm",
-            "mp",
-            "pm",
-            "pp",
-            null
-          ],
+          "anyOf": [
+            {
+              "enum": [
+                "unpolarized",
+                "p",
+                "m",
+                "mm",
+                "mp",
+                "pm",
+                "pp"
+              ],
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ValueVector"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "configuration": {
+          "description": "half / full polarized | liquid_surface | etc",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
           "anyOf": [
             {
               "type": "string"
@@ -479,7 +604,18 @@
           ]
         },
         "timestamp": {
+          "description": "Last modified timestamp. If it's not specified, then an attempt will be made to check on the file itself",
           "format": "date-time",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
           "anyOf": [
             {
               "type": "string"
@@ -491,8 +627,7 @@
         }
       },
       "required": [
-        "file",
-        "timestamp"
+        "file"
       ]
     },
     "Measurement": {
@@ -526,6 +661,26 @@
             }
           ]
         },
+        "references": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/File"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "scheme": {
           "enum": [
             "angle- and energy-dispersive",
@@ -533,6 +688,16 @@
             "energy-dispersive",
             null
           ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
           "anyOf": [
             {
               "type": "string"
@@ -579,50 +744,8 @@
               "$ref": "#/definitions/Measurement"
             }
           ]
-        }
-      },
-      "required": [
-        "owner",
-        "experiment",
-        "sample",
-        "measurement"
-      ]
-    },
-    "qz_column": {
-      "title": "qz_column",
-      "type": "object",
-      "properties": {
-        "name": {
-          "enum": [
-            "Qz",
-            null
-          ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
         },
-        "dimension": {
-          "default": "",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "unit": {
-          "enum": [
-            "1/angstrom",
-            "1/nm",
-            null
-          ],
+        "comment": {
           "anyOf": [
             {
               "type": "string"
@@ -634,188 +757,10 @@
         }
       },
       "required": [
-        "name"
-      ]
-    },
-    "R_column": {
-      "title": "R_column",
-      "type": "object",
-      "properties": {
-        "name": {
-          "enum": [
-            "R",
-            null
-          ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "dimension": {
-          "default": "",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
-    "sR_column": {
-      "title": "sR_column",
-      "type": "object",
-      "properties": {
-        "name": {
-          "enum": [
-            "sR",
-            null
-          ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "dimension": {
-          "default": "",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
-    "sQz_column": {
-      "title": "sQz_column",
-      "type": "object",
-      "properties": {
-        "name": {
-          "enum": [
-            "sQz",
-            null
-          ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "dimension": {
-          "default": "",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "unit": {
-          "enum": [
-            "1/angstrom",
-            "1/nm",
-            null
-          ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
-    "Column": {
-      "title": "Column",
-      "type": "object",
-      "properties": {
-        "name": {
-          "description": "The name of the column",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "dimension": {
-          "default": "",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "name"
+        "owner",
+        "experiment",
+        "sample",
+        "measurement"
       ]
     },
     "Software": {
@@ -851,6 +796,16 @@
               "type": "null"
             }
           ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -866,28 +821,6 @@
             {
               "$ref": "#/definitions/Software"
             },
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "computer": {
-          "description": "Computer used for reduction",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "call": {
-          "description": "The command line call used",
-          "anyOf": [
             {
               "type": "string"
             },
@@ -928,6 +861,28 @@
             }
           ]
         },
+        "computer": {
+          "description": "Computer used for reduction",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "call": {
+          "description": "The command line call used",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "script": {
           "description": "Path to reduction script or notebook",
           "anyOf": [
@@ -949,10 +904,239 @@
               "type": "null"
             }
           ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
         "software"
+      ]
+    },
+    "Column": {
+      "title": "Column",
+      "type": "object",
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "description": "SI unit string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dimension": {
+          "dimension": "A description of the column",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Qz_column": {
+      "title": "Qz",
+      "type": "object",
+      "properties": {
+        "name": {
+          "enum": [
+            "Qz"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "1/angstrom",
+            "1/nm",
+            null
+          ]
+        },
+        "dimension": {
+          "dimension": "dimension of column",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "R_column": {
+      "title": "R",
+      "type": "object",
+      "properties": {
+        "name": {
+          "enum": [
+            "R"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "1/angstrom",
+            "1/nm",
+            null
+          ]
+        },
+        "dimension": {
+          "dimension": "dimension of column",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "sR_column": {
+      "title": "sR",
+      "type": "object",
+      "properties": {
+        "name": {
+          "enum": [
+            "sR"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "1/angstrom",
+            "1/nm",
+            null
+          ]
+        },
+        "dimension": {
+          "dimension": "dimension of column",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "sQz_column": {
+      "title": "sQz",
+      "type": "object",
+      "properties": {
+        "name": {
+          "enum": [
+            "sQz"
+          ]
+        },
+        "unit": {
+          "enum": [
+            "1/angstrom",
+            "1/nm",
+            null
+          ]
+        },
+        "dimension": {
+          "dimension": "dimension of column",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
       ]
     }
   }
