@@ -467,6 +467,10 @@ class File(Header):
                 self.timestamp = datetime.datetime.fromtimestamp(fname.stat().st_mtime)
 
 
+class NotOrsoCompatibleFileError(ValueError):
+    pass
+
+
 def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple[List[dict], list, str]:
     """
     Reads the header and data contained within an ORSO file, parsing it into
@@ -533,8 +537,10 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
             r" standard \| YAML encoding \| https://www\.reflectometry\.org/)$"
         )
 
-        if not pattern.match(header[0].lstrip(" ")):
-            raise ValueError("First line does not appear to match that of an ORSO file")
+        if len(header) < 1 or not pattern.match(header[0].lstrip(" ")):
+            raise NotOrsoCompatibleFileError(
+                "First line does not appear to match that of an ORSO file"
+            )
         version = re.findall(r"([0-9]+\.?[0-9]*|\.[0-9]+)+?", header[0])[0]
 
         dcts = yaml.safe_load_all(yml)
