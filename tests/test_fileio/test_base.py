@@ -4,13 +4,15 @@ Tests for fileio.base module
 # pylint: disable=R0201
 
 import pathlib
+from os.path import join as pjoin
 import unittest
+import pytest
 
 from datetime import datetime
 
 from numpy.testing import assert_equal
 
-from orsopy.fileio import base
+from orsopy.fileio import base, orso
 
 
 class TestValue(unittest.TestCase):
@@ -311,3 +313,10 @@ class TestFile(unittest.TestCase):
             + "timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )
+
+
+def test_not_orso():
+    with pytest.raises(
+            base.NotOrsoCompatibleFileError, match="First line does not appea"
+    ):
+        orso.load_orso(pjoin("tests", "not_orso.ort"))
