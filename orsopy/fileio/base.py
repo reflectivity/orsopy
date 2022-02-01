@@ -268,8 +268,11 @@ class Header:
                 continue
             elif isclass(fld.type) and issubclass(fld.type, Header):
                 attr_items[fld.name] = fld.type.empty()
-            elif get_origin(fld.type) is Union and isclass(get_args(fld.type)[0]) \
-                    and issubclass(get_args(fld.type)[0], Header):
+            elif (
+                get_origin(fld.type) is Union
+                and isclass(get_args(fld.type)[0])
+                and issubclass(get_args(fld.type)[0], Header)
+            ):
                 attr_items[fld.name] = get_args(fld.type)[0].empty()
             elif (
                 get_origin(fld.type) is list
@@ -277,7 +280,7 @@ class Header:
                 and issubclass(get_args(fld.type)[0], Header)
             ):
                 attr_items[fld.name] = [get_args(fld.type)[0].empty()]
-            elif (get_origin(fld.type) is list):
+            elif get_origin(fld.type) is list:
                 attr_items[fld.name] = []
             else:
                 attr_items[fld.name] = None
