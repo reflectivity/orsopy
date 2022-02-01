@@ -124,11 +124,7 @@ class TestOrso(unittest.TestCase):
 
         info3 = fileio.Orso(
             data_source=fileio.DataSource(
-                sample=fileio.Sample(
-                    name="My Sample",
-                    category="solid",
-                    description="Something descriptive",
-                ),
+                sample=fileio.Sample(name="My Sample", category="solid", description="Something descriptive",),
                 experiment=fileio.Experiment(
                     title="Main experiment",
                     instrument="Reflectometer",
@@ -138,8 +134,7 @@ class TestOrso(unittest.TestCase):
                 owner=fileio.Person("someone", "important"),
                 measurement=fileio.Measurement(
                     instrument_settings=fileio.InstrumentSettings(
-                        incident_angle=fileio.Value(13.4, "deg"),
-                        wavelength=fileio.Value(5.34, "A"),
+                        incident_angle=fileio.Value(13.4, "deg"), wavelength=fileio.Value(5.34, "A"),
                     ),
                     data_files=["abc", "def", "ghi"],
                     references=["more", "files"],

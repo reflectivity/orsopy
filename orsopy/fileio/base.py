@@ -425,7 +425,7 @@ class Person(Header):
     """
 
     name: str
-    affiliation: Union[str, List[str]]
+    affiliation: Union[List[str], str]
     contact: Optional[str] = field(default=None, metadata={"description": "Contact (email) address"})
 
 
