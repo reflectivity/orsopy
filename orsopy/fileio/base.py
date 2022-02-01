@@ -26,8 +26,8 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
-from ..dataclasses import (dataclass, _FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING,
-                           _create_fn, _field_init, _init_param, _set_new_attribute, field, fields)
+from ..dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
+                           _field_init, _init_param, _set_new_attribute, dataclass, field, fields)
 
 
 def _noop(self, *args, **kw):
@@ -268,7 +268,8 @@ class Header:
                 continue
             elif isclass(fld.type) and issubclass(fld.type, Header):
                 attr_items[fld.name] = fld.type.empty()
-            elif get_origin(fld.type) is Union and issubclass(get_args(fld.type)[0], Header):
+            elif get_origin(fld.type) is Union and isclass(get_args(fld.type)[0]) \
+                    and issubclass(get_args(fld.type)[0], Header):
                 attr_items[fld.name] = get_args(fld.type)[0].empty()
             elif (
                 get_origin(fld.type) is list
@@ -276,6 +277,8 @@ class Header:
                 and issubclass(get_args(fld.type)[0], Header)
             ):
                 attr_items[fld.name] = [get_args(fld.type)[0].empty()]
+            elif (get_origin(fld.type) is list):
+                attr_items[fld.name] = []
             else:
                 attr_items[fld.name] = None
         return cls(**attr_items)
@@ -538,9 +541,7 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
         )
 
         if len(header) < 1 or not pattern.match(header[0].lstrip(" ")):
-            raise NotOrsoCompatibleFileError(
-                "First line does not appear to match that of an ORSO file"
-            )
+            raise NotOrsoCompatibleFileError("First line does not appear to match that of an ORSO file")
         version = re.findall(r"([0-9]+\.?[0-9]*|\.[0-9]+)+?", header[0])[0]
 
         dcts = yaml.safe_load_all(yml)

@@ -67,7 +67,7 @@ class Orso(Header):
         :return: Empty Orso class, within minimum required columns
         """
         res = super(Orso, cls).empty()
-        res.columns = [Column('Qz', '1/angstrom'), Column('R')]
+        res.columns = [Column("Qz", "1/angstrom"), Column("R")]
         return res
 
     @property

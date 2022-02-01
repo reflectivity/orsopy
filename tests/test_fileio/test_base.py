@@ -4,11 +4,12 @@ Tests for fileio.base module
 # pylint: disable=R0201
 
 import pathlib
-from os.path import join as pjoin
 import unittest
-import pytest
 
 from datetime import datetime
+from os.path import join as pjoin
+
+import pytest
 
 from numpy.testing import assert_equal
 
@@ -316,7 +317,5 @@ class TestFile(unittest.TestCase):
 
 
 def test_not_orso():
-    with pytest.raises(
-            base.NotOrsoCompatibleFileError, match="First line does not appea"
-    ):
+    with pytest.raises(base.NotOrsoCompatibleFileError, match="First line does not appea"):
         orso.load_orso(pjoin("tests", "not_orso.ort"))
