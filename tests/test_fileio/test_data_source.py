@@ -145,6 +145,17 @@ class TestSample(unittest.TestCase):
             + "environment: Temperature cell\n"
         )
 
+    def test_creation_lists(self):
+        # description can be List[any], enironment List[str]
+        value = data_source.Sample(
+            "A Perfect Sample",
+            description=["The sample is without flaws", "now it got scratched", 314.2, 41],
+            environment=["Temperature cell", "Super magnet"],
+        )
+        assert value.name == "A Perfect Sample"
+        assert value.description == ["The sample is without flaws", "now it got scratched", 314.2, 41]
+        assert value.environment == ["Temperature cell", "Super magnet"]
+
 
 class TestDataSource(unittest.TestCase):
     """
