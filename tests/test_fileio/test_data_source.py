@@ -212,9 +212,9 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),)
         assert (
             value.to_yaml()
-            == "incident_angle:\n  magnitude: "
-            + "4.0\n  unit: deg\nwavelength:\n  min: 2.0\n  "
-            + "max: 12.0\n  unit: angstrom\npolarization: unpolarized\n"
+            == "incident_angle: {magnitude: 4.0, unit: deg}\n"
+            + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+            + "polarization: unpolarized\n"
         )
 
     def test_creation_config_and_polarization(self):
@@ -247,9 +247,9 @@ class TestInstrumentSettings(unittest.TestCase):
         )
         assert (
             value.to_yaml()
-            == "incident_angle:\n  magnitude: "
-            + "4.0\n  unit: deg\nwavelength:\n  min: 2.0\n  "
-            + "max: 12.0\n  unit: angstrom\npolarization: p\n"
+            == "incident_angle: {magnitude: 4.0, unit: deg}\n"
+            + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+            + "polarization: p\n"
             + "configuration: liquid surface\n"
         )
 
@@ -287,8 +287,8 @@ class TestMeasurement(unittest.TestCase):
         assert (
             value.to_yaml()
             == "instrument_settings:\n  incident_angle:"
-            + "\n    magnitude: 4.0\n    unit: deg\n  wavelength:\n    min: "
-            + "2.0\n    max: 12.0\n    unit: angstrom\n  polarization: "
+            + " {magnitude: 4.0, unit: deg}\n  wavelength: {min: "
+            + "2.0, max: 12.0, unit: angstrom}\n  polarization: "
             + "unpolarized\ndata_files:\n- file: "
             + f"{str(fname.absolute())}\n  timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
@@ -328,8 +328,8 @@ class TestMeasurement(unittest.TestCase):
         assert (
             value.to_yaml()
             == "instrument_settings:\n  incident_angle:"
-            + "\n    magnitude: 4.0\n    unit: deg\n  wavelength:\n    min: "
-            + "2.0\n    max: 12.0\n    unit: angstrom\n  polarization: "
+            + " {magnitude: 4.0, unit: deg}\n  wavelength: {min: "
+            + "2.0, max: 12.0, unit: angstrom}\n  polarization: "
             + "unpolarized\ndata_files:\n- file: "
             + f"{str(fname.absolute())}\n  timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"

@@ -331,7 +331,23 @@ class Header:
 
         :return: Yaml string
         """
-        return yaml.dump(self.to_dict(), sort_keys=False)
+        return yaml.dump(self, Dumper=OrsoDumper, sort_keys=False)
+
+    def _to_object_dict(self):
+        output = {}
+        for i, value in self.__dict__.items():
+            if i.startswith("_") or (value is None and i in self._orso_optionals):
+                continue
+            output[i] = value
+        return output
+
+    def yaml_representer(self, dumper: yaml.Dumper):
+        output = self._to_object_dict()
+        return dumper.represent_mapping(dumper.DEFAULT_MAPPING_TAG, output, flow_style=False)
+
+    def yaml_representer_compact(self, dumper: yaml.Dumper):
+        output = self._to_object_dict()
+        return dumper.represent_mapping(dumper.DEFAULT_MAPPING_TAG, output, flow_style=True)
 
     @staticmethod
     def _check_unit(unit: str):
@@ -381,6 +397,17 @@ class Header:
         return out
 
 
+class OrsoDumper(yaml.SafeDumper):
+    def represent_data(self, data):
+        if isinstance(data, Header):
+            return data.yaml_representer(self)
+        elif isinstance(data, datetime.datetime):
+            value = data.isoformat("T")
+            return super().represent_scalar("tag:yaml.org,2002:timestamp", value)
+        else:
+            return super().represent_data(data)
+
+
 @orsodataclass
 class Value(Header):
     """
@@ -389,6 +416,8 @@ class Value(Header):
 
     magnitude: Union[float, List[float]]
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+
+    yaml_representer = Header.yaml_representer_compact
 
 
 @orsodataclass
@@ -400,6 +429,8 @@ class ValueRange(Header):
     min: Union[float, List[float]]
     max: Union[float, List[float]]
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+
+    yaml_representer = Header.yaml_representer_compact
 
 
 @orsodataclass
@@ -444,6 +475,8 @@ class Column(Header):
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     dimension: Optional[str] = field(default=None, metadata={"dimension": "A description of the column"})
+
+    yaml_representer = Header.yaml_representer_compact
 
 
 @orsodataclass
