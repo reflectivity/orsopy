@@ -36,17 +36,6 @@ def _noop(self, *args, **kw):
 
 yaml.emitter.Emitter.process_tag = _noop
 
-
-def __datetime_representer(dumper, data):
-    """
-    Ensures that datetime objects are represented correctly.
-    """
-    value = data.isoformat("T")
-    return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
-
-
-yaml.add_representer(datetime.datetime, __datetime_representer)
-
 # make sure that datetime strings get loaded as str not datetime instances
 yaml.constructor.SafeConstructor.yaml_constructors[
     "tag:yaml.org,2002:timestamp"
