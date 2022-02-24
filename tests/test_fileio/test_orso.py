@@ -124,11 +124,7 @@ class TestOrso(unittest.TestCase):
 
         info3 = fileio.Orso(
             data_source=fileio.DataSource(
-                sample=fileio.Sample(
-                    name="My Sample",
-                    category="solid",
-                    description="Something descriptive",
-                ),
+                sample=fileio.Sample(name="My Sample", category="solid", description="Something descriptive",),
                 experiment=fileio.Experiment(
                     title="Main experiment",
                     instrument="Reflectometer",
@@ -138,8 +134,7 @@ class TestOrso(unittest.TestCase):
                 owner=fileio.Person("someone", "important"),
                 measurement=fileio.Measurement(
                     instrument_settings=fileio.InstrumentSettings(
-                        incident_angle=fileio.Value(13.4, "deg"),
-                        wavelength=fileio.Value(5.34, "A"),
+                        incident_angle=fileio.Value(13.4, "deg"), wavelength=fileio.Value(5.34, "A"),
                     ),
                     data_files=["abc", "def", "ghi"],
                     references=["more", "files"],
@@ -256,7 +251,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert ds.measurement.instrument_settings.incident_angle.magnitude is None
         assert ds.measurement.instrument_settings.wavelength.magnitude is None
-        assert ds.measurement.data_files is None
+        assert ds.measurement.data_files == []
         assert empty.reduction.software.name is None
         assert empty.reduction.software.version is None
         assert empty.reduction.software.platform is None
@@ -279,13 +274,13 @@ class TestFunctions(unittest.TestCase):
         """
         empty = Orso.empty()
         req = (
-            'data_source:\n  owner:\n    name: null\n'
-            '    affiliation: null\n  experiment:\n    title: null\n'
-            '    instrument: null\n    start_date: null\n    probe: null\n'
-            '  sample:\n    name: null\n  measurement:\n'
-            '    instrument_settings:\n      incident_angle:\n        magnitude: null\n'
-            '      wavelength:\n        magnitude: null\n      polarization: unpolarized\n'
-            '    data_files: null\nreduction:\n  software:\n    name: null\n'
-            'columns:\n- name: Qz\n  unit: 1/angstrom\n- name: R\n'
+            "data_source:\n  owner:\n    name: null\n"
+            "    affiliation: null\n  experiment:\n    title: null\n"
+            "    instrument: null\n    start_date: null\n    probe: null\n"
+            "  sample:\n    name: null\n  measurement:\n"
+            "    instrument_settings:\n      incident_angle:\n        magnitude: null\n"
+            "      wavelength:\n        magnitude: null\n      polarization: unpolarized\n"
+            "    data_files: []\nreduction:\n  software:\n    name: null\n"
+            "columns:\n- name: Qz\n  unit: 1/angstrom\n- name: R\n"
         )
         assert empty.to_yaml() == req

@@ -1,6 +1,7 @@
 import sys
-from dataclasses import (dataclass, _FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING,
-                         _create_fn, _field_init, _init_param, _set_new_attribute, field, fields)
+
+from dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
+                         _field_init, _init_param, _set_new_attribute, dataclass, field, fields)
 
 # change of signature introduced in python 3.10.1
 if sys.version_info >= (3, 10, 1):

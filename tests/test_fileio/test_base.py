@@ -4,11 +4,12 @@ Tests for fileio.base module
 # pylint: disable=R0201
 
 import pathlib
-from os.path import join as pjoin
 import unittest
-import pytest
 
 from datetime import datetime
+from os.path import join as pjoin
+
+import pytest
 
 from numpy.testing import assert_equal
 
@@ -179,6 +180,11 @@ class TestPerson(unittest.TestCase):
         assert value.affiliation == "Ivy League University"
         assert value.contact == "jauser@ivy.edu"
 
+    def test_creation_with_list(self):
+        value = base.Person("Joe A. User", ["Ivy League University", "Great Neutron Factory"])
+        assert value.name == "Joe A. User"
+        assert value.affiliation == ["Ivy League University", "Great Neutron Factory"]
+
     def test_to_yaml(self):
         """
         Transform to yaml with no email.
@@ -316,7 +322,5 @@ class TestFile(unittest.TestCase):
 
 
 def test_not_orso():
-    with pytest.raises(
-            base.NotOrsoCompatibleFileError, match="First line does not appea"
-    ):
+    with pytest.raises(base.NotOrsoCompatibleFileError, match="First line does not appea"):
         orso.load_orso(pjoin("tests", "not_orso.ort"))

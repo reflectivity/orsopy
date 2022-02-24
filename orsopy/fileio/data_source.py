@@ -61,8 +61,8 @@ class Sample(Header):
     name: str
     category: Optional[str] = None
     composition: Optional[str] = None
-    description: Optional[Union[str, List]] = None
-    environment: Optional[Union[str, List[str]]] = None
+    description: Optional[Union[list, str]] = None
+    environment: Optional[Union[List[str], str]] = None
     sample_parameters: Optional[Dict] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
     )
