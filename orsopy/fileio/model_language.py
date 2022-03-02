@@ -5,10 +5,9 @@ It includes parsing of models from header or different input information and
 resolving the model to a simple list of slabs.
 """
 
-from dataclasses import field
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
-from .base import Header, Value, ValueRange, ValueVector, orsodataclass
+from .base import Header, Value, orsodataclass
 
 
 def find_idx(string, start, value):
