@@ -6,6 +6,7 @@ from dataclasses import field
 from typing import Dict, List, Optional, Union
 
 from .base import File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
+from .model_language import SampleModel
 
 # typing stuff introduced in python 3.8
 try:
@@ -66,6 +67,7 @@ class Sample(Header):
     sample_parameters: Optional[Dict] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
     )
+    model: Optional[SampleModel] = None
 
 
 # Enum does not work with yaml, if we really want this it has to be handle
