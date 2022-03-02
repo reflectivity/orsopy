@@ -139,6 +139,14 @@ class Orso(Header):
         out["columns"] = cols
         return out
 
+    def _to_object_dict(self):
+        out = super()._to_object_dict()
+        out.update(self._user_data)
+        # put columns at the end of the dictionary
+        cols = out.pop("columns")
+        out["columns"] = cols
+        return out
+
 
 @dataclass
 class OrsoDataset:

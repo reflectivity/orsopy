@@ -49,14 +49,14 @@ class TestValue(unittest.TestCase):
         Transform to yaml.
         """
         value = base.Value(1.0, "m")
-        assert value.to_yaml() == "magnitude: 1.0\nunit: m\n"
+        assert value.to_yaml() == "{magnitude: 1.0, unit: m}\n"
 
     def test_no_magnitude_to_yaml(self):
         """
         Transform to yaml with a non-optional ORSO item.
         """
         value = base.Value(None)
-        assert value.to_yaml() == "magnitude: null\n"
+        assert value.to_yaml() == "{magnitude: null}\n"
 
 
 class TestValueVector(unittest.TestCase):
@@ -141,21 +141,21 @@ class TestValueRange(unittest.TestCase):
         Transform to yaml.
         """
         value = base.ValueRange(1.0, 2.0, "m")
-        assert value.to_yaml() == "min: 1.0\nmax: 2.0\nunit: m\n"
+        assert value.to_yaml() == "{min: 1.0, max: 2.0, unit: m}\n"
 
     def test_no_upper_to_yaml(self):
         """
         Transform to yaml with no max.
         """
         value = base.ValueRange(1.0, None)
-        assert value.to_yaml() == "min: 1.0\nmax: null\n"
+        assert value.to_yaml() == "{min: 1.0, max: null}\n"
 
     def test_no_lower_to_yaml(self):
         """
         Transform to yaml with no min.
         """
         value = base.ValueRange(None, 1.0)
-        assert value.to_yaml() == "min: null\nmax: 1.0\n"
+        assert value.to_yaml() == "{min: null, max: 1.0}\n"
 
 
 class TestPerson(unittest.TestCase):
@@ -242,14 +242,14 @@ class TestColumn(unittest.TestCase):
         Transformation to yaml.
         """
         value = base.Column("q", "1/angstrom", "qz vector")
-        assert value.to_yaml() == "name: q\nunit: 1/angstrom\ndimension: qz vector\n"
+        assert value.to_yaml() == "{name: q, unit: 1/angstrom, dimension: qz vector}\n"
 
     def test_no_description_to_yaml(self):
         """
         Transformation to yaml.
         """
         value = base.Column("q", "1/angstrom")
-        assert value.to_yaml() == "name: q\nunit: 1/angstrom\n"
+        assert value.to_yaml() == "{name: q, unit: 1/angstrom}\n"
 
 
 class TestFile(unittest.TestCase):

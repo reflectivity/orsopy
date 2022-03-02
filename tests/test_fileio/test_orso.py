@@ -278,9 +278,9 @@ class TestFunctions(unittest.TestCase):
             "    affiliation: null\n  experiment:\n    title: null\n"
             "    instrument: null\n    start_date: null\n    probe: null\n"
             "  sample:\n    name: null\n  measurement:\n"
-            "    instrument_settings:\n      incident_angle:\n        magnitude: null\n"
-            "      wavelength:\n        magnitude: null\n      polarization: unpolarized\n"
+            "    instrument_settings:\n      incident_angle: {magnitude: null}\n"
+            "      wavelength: {magnitude: null}\n      polarization: unpolarized\n"
             "    data_files: []\nreduction:\n  software:\n    name: null\n"
-            "columns:\n- name: Qz\n  unit: 1/angstrom\n- name: R\n"
+            "columns:\n- {name: Qz, unit: 1/angstrom}\n- {name: R}\n"
         )
         assert empty.to_yaml() == req
