@@ -3,7 +3,7 @@ Implementation of the top level class for the ORSO header.
 """
 
 from dataclasses import dataclass
-from typing import Any, List, Optional, TextIO, Union
+from typing import Any, BinaryIO, List, Optional, TextIO, Union
 
 import numpy as np
 import yaml
@@ -269,3 +269,36 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
         od = OrsoDataset(o, data)
         ods.append(od)
     return ods
+
+
+def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment: Optional[str] = None) -> BinaryIO:
+    import h5py
+
+    for idx, dataset in enumerate(datasets):
+        info = dataset.info
+        data_set = info.data_set
+        if data_set is None or (isinstance(data_set, str) and len(data_set) == 0):
+            # it's not set, or is zero length string
+            info.data_set = idx
+
+    dsets = [dataset.info.data_set for dataset in datasets]
+    if len(set(dsets)) != len(dsets):
+        raise ValueError("All `OrsoDataset.info.data_set` values must be unique")
+
+    with h5py.File(fname, mode="w") as f:
+        if comment is not None:
+            f.attrs["comment"] = comment
+
+        for dsi in datasets:
+            info = dsi.info
+            entry = info.to_nexus(f, name=info.data_set)
+            entry.attrs["NX_class"] = "NXentry"
+            data_group = entry.create_group("data")
+            data_group.attrs["NX_class"] = "NXdata"
+            data_group.attrs["ORSO_class"] = "dataset"
+            for column_index, column in enumerate(info.columns):
+                # assume that dataset.data has dimension == ncolumns along first dimension
+                # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
+                col_data = data_group.create_dataset(column.name, data=dsi.data[column_index])
+                if column.unit is not None:
+                    col_data.attrs["unit"] = column.unit
