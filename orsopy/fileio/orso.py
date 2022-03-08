@@ -294,7 +294,7 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
             entry = f.create_group(info.data_set)
             entry.attrs["ORSO_class"] = "OrsoDataset"
             entry.attrs["NX_class"] = "NXentry"
-            info_group = info.to_nexus(root=entry, name="info")
+            info.to_nexus(root=entry, name="info")
             data_group = entry.create_group("data")
             data_group.attrs["NX_class"] = "NXdata"
             for column_index, column in enumerate(info.columns):
