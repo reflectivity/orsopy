@@ -80,7 +80,9 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
         return_type=None,
     )
 
+
 ORSO_DATACLASSES = set()
+
 
 def orsodataclass(cls: type):
     ORSO_DATACLASSES.add(cls)
@@ -378,7 +380,6 @@ class Header:
                 else:
                     group.create_dataset(child_name, data=json.dumps(_todict(value), default=json_datetime_trap))
         return group
-
 
     @staticmethod
     def _check_unit(unit: str):
@@ -735,10 +736,12 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
     else:
         return obj
 
+
 def json_datetime_trap(obj):
     if isinstance(obj, datetime.datetime):
         return obj.isoformat()
     return obj
+
 
 def _nested_update(d: dict, u: dict) -> dict:
     """
