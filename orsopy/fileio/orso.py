@@ -291,11 +291,12 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
 
         for dsi in datasets:
             info = dsi.info
-            entry = info.to_nexus(f, name=info.data_set)
+            entry = f.create_group(info.data_set)
+            entry.attrs["ORSO_class"] = "OrsoDataset"
             entry.attrs["NX_class"] = "NXentry"
+            info_group = info.to_nexus(root=entry, name="info")
             data_group = entry.create_group("data")
             data_group.attrs["NX_class"] = "NXdata"
-            data_group.attrs["ORSO_class"] = "dataset"
             for column_index, column in enumerate(info.columns):
                 # assume that dataset.data has dimension == ncolumns along first dimension
                 # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
