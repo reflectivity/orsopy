@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
 from inspect import isclass
-from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
+from typing import Any, Generator, IO, List, Optional, TextIO, Tuple, Type, Union
 
 import numpy as np
 import yaml
@@ -80,8 +80,10 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
         return_type=None,
     )
 
+ORSO_DATACLASSES = set()
 
 def orsodataclass(cls: type):
+    ORSO_DATACLASSES.add(cls)
     attrs = cls.__dict__
     bases = cls.__bases__
     if "__annotations__" in attrs and len([k for k in attrs["__annotations__"].keys() if not k.startswith("_")]) > 0:
@@ -338,6 +340,46 @@ class Header:
         output = self._to_object_dict()
         return dumper.represent_mapping(dumper.DEFAULT_MAPPING_TAG, output, flow_style=True)
 
+    def to_nexus(self, root=None, name=None, data=None):
+        """
+        Produces an HDF5 representation of the Header object, removing
+        any optional attributes with the value :code:`None`.
+
+        :return: HDF5 object
+        """
+        classname = self.__class__.__name__
+        group = root.create_group(classname if name is None else name)
+        group.attrs["ORSO_class"] = classname
+
+        for child_name, value in self.__dict__.items():
+            if child_name.startswith("_") or (value is None and child_name in self._orso_optionals):
+                continue
+
+            if isinstance(value, Column):
+                pass
+            elif value.__class__ in ORSO_DATACLASSES:
+                value.to_nexus(root=group, name=child_name)
+            elif isinstance(value, (list, tuple)):
+                if all(item.__class__ in ORSO_DATACLASSES for item in value):
+                    child_group = group.create_group(child_name)
+                    for index, item in enumerate(value):
+                        # use the 'name' attribute of children if it exists, else index:
+                        sub_name = getattr(item, 'name', str(index))
+                        nx_item = item.to_nexus(root=child_group, name=sub_name)
+                        nx_item.attrs["sequence_index"] = index
+                else:
+                    group.attrs[child_name] = json.dumps(list(_todict(v) for v in value), default=json_datetime_trap)
+            else:
+                # here _todict converts objects that aren't derived from Header
+                # and therefore don't have to_dict methods.
+                t_value = json_datetime_trap(value)
+                if any(isinstance(t_value, t) for t in (str, float, int, bool)):
+                    group.create_dataset(child_name, data=t_value)
+                else:
+                    group.create_dataset(child_name, data=json.dumps(_todict(value), default=json_datetime_trap))
+        return group
+
+
     @staticmethod
     def _check_unit(unit: str):
         """
@@ -408,6 +450,14 @@ class Value(Header):
 
     yaml_representer = Header.yaml_representer_compact
 
+    def to_nexus(self, root, name):
+        group = root.create_group(name)
+        group.create_dataset("magnitude", dtype=float, data=self.magnitude)
+        if self.unit is not None:
+            print("unit", self.unit)
+            group.create_dataset("unit", data=self.unit)
+        return group
+
 
 @orsodataclass
 class ValueRange(Header):
@@ -421,6 +471,14 @@ class ValueRange(Header):
 
     yaml_representer = Header.yaml_representer_compact
 
+    def to_nexus(self, root, name):
+        group = root.create_group(name)
+        group.create_dataset("min", dtype=float, data=self.min)
+        group.create_dataset("max", dtype=float, data=self.max)
+        if self.unit is not None:
+            print("unit", self.unit)
+            group.create_dataset("unit", data=self.unit)
+        return group
 
 @orsodataclass
 class ValueVector(Header):
@@ -693,6 +751,10 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
     else:
         return obj
 
+def json_datetime_trap(obj):
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    return obj
 
 def _nested_update(d: dict, u: dict) -> dict:
     """
