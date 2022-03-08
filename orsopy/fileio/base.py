@@ -450,14 +450,6 @@ class Value(Header):
 
     yaml_representer = Header.yaml_representer_compact
 
-    def to_nexus(self, root, name):
-        group = root.create_group(name)
-        group.create_dataset("magnitude", dtype=float, data=self.magnitude)
-        if self.unit is not None:
-            print("unit", self.unit)
-            group.create_dataset("unit", data=self.unit)
-        return group
-
 
 @orsodataclass
 class ValueRange(Header):
@@ -471,14 +463,6 @@ class ValueRange(Header):
 
     yaml_representer = Header.yaml_representer_compact
 
-    def to_nexus(self, root, name):
-        group = root.create_group(name)
-        group.create_dataset("min", dtype=float, data=self.min)
-        group.create_dataset("max", dtype=float, data=self.max)
-        if self.unit is not None:
-            print("unit", self.unit)
-            group.create_dataset("unit", data=self.unit)
-        return group
 
 @orsodataclass
 class ValueVector(Header):
