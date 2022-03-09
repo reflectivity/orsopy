@@ -34,6 +34,8 @@ def _noop(self, *args, **kw):
     pass
 
 
+JSON_MIMETYPE = "application/json"
+
 yaml.emitter.Emitter.process_tag = _noop
 
 # make sure that datetime strings get loaded as str not datetime instances
@@ -81,11 +83,11 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
     )
 
 
-ORSO_DATACLASSES = set()
+ORSO_DATACLASSES = dict()
 
 
 def orsodataclass(cls: type):
-    ORSO_DATACLASSES.add(cls)
+    ORSO_DATACLASSES[cls.__name__] = cls
     attrs = cls.__dict__
     bases = cls.__bases__
     if "__annotations__" in attrs and len([k for k in attrs["__annotations__"].keys() if not k.startswith("_")]) > 0:
@@ -359,26 +361,36 @@ class Header:
 
             if isinstance(value, Column):
                 pass
-            elif value.__class__ in ORSO_DATACLASSES:
+            elif value.__class__ in ORSO_DATACLASSES.values():
                 value.to_nexus(root=group, name=child_name)
             elif isinstance(value, (list, tuple)):
-                if all(item.__class__ in ORSO_DATACLASSES for item in value):
-                    child_group = group.create_group(child_name)
-                    for index, item in enumerate(value):
-                        # use the 'name' attribute of children if it exists, else index:
-                        sub_name = getattr(item, 'name', str(index))
-                        nx_item = item.to_nexus(root=child_group, name=sub_name)
-                        nx_item.attrs["sequence_index"] = index
-                else:
-                    group.attrs[child_name] = json.dumps(list(_todict(v) for v in value), default=json_datetime_trap)
+                child_group = group.create_group(child_name)
+                child_group.attrs["list"] = 1
+                for index, item in enumerate(value):
+                    # use the 'name' attribute of children if it exists, else index:
+                    sub_name = getattr(item, 'name', str(index))
+                    if item.__class__ in ORSO_DATACLASSES.values():
+                        item_out = item.to_nexus(root=child_group, name=sub_name)
+                    else:
+                        t_value = json_datetime_trap(value)
+                        if any(isinstance(t_value, t) for t in (str, float, int, bool, np.ndarray)):
+                            item_out = child_group.create_dataset(sub_name, data=t_value)
+                        else:
+                            item_out = child_group.create_dataset(
+                                sub_name,
+                                data=json.dumps(_todict(value), default=json_datetime_trap)
+                            )
+                            item_out.attrs["mimetype"] = JSON_MIMETYPE
+                    item_out.attrs["sequence_index"] = index
             else:
                 # here _todict converts objects that aren't derived from Header
                 # and therefore don't have to_dict methods.
                 t_value = json_datetime_trap(value)
-                if any(isinstance(t_value, t) for t in (str, float, int, bool)):
+                if any(isinstance(t_value, t) for t in (str, float, int, bool, np.ndarray)):
                     group.create_dataset(child_name, data=t_value)
                 else:
-                    group.create_dataset(child_name, data=json.dumps(_todict(value), default=json_datetime_trap))
+                    dset = group.create_dataset(child_name, data=json.dumps(_todict(value), default=json_datetime_trap))
+                    dset.attrs["mimetype"] = JSON_MIMETYPE
         return group
 
     @staticmethod

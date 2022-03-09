@@ -8,7 +8,8 @@ from typing import Any, BinaryIO, List, Optional, TextIO, Union
 import numpy as np
 import yaml
 
-from .base import Column, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data, orsodataclass
+from .base import JSON_MIMETYPE, ORSO_DATACLASSES, Column, Header, _dict_diff, _nested_update, \
+    _possibly_open_file, _read_header_data, orsodataclass
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -206,6 +207,9 @@ class OrsoDataset:
         return self.info == other.info and (self.data == other.data).all()
 
 
+ORSO_DATACLASSES["OrsoDataset"] = OrsoDataset
+
+
 def save_orso(
     datasets: List[OrsoDataset], fname: Union[TextIO, str], comment: Optional[str] = None, data_separator: str = ""
 ) -> None:
@@ -271,6 +275,45 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
     return ods
 
 
+def _from_nexus_group(group):
+
+    if group.attrs.get("list", None) is not None:
+        sort_list = [[v.attrs["sequence_index"], v] for v in group.values()]
+        return [_get_nexus_item(v) for _, v in sorted(sort_list)]
+    else:
+        dct = dict()
+        for name, value in group.items():
+            dct[name] = _get_nexus_item(value)
+
+        if 'ORSO_class' in group.attrs:
+            cls = ORSO_DATACLASSES[group.attrs['ORSO_class']]
+            return cls(**dct)
+        else:
+            return dct
+
+
+def _get_nexus_item(value):
+    import h5py
+    import json
+    if isinstance(value, h5py.Group):
+        return _from_nexus_group(value)
+    elif isinstance(value, h5py.Dataset):
+        v = value[()]
+        if value.attrs.get('mimetype', None) == JSON_MIMETYPE:
+            return json.loads(v)
+        elif hasattr(v, 'decode'):
+            # it is a bytes object, should be string
+            return v.decode()
+        else:
+            return v
+
+
+def load_nexus(fname: Union[str, BinaryIO]) -> List[OrsoDataset]:
+    import h5py
+    f = h5py.File(fname, 'r')
+    return [_from_nexus_group(g) for g in f.values() if g.attrs.get('ORSO_class', None) == "OrsoDataset"]
+
+
 def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment: Optional[str] = None) -> BinaryIO:
     import h5py
 
@@ -297,6 +340,7 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
             info.to_nexus(root=entry, name="info")
             data_group = entry.create_group("data")
             data_group.attrs["NX_class"] = "NXdata"
+            data_group.attrs["list"] = 1
             for column_index, column in enumerate(info.columns):
                 # assume that dataset.data has dimension == ncolumns along first dimension
                 # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
