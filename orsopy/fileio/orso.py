@@ -344,6 +344,9 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
             data_group = entry.create_group("data")
             data_group.attrs["NX_class"] = "NXdata"
             data_group.attrs["list"] = 1
+            data_group.attrs["axes"] = [info.columns[0].name]
+            data_group.attrs["signal"] = info.columns[1].name
+            data_group.attrs[f"{info.columns[0].name}_indices"] = [0]
             for column_index, column in enumerate(info.columns):
                 # assume that dataset.data has dimension == ncolumns along first dimension
                 # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
