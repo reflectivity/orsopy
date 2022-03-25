@@ -218,7 +218,7 @@ class Header:
                 except (ValueError, TypeError):
                     return None
         else:
-            # the hint is a combined type (Union/List etc.)
+            # the hint is a combined type (Union/List/Dict etc.)
             hbase = get_origin(hint)
             if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
@@ -226,6 +226,12 @@ class Header:
                     return type(item)([Header._resolve_type(t0, i) for i in item])
                 else:
                     return [Header._resolve_type(t0, item)]
+            elif hbase is dict:
+                value_type = get_args(hint)[1]
+                for key, value in item.items():
+                    # resolve the type of any value in the dictionary
+                    item[key] = Header._resolve_type(value_type, value)
+                return item
             elif hbase in [Union, Optional]:
                 subtypes = get_args(hint)
                 if type(item) in subtypes:

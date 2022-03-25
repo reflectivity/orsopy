@@ -5,7 +5,7 @@ It includes parsing of models from header or different input information and
 resolving the model to a simple list of slabs.
 """
 
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 from .base import Header, Value, orsodataclass
 
@@ -22,104 +22,133 @@ def find_idx(string, start, value):
 @orsodataclass
 class ModelParameters(Header):
     roughness: Optional[Union[Value, float]] = Value(0.3, 'nm')
-    length_units: Optional[str] = 'nm'
-    mass_density_units: Optional[str] = 'g/cm^3'
-    sld_units: Optional[str] = '1/angstrom^2'
-    moment_units: Optional[str] = 'muB'
+    length_unit: Optional[str] = 'nm'
+    mass_density_unit: Optional[str] = 'g/cm^3'
+    number_density_unit: Optional[str] = '1/nm^3'
+    sld_unit: Optional[str] = '1/angstrom^2'
+    magnetic_moment_unit: Optional[str] = 'muB'
 
 
 @orsodataclass
 class Material(Header):
-    name: str
     formula: Optional[str] = None
     mass_density: Optional[Union[Value, float]] = None
     number_density: Optional[Union[Value, float]] = None
-    rel_density: Optional[Union[Value, float]] = None
     sld: Optional[Union[Value, float]] = None
-    moment: Optional[Union[Value, float]] = None
-
-    def __post_init__(self):
-        Header.__post_init__(self)
-        if self.formula is None:
-            self.formula = self.name
+    magnetic_moment: Optional[Union[Value, float]] = None
 
     def resolve_defaults(self, defaults: ModelParameters):
         if self.mass_density is not None and \
                 not isinstance(self.mass_density, Value):
             self.mass_density = Value(self.mass_density,
-                                      unit=defaults.mass_density_units)
+                                      unit=defaults.mass_density_unit)
         if self.sld is not None and \
                 not isinstance(self.sld, Value):
             self.sld = Value(self.sld, unit=defaults.sld_units)
 
-        if self.moment is not None and \
-                not isinstance(self.moment, Value):
-            self.moment = Value(self.moment, unit=defaults.moment_units)
+        if self.magnetic_moment is not None and \
+                not isinstance(self.magnetic_moment, Value):
+            self.magnetic_moment = Value(self.magnetic_moment, unit=defaults.moment_units)
+
+    def generate_density(self):
+        if self.sld is not None or self.mass_density is not None or self.number_density is not None:
+            # this material already contains density information
+            return
+        from orsopy.slddb import api
+        from orsopy.slddb.material import Formula
+        formula = Formula(self.formula)
+        # first search for formula itself
+        res = api.search(formula=formula)
+        if len(res)>0:
+            m=api.material(res[0]['ID'])
+            self.number_density = Value(magnitude=1e3*m.fu_dens, unit='1/nm^3')
+            self.comment = f"density from ORSO SLD db ID={res[0]['ID']}"
+            return
+        # mix elemental density to approximate alloys
+        n=0.
+        dens=0.
+        for i in range(len(formula)):
+            res = api.search(formula=formula[i][0])
+            m = api.material(res[0]['ID'])
+            n+=formula[i][1]
+            dens+=1e3*m.fu_dens
+        dens/=n*len(formula)
+        self.number_density = Value(magnitude=dens, unit='1/nm^3')
+        self.comment = f"density from average element density"
+
+    def get_sld(self):
+        if self.sld is not None:
+            return self.sld
+        from orsopy.slddb.material import Formula, Material, get_element
+        formula = Formula(self.formula)
+        if self.mass_density is not None:
+            material = Material([(get_element(element), amount) for element, amount in formula],
+                                dens=self.mass_density.magnitude)
+            return material.rho_n
+        elif self.number_density is not None:
+            material = Material([(get_element(element), amount) for element, amount in formula],
+                                fu_dens=self.number_density.magnitude*1e-3)
+            return material.rho_n
+        else:
+            return Value(magnitude=0., unit='1/angstrom^2')
 
 
 SPECIAL_MATERIALS = {
-    'air': Material(name='air', formula='N8O2',
-                    number_density=Value(0.)),
-    'water': Material(name='water', formula='H2O',
-                      mass_density=Value(1., unit='g/cm^3')),
+    'air': Material(formula='N8O2', number_density=Value(0.)),
+    'water': Material(formula='H2O', mass_density=Value(1., unit='g/cm^3')),
 }
 
 
 @orsodataclass
 class Layer(Header):
-    name: Optional[str] = None
-    material: Optional[str] = None
     thickness: Optional[Union[Value, float]] = None
     roughness: Optional[Union[Value, float]] = None
-    formula: Optional[str] = None
-    mass_density: Optional[Union[Value, float]] = None
-    number_density: Optional[Union[Value, float]] = None
-    sld: Optional[Union[Value, float]] = None
-    moment: Optional[Union[Value, float]] = None
+    material: Optional[Union[Material, str]] = None
+    composition: Optional[Dict[float, Union[Material, str]]] = None
+
 
     def resolve_names(self, resolvable_items):
-        if self.material is None:
-            return
-        if self.material in resolvable_items:
-            material = resolvable_items[self.material]
-        elif self.material in SPECIAL_MATERIALS:
-            material = SPECIAL_MATERIALS[self.material]
+        if self.material is not None:
+            if isinstance(self.material, Material):
+                pass
+            elif self.material in resolvable_items:
+                self.material = resolvable_items[self.material]
+            elif self.material in SPECIAL_MATERIALS:
+                self.material = SPECIAL_MATERIALS[self.material]
+            else:
+                self.material = Material(formula=self.material)
+        elif self.composition is None:
+            raise ValueError("Layer has to have either material or composition")
         else:
-            material = Material(name=self.material,
-                                formula=self.material)
-        self.formula = material.formula
-        self.mass_density = material.mass_density
-        self.number_density = material.number_density
-        self.sld = material.sld
-        self.moment = material.moment
+            for key, value in self.composition.items():
+                if value in resolvable_items:
+                    material = resolvable_items[value]
+                elif value in SPECIAL_MATERIALS:
+                    material = SPECIAL_MATERIALS[value]
+                else:
+                    material = Material(formula=value)
+                self.composition[key] = material
 
     def resolve_defaults(self, defaults: ModelParameters):
-        if self.mass_density is not None and \
-                not isinstance(self.mass_density, Value):
-            self.mass_density = Value(self.mass_density,
-                                      unit=defaults.mass_density_units)
-        if self.sld is not None and \
-                not isinstance(self.sld, Value):
-            self.sld = Value(self.sld, unit=defaults.sld_units)
-
-        if self.moment is not None and \
-                not isinstance(self.moment, Value):
-            self.moment = Value(self.moment, unit=defaults.moment_units)
-
         if self.roughness is None:
             self.roughness = defaults.roughness
         elif not isinstance(self.roughness, Value):
-            self.roughness = Value(self.roughness, unit=defaults.length_units)
+            self.roughness = Value(self.roughness, unit=defaults.length_unit)
 
         if self.thickness is None:
-            self.thickness = Value(0., unit=defaults.length_units)
+            self.thickness = Value(0., unit=defaults.length_unit)
         elif not isinstance(self.thickness, Value):
-            self.thickness = Value(self.thickness, unit=defaults.length_units)
+            self.thickness = Value(self.thickness, unit=defaults.length_unit)
+
+        if self.material is not None:
+            self.material.resolve_defaults(defaults)
+        else:
+            for mat in self.composition.values():
+                mat.resolve_defaults(defaults)
 
 
 @orsodataclass
 class SubStack(Header):
-    name: str
     repetitions: int = 1
     stack: Optional[str] = None
     layers: Optional[List[Layer]] = None
@@ -150,21 +179,16 @@ class SubStack(Header):
                     if item in ri:
                         obj = ri[item]
                         if isinstance(obj, Material):
-                            obj = Layer(name=item,
-                                        formula=obj.formula,
-                                        mass_density=obj.mass_density,
-                                        number_density=obj.number_density,
-                                        thickness=thickness)
+                            obj = Layer(material=obj, thickness=thickness)
                     else:
                         obj = Layer(material=item, thickness=thickness)
                 if hasattr(obj, 'resolve_names'):
                     obj.resolve_names(ri)
                 output.append(obj)
                 idx = next_idx + 1
-            output.reverse()
             self.layers = output
-        elif self.stack is None:
-            raise ValueError("SubStack has to have either layers or stack defined.")
+        # elif self.stack is None:
+        #     raise ValueError("SubStack has to have either layers or stack defined.")
 
     def resolve_defaults(self, defaults: ModelParameters):
         for li in self.layers:
@@ -176,7 +200,7 @@ class SubStack(Header):
         added = 0
         for i in range(len(layers)):
             if isinstance(layers[i + added], Layer):
-                continue
+                layers[i + added].material.generate_density()
             else:
                 obj = layers.pop(i + added)
                 sub_layers = obj.resolve_to_layers()
@@ -187,11 +211,11 @@ class SubStack(Header):
 
 @orsodataclass
 class SampleModel(Header):
-    origin: str
     stack: str
-    sub_stacks: Optional[List[SubStack]] = None
-    layers: Optional[List[Layer]] = None
-    materials: Optional[List[Material]] = None
+    origin: Optional[str] = None
+    sub_stacks: Optional[Dict[str, SubStack]] = None
+    layers: Optional[Dict[str, Layer]] = None
+    materials: Optional[Dict[str, Material]] = None
     globals: Optional[ModelParameters] = ModelParameters()
     reference: Optional[str] = None
 
@@ -199,14 +223,11 @@ class SampleModel(Header):
     def resolvable_items(self):
         output = {}
         if self.sub_stacks:
-            for si in self.sub_stacks:
-                output[si.name] = si
+            output.update(self.sub_stacks)
         if self.layers:
-            for li in self.layers:
-                output[li.name] = li
+            output.update(self.layers)
         if self.materials:
-            for mi in self.materials:
-                output[mi.name] = mi
+            output.update(self.materials)
         return output
 
     def resolve_stack(self):
@@ -221,8 +242,7 @@ class SampleModel(Header):
                 next_idx = find_idx(stack, close_idx, '|')
                 rep, sub_stack = stack[idx:close_idx].split('(', 1)
                 rep = int(rep)
-                obj = SubStack(name=f'multilayer_{idx}',
-                               repetitions=rep, stack=sub_stack.strip())
+                obj = SubStack(repetitions=rep, stack=sub_stack.strip())
             else:
                 items = stack[idx:next_idx].strip().rsplit(None, 1)
                 item = items[0].strip()
@@ -234,11 +254,7 @@ class SampleModel(Header):
                 if item in ri:
                     obj = ri[item]
                     if isinstance(obj, Material):
-                        obj = Layer(name=item,
-                                    formula=obj.formula,
-                                    mass_density=obj.mass_density,
-                                    number_density=obj.number_density,
-                                    thickness=thickness)
+                        obj = Layer(material=obj, thickness=thickness)
                 else:
                     obj = Layer(material=item, thickness=thickness)
             if hasattr(obj, 'resolve_names'):
@@ -247,7 +263,6 @@ class SampleModel(Header):
                 obj.resolve_defaults(self.globals)
             output.append(obj)
             idx = next_idx + 1
-        output.reverse()
         return output
 
     def resolve_to_layers(self):
@@ -255,7 +270,7 @@ class SampleModel(Header):
         added = 0
         for i in range(len(layers)):
             if isinstance(layers[i + added], Layer):
-                continue
+                layers[i + added].material.generate_density()
             else:
                 obj = layers.pop(i + added)
                 sub_layers = obj.resolve_to_layers()
