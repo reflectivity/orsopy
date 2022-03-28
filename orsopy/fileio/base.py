@@ -414,6 +414,15 @@ class Value(Header):
 
     yaml_representer = Header.yaml_representer_compact
 
+    def __repr__(self):
+        """
+        Make representation more readability by removing names of default arguments.
+        """
+        output = super().__repr__()
+        output = output.replace("magnitude=", "")
+        output = output.replace("unit=", "")
+        return output
+
 
 @orsodataclass
 class ValueRange(Header):

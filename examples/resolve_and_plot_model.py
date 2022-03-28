@@ -25,7 +25,8 @@ def main(txt=None):
         structure |= m(l.thickness.magnitude*10., l.roughness.magnitude*10.)
     model = ReflectModel(structure, bkg=0.)
 
-    print(layers)
+    print(repr(sample), '\n')
+    print("\n".join([repr(li) for li in layers]))
 
     pyplot.figure(figsize=(12,5))
     pyplot.subplot(121)
