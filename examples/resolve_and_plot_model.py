@@ -27,6 +27,9 @@ def main(txt=None):
         sample = model_language.SampleModel(**dtxt)
     else:
         sample = model_language.SampleModel(stack=txt)
+    # initial model before resolving any names
+    print(repr(sample), '\n')
+
     layers = sample.resolve_to_layers()
     structure = Structure()
     for l in reversed(layers):
@@ -37,7 +40,6 @@ def main(txt=None):
             structure |= m(l.thickness.magnitude, l.roughness.magnitude)
     model = ReflectModel(structure, bkg=0.)
 
-    print(repr(sample), '\n')
     print("\n".join([repr(li) for li in layers]))
 
     pyplot.figure(figsize=(12,5))

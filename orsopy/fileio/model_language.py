@@ -7,7 +7,7 @@ resolving the model to a simple list of slabs.
 
 from typing import Dict, List, Optional, Union
 
-from .base import Header, Value, orsodataclass
+from .base import Header, Value, ComplexValue, orsodataclass
 
 
 def find_idx(string, start, value):
@@ -34,7 +34,7 @@ class Material(Header):
     formula: Optional[str] = None
     mass_density: Optional[Union[Value, float]] = None
     number_density: Optional[Union[Value, float]] = None
-    sld: Optional[Union[Value, float]] = None
+    sld: Optional[Union[ComplexValue, Value, float]] = None
     magnetic_moment: Optional[Union[Value, float]] = None
 
     def resolve_defaults(self, defaults: ModelParameters):
@@ -73,9 +73,12 @@ class Material(Header):
         self.number_density = Value(magnitude=dens, unit="1/nm^3")
         self.comment = "density from average element density"
 
-    def get_sld(self):
+    def get_sld(self) -> complex:
         if self.sld is not None:
-            return self.sld.magnitude
+            if isinstance(self.sld, Value):
+                return self.sld.magnitude+0j
+            else:
+                return self.sld.real + 1j*self.sld.imag
         from orsopy.slddb.material import Formula, Material, get_element
 
         formula = Formula(self.formula)
@@ -91,7 +94,7 @@ class Material(Header):
             )
             return material.rho_n
         else:
-            return 0.0
+            return 0.0j
 
 
 SPECIAL_MATERIALS = {
@@ -105,7 +108,7 @@ class Layer(Header):
     thickness: Optional[Union[Value, float]] = None
     roughness: Optional[Union[Value, float]] = None
     material: Optional[Union[Material, str]] = None
-    composition: Optional[Dict[float, Union[Material, str]]] = None
+    composition: Optional[Dict[str, float]] = None
 
     def resolve_names(self, resolvable_items):
         if self.material is not None:
@@ -120,14 +123,15 @@ class Layer(Header):
         elif self.composition is None:
             raise ValueError("Layer has to have either material or composition")
         else:
+            self._composition_materials = {}
             for key, value in self.composition.items():
-                if value in resolvable_items:
-                    material = resolvable_items[value]
-                elif value in SPECIAL_MATERIALS:
-                    material = SPECIAL_MATERIALS[value]
+                if key in resolvable_items:
+                    material = resolvable_items[key]
+                elif key in SPECIAL_MATERIALS:
+                    material = SPECIAL_MATERIALS[key]
                 else:
-                    material = Material(formula=value)
-                self.composition[key] = material
+                    material = Material(formula=key)
+                self._composition_materials[key] = material
 
     def resolve_defaults(self, defaults: ModelParameters):
         if self.roughness is None:
@@ -143,18 +147,30 @@ class Layer(Header):
         if self.material is not None:
             self.material.resolve_defaults(defaults)
         else:
-            for mat in self.composition.values():
+            for mat in self._composition_materials.values():
                 mat.resolve_defaults(defaults)
+
+    def generate_material(self):
+        """
+        Create a material based on the composition attribute.
+        """
+        sld = 0.
+        for key, value in self.composition.items():
+            mi = self._composition_materials[key]
+            mi.generate_density()
+            sldi = mi.get_sld()
+            sld += value*sldi
+        self.material = Material(sld=ComplexValue(real=sld.real, imag=sld.imag, unit='1/angstrom^2'))
 
 
 @orsodataclass
 class SubStack(Header):
     repetitions: int = 1
     stack: Optional[str] = None
-    layers: Optional[List[Layer]] = None
+    sequence: Optional[List[Layer]] = None
 
     def resolve_names(self, resolvable_items):
-        if self.layers is None:
+        if self.sequence is None:
             stack = self.stack
             ri = resolvable_items
             output = []
@@ -185,20 +201,23 @@ class SubStack(Header):
                     obj.resolve_names(ri)
                 output.append(obj)
                 idx = next_idx + 1
-            self.layers = output
-        # elif self.stack is None:
-        #     raise ValueError("SubStack has to have either layers or stack defined.")
+            self.sequence = output
+        else:
+            for li in self.sequence:
+                li.resolve_names(resolvable_items)
 
     def resolve_defaults(self, defaults: ModelParameters):
-        for li in self.layers:
+        for li in self.sequence:
             if hasattr(li, "resolve_defaults"):
                 li.resolve_defaults(defaults)
 
     def resolve_to_layers(self):
-        layers = list(self.layers)
+        layers = list(self.sequence)
         added = 0
         for i in range(len(layers)):
             if isinstance(layers[i + added], Layer):
+                if layers[i + added].material is None:
+                    layers[i + added].generate_material()
                 layers[i + added].material.generate_density()
             else:
                 obj = layers.pop(i + added)
@@ -269,6 +288,8 @@ class SampleModel(Header):
         added = 0
         for i in range(len(layers)):
             if isinstance(layers[i + added], Layer):
+                if layers[i + added].material is None:
+                    layers[i + added].generate_material()
                 layers[i + added].material.generate_density()
             else:
                 obj = layers.pop(i + added)

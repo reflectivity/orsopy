@@ -425,6 +425,28 @@ class Value(Header):
 
 
 @orsodataclass
+class ComplexValue(Header):
+    """
+    A value or list of values with an optional unit.
+    """
+
+    real: Union[float, List[float]]
+    imag: Optional[Union[float, List[float]]] = 0.
+    unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+
+    yaml_representer = Header.yaml_representer_compact
+
+    def __repr__(self):
+        """
+        Make representation more readability by removing names of default arguments.
+        """
+        output = super().__repr__()
+        output = output.replace("magnitude=", "")
+        output = output.replace("unit=", "")
+        return output
+
+
+@orsodataclass
 class ValueRange(Header):
     """
     A range or list of ranges with mins, maxs, and an optional unit.
