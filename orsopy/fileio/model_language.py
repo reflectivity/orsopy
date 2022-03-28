@@ -160,7 +160,9 @@ class Layer(Header):
             mi.generate_density()
             sldi = mi.get_sld()
             sld += value*sldi
-        self.material = Material(sld=ComplexValue(real=sld.real, imag=sld.imag, unit='1/angstrom^2'))
+        mix_str = ';'.join([f'{value}x{key}' for key, value in self.composition.items()])
+        self.material = Material(sld=ComplexValue(real=sld.real, imag=sld.imag, unit='1/angstrom^2'),
+                                 comment=f'composition material: {mix_str}')
 
 
 @orsodataclass
