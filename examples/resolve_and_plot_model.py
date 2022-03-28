@@ -29,6 +29,7 @@ def main(txt=None):
         sample = model_language.SampleModel(stack=txt)
     # initial model before resolving any names
     print(repr(sample), '\n')
+    print("\n".join([repr(ss) for ss in sample.resolve_stack()]), '\n')
 
     layers = sample.resolve_to_layers()
     structure = Structure()

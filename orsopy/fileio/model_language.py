@@ -170,6 +170,7 @@ class SubStack(Header):
     repetitions: int = 1
     stack: Optional[str] = None
     sequence: Optional[List[Layer]] = None
+    represents: Optional[str] = None
 
     def resolve_names(self, resolvable_items):
         if self.sequence is None:
