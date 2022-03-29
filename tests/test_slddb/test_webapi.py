@@ -43,7 +43,7 @@ class TestWebAPI(unittest.TestCase):
                 return
         # clear all modules of slddb
         for key in list(sys.modules.keys()):
-            if key.startswith("osropy.slddb"):
+            if key.startswith("orsopy.slddb"):
                 del sys.modules[key]
 
         # use the local api version to make sure test coverage works
@@ -76,7 +76,7 @@ class TestWebAPI(unittest.TestCase):
 
         # clear all modules of slddb
         for key in list(sys.modules.keys()):
-            if key.startswith("osropy.slddb"):
+            if key.startswith("orsopy.slddb"):
                 del sys.modules[key]
 
     def test_a_downloaddb(self):
