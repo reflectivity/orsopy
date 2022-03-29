@@ -39,4 +39,4 @@ sample:
           length_units: angstrom
           mass_density_units: g/cm^3
           sld_unit: 1/angstrom^2
-          reference: ORSO model language | 1.0 | https://www.reflectometry.org/projects/simple_model
+        reference: ORSO model language | 1.0 | https://www.reflectometry.org/projects/simple_model
