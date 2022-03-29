@@ -45,6 +45,8 @@ class Material(Header):
     def resolve_defaults(self, defaults: ModelParameters):
         if self.mass_density is not None and not isinstance(self.mass_density, Value):
             self.mass_density = Value(self.mass_density, unit=defaults.mass_density_unit)
+        if self.number_density is not None and not isinstance(self.number_density, Value):
+            self.number_density = Value(self.number_density, unit=defaults.number_density_unit)
         if self.sld is not None and not isinstance(self.sld, Value):
             self.sld = Value(self.sld, unit=defaults.sld_unit)
         if self.magnetic_moment is not None and not isinstance(self.magnetic_moment, Value):
@@ -140,7 +142,7 @@ class Composit(Header):
 
 
 SPECIAL_MATERIALS = {
-    "air": Material(formula="N8O2", number_density=Value(0.0)),
+    "air": Material(formula="N8O2", number_density=Value(0.0, unit="1/nm^3")),
     "water": Material(formula="H2O", mass_density=Value(1.0, unit="g/cm^3")),
 }
 
