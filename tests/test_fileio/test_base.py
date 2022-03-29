@@ -5,6 +5,7 @@ Tests for fileio.base module
 
 import pathlib
 import unittest
+import pint
 
 from datetime import datetime
 from os.path import join as pjoin
@@ -58,6 +59,70 @@ class TestValue(unittest.TestCase):
         value = base.Value(None)
         assert value.to_yaml() == "{magnitude: null}\n"
 
+    def test_unit_conversion(self):
+        value = base.Value(1.0, 'mm')
+        assert value.as_unit('m') == 1.0e-3
+        value = base.Value(1.0, '1/nm^3')
+        assert value.as_unit('1/angstrom^3') == 1.0e-3
+
+        with self.assertRaises(pint.DimensionalityError):
+            value = base.Value(1.0, '1/nm^3')
+            value.as_unit('m')
+
+
+class TestComplexValue(unittest.TestCase):
+    """
+    Testing the Value class.
+    """
+
+    def test_single_value(self):
+        """
+        Creation of an object with a magnitude and unit.
+        """
+        value = base.ComplexValue(1.0, 2.0, "m")
+        assert value.real == 1.0
+        assert value.imag == 2.0
+        assert value.unit == "m"
+
+    def test_list(self):
+        """
+        Creation of an object with a a list of values and a unit.
+        """
+        value = base.ComplexValue([1, 2, 3], [4, 5, 6], "m")
+        assert_equal(value.real, [1, 2, 3])
+        assert_equal(value.imag, [4, 5, 6])
+        assert value.unit == "m"
+
+    def test_bad_unit(self):
+        """
+        Rejection of non-ASCII units.
+        """
+        with self.assertRaises(ValueError):
+            _ = base.ComplexValue(1.0, 2.0, "Å")
+
+    def test_to_yaml(self):
+        """
+        Transform to yaml.
+        """
+        value = base.ComplexValue(1.0, 2.0, "m")
+        assert value.to_yaml() == "{real: 1.0, imag: 2.0, unit: m}\n"
+
+    def test_no_magnitude_to_yaml(self):
+        """
+        Transform to yaml with a non-optional ORSO item.
+        """
+        value = base.ComplexValue(None)
+        assert value.to_yaml() == "{real: null}\n"
+
+    def test_unit_conversion(self):
+        value = base.ComplexValue(1.0, 2.0, 'mm')
+        assert value.as_unit('m') == 1.0e-3+2.0e-3j
+        value = base.ComplexValue(1.0, 2.0, '1/nm^3')
+        assert value.as_unit('1/angstrom^3') == 1.0e-3+2.0e-3j
+
+        with self.assertRaises(pint.DimensionalityError):
+            value = base.ComplexValue(1.0, 2.0, '1/nm^3')
+            value.as_unit('m')
 
 class TestValueVector(unittest.TestCase):
     """

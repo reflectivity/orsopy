@@ -442,7 +442,7 @@ class ComplexValue(Header):
     """
 
     real: Union[float, List[float]]
-    imag: Optional[Union[float, List[float]]] = 0.0
+    imag: Optional[Union[float, List[float]]] = None
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
@@ -452,7 +452,8 @@ class ComplexValue(Header):
         Make representation more readability by removing names of default arguments.
         """
         output = super().__repr__()
-        output = output.replace("magnitude=", "")
+        output = output.replace("real=", "")
+        output = output.replace("imag=", "")
         output = output.replace("unit=", "")
         return output
 
@@ -460,7 +461,10 @@ class ComplexValue(Header):
         """
         Returns the value as converted to the given unit.
         """
-        value = self.real + 1j * self.imag
+        if self.imag is None:
+            value = self.real+0j
+        else:
+            value = self.real + 1j * self.imag
         if output_unit == self.unit:
             return value
         import pint
