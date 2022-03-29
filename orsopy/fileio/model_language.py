@@ -37,12 +37,16 @@ class Material(Header):
     sld: Optional[Union[float, ComplexValue, Value]] = None
     magnetic_moment: Optional[Union[float, Value]] = None
 
+    def __post_init__(self):
+        super().__post_init__()
+        if self.formula is None and self.sld is None:
+            raise ValueError("Material has to either define sld or formula")
+
     def resolve_defaults(self, defaults: ModelParameters):
         if self.mass_density is not None and not isinstance(self.mass_density, Value):
             self.mass_density = Value(self.mass_density, unit=defaults.mass_density_unit)
         if self.sld is not None and not isinstance(self.sld, Value):
             self.sld = Value(self.sld, unit=defaults.sld_unit)
-
         if self.magnetic_moment is not None and not isinstance(self.magnetic_moment, Value):
             self.magnetic_moment = Value(self.magnetic_moment, unit=defaults.magnetic_moment_unit)
 

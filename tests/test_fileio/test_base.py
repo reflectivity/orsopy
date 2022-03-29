@@ -5,11 +5,11 @@ Tests for fileio.base module
 
 import pathlib
 import unittest
-import pint
 
 from datetime import datetime
 from os.path import join as pjoin
 
+import pint
 import pytest
 
 from numpy.testing import assert_equal
@@ -60,14 +60,14 @@ class TestValue(unittest.TestCase):
         assert value.to_yaml() == "{magnitude: null}\n"
 
     def test_unit_conversion(self):
-        value = base.Value(1.0, 'mm')
-        assert value.as_unit('m') == 1.0e-3
-        value = base.Value(1.0, '1/nm^3')
-        assert value.as_unit('1/angstrom^3') == 1.0e-3
+        value = base.Value(1.0, "mm")
+        assert value.as_unit("m") == 1.0e-3
+        value = base.Value(1.0, "1/nm^3")
+        assert value.as_unit("1/angstrom^3") == 1.0e-3
 
         with self.assertRaises(pint.DimensionalityError):
-            value = base.Value(1.0, '1/nm^3')
-            value.as_unit('m')
+            value = base.Value(1.0, "1/nm^3")
+            value.as_unit("m")
 
 
 class TestComplexValue(unittest.TestCase):
@@ -115,14 +115,15 @@ class TestComplexValue(unittest.TestCase):
         assert value.to_yaml() == "{real: null}\n"
 
     def test_unit_conversion(self):
-        value = base.ComplexValue(1.0, 2.0, 'mm')
-        assert value.as_unit('m') == 1.0e-3+2.0e-3j
-        value = base.ComplexValue(1.0, 2.0, '1/nm^3')
-        assert value.as_unit('1/angstrom^3') == 1.0e-3+2.0e-3j
+        value = base.ComplexValue(1.0, 2.0, "mm")
+        assert value.as_unit("m") == 1.0e-3 + 2.0e-3j
+        value = base.ComplexValue(1.0, 2.0, "1/nm^3")
+        assert value.as_unit("1/angstrom^3") == 1.0e-3 + 2.0e-3j
 
         with self.assertRaises(pint.DimensionalityError):
-            value = base.ComplexValue(1.0, 2.0, '1/nm^3')
-            value.as_unit('m')
+            value = base.ComplexValue(1.0, 2.0, "1/nm^3")
+            value.as_unit("m")
+
 
 class TestValueVector(unittest.TestCase):
     """

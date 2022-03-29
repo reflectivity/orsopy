@@ -462,7 +462,7 @@ class ComplexValue(Header):
         Returns the value as converted to the given unit.
         """
         if self.imag is None:
-            value = self.real+0j
+            value = self.real + 0j
         else:
             value = self.real + 1j * self.imag
         if output_unit == self.unit:
