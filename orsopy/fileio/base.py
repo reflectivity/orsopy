@@ -423,6 +423,16 @@ class Value(Header):
         output = output.replace("unit=", "")
         return output
 
+    def as_unit(self, output_unit):
+        """
+        Returns the value as converted to the given unit.
+        """
+        if output_unit==self.unit:
+            return self.magnitude
+        import pint
+        val = self.magnitude * pint.UnitRegistry()(self.unit)
+        return val.to(output_unit).magnitude
+
 
 @orsodataclass
 class ComplexValue(Header):
@@ -444,6 +454,17 @@ class ComplexValue(Header):
         output = output.replace("magnitude=", "")
         output = output.replace("unit=", "")
         return output
+
+    def as_unit(self, output_unit):
+        """
+        Returns the value as converted to the given unit.
+        """
+        value = self.real+1j*self.imag
+        if output_unit==self.unit:
+            return value
+        import pint
+        val = value * pint.UnitRegistry()(self.unit)
+        return val.to(output_unit).magnitude
 
 
 @orsodataclass

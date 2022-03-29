@@ -32,16 +32,14 @@ def main(txt=None):
     print("\n".join([repr(ss) for ss in sample.resolve_stack()]), '\n')
 
     layers = sample.resolve_to_layers()
+    print("\n".join([repr(li) for li in layers]))
+
     structure = Structure()
     for l in reversed(layers):
         m = SLD(l.material.get_sld()*1e6)
-        if l.thickness.unit == 'nm':
-            structure |= m(l.thickness.magnitude*10., l.roughness.magnitude*10.)
-        else:
-            structure |= m(l.thickness.magnitude, l.roughness.magnitude)
+        structure |= m(l.thickness.as_unit('angstrom'), l.roughness.as_unit('angstrom'))
     model = ReflectModel(structure, bkg=0.)
 
-    print("\n".join([repr(li) for li in layers]))
 
     pyplot.figure(figsize=(12,5))
     pyplot.subplot(121)

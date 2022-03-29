@@ -21,7 +21,7 @@ def find_idx(string, start, value):
 
 @orsodataclass
 class ModelParameters(Header):
-    roughness: Optional[Union[Value, float]] = Value(0.3, "nm")
+    roughness: Optional[Union[float, Value]] = Value(0.3, "nm")
     length_unit: Optional[str] = "nm"
     mass_density_unit: Optional[str] = "g/cm^3"
     number_density_unit: Optional[str] = "1/nm^3"
@@ -32,10 +32,10 @@ class ModelParameters(Header):
 @orsodataclass
 class Material(Header):
     formula: Optional[str] = None
-    mass_density: Optional[Union[Value, float]] = None
-    number_density: Optional[Union[Value, float]] = None
-    sld: Optional[Union[ComplexValue, Value, float]] = None
-    magnetic_moment: Optional[Union[Value, float]] = None
+    mass_density: Optional[Union[float, Value]] = None
+    number_density: Optional[Union[float, Value]] = None
+    sld: Optional[Union[float, ComplexValue, Value]] = None
+    magnetic_moment: Optional[Union[float, Value]] = None
 
     def resolve_defaults(self, defaults: ModelParameters):
         if self.mass_density is not None and not isinstance(self.mass_density, Value):
@@ -75,22 +75,19 @@ class Material(Header):
 
     def get_sld(self) -> complex:
         if self.sld is not None:
-            if isinstance(self.sld, Value):
-                return self.sld.magnitude+0j
-            else:
-                return self.sld.real + 1j*self.sld.imag
-        from orsopy.slddb.material import Formula, Material, get_element
+            return self.sld.as_unit('1/angstrom^2')+0j
 
+        from orsopy.slddb.material import Formula, Material, get_element
         formula = Formula(self.formula)
         if self.mass_density is not None:
             material = Material(
-                [(get_element(element), amount) for element, amount in formula], dens=self.mass_density.magnitude
+                [(get_element(element), amount) for element, amount in formula], dens=self.mass_density.as_unit('g/cm^3')
             )
             return material.rho_n
         elif self.number_density is not None:
             material = Material(
                 [(get_element(element), amount) for element, amount in formula],
-                fu_dens=self.number_density.magnitude * 1e-3,
+                fu_dens=self.number_density.as_unit('1/angstrom^3'),
             )
             return material.rho_n
         else:
@@ -105,8 +102,8 @@ SPECIAL_MATERIALS = {
 
 @orsodataclass
 class Layer(Header):
-    thickness: Optional[Union[Value, float]] = None
-    roughness: Optional[Union[Value, float]] = None
+    thickness: Optional[Union[float, Value]] = None
+    roughness: Optional[Union[float, Value]] = None
     material: Optional[Union[Material, str]] = None
     composition: Optional[Dict[str, float]] = None
 
