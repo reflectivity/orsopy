@@ -142,7 +142,8 @@ class Composit(Header):
 
 
 SPECIAL_MATERIALS = {
-    "air": Material(formula="N8O2", number_density=Value(0.0, unit="1/nm^3")),
+    "vacuum": Material(sld=ComplexValue(real=0.0, imag=0.0, unit="1/angstrom^2")),
+    "air": Material(formula="N8O2", mass_density=Value(1.225, unit="kg/m^3")),
     "water": Material(formula="H2O", mass_density=Value(1.0, unit="g/cm^3")),
 }
 

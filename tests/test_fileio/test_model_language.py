@@ -32,20 +32,34 @@ class TestMaterial(unittest.TestCase):
 
     def test_default(self):
         defaults = model_language.ModelParameters(
-            mass_density_unit="g/cm^3", sld_unit="1/angstrom^2", magnetic_moment_unit="muB"
+            mass_density_unit="g/cm^3", number_density_unit="1/nm^3",
+            sld_unit="1/angstrom^2", magnetic_moment_unit="muB"
         )
-        m = model_language.Material(formula="Fe2O3", mass_density=7.0, sld=6.3e-6, magnetic_moment=3.4)
+        m = model_language.Material(formula="Fe2O3", mass_density=7.0, number_density=0.15,
+                                    sld=6.3e-6, magnetic_moment=3.4)
         m.resolve_defaults(defaults)
 
         assert m.mass_density == Value(7.0, "g/cm^3")
+        assert m.number_density == Value(0.15, "1/nm^3")
         assert m.sld == Value(6.3e-6, "1/angstrom^2")
         assert m.magnetic_moment == Value(3.4, "muB")
 
     def test_density_lookup_elements(self):
+        # no lookup case
+        m = model_language.Material(sld=Value(4e-6, '1/angstrom^3'))
+        m.generate_density()
+        # single element lookup case
         for element in ["Co", "Ni", "Si", "C"]:
             m = model_language.Material(formula=element)
             m.generate_density()
             assert m.number_density is not None
+            assert m.comment.startswith("density from ORSO SLD db ID")
+        # mixed element lookup case
+        for element in ["Co0.8Cr0.2Fe0.1", "Ni3.4O5.4", "SiC4.3425"]:
+            m = model_language.Material(formula=element)
+            m.generate_density()
+            assert m.number_density is not None
+            assert m.comment == "density from average element density"
 
     def test_sld(self):
         m = model_language.Material(sld=Value(3.4e-6, "1/angstrom^2"))
