@@ -7,7 +7,7 @@ resolving the model to a simple list of slabs.
 
 from typing import Dict, List, Optional, Union
 
-from .base import Header, Value, ComplexValue, orsodataclass
+from .base import ComplexValue, Header, Value, orsodataclass
 
 
 def find_idx(string, start, value):
@@ -75,23 +75,64 @@ class Material(Header):
 
     def get_sld(self) -> complex:
         if self.sld is not None:
-            return self.sld.as_unit('1/angstrom^2')+0j
+            return self.sld.as_unit("1/angstrom^2") + 0j
 
         from orsopy.slddb.material import Formula, Material, get_element
+
         formula = Formula(self.formula)
         if self.mass_density is not None:
             material = Material(
-                [(get_element(element), amount) for element, amount in formula], dens=self.mass_density.as_unit('g/cm^3')
+                [(get_element(element), amount) for element, amount in formula],
+                dens=self.mass_density.as_unit("g/cm^3"),
             )
             return material.rho_n
         elif self.number_density is not None:
             material = Material(
                 [(get_element(element), amount) for element, amount in formula],
-                fu_dens=self.number_density.as_unit('1/angstrom^3'),
+                fu_dens=self.number_density.as_unit("1/angstrom^3"),
             )
             return material.rho_n
         else:
             return 0.0j
+
+
+@orsodataclass
+class Composit(Header):
+    composition: Dict[str, float]
+
+    def resolve_names(self, resolvable_items):
+        self._composition_materials = {}
+        for key, value in self.composition.items():
+            if key in resolvable_items:
+                material = resolvable_items[key]
+            elif key in SPECIAL_MATERIALS:
+                material = SPECIAL_MATERIALS[key]
+            else:
+                material = Material(formula=key)
+            self._composition_materials[key] = material
+
+    def resolve_defaults(self, defaults: ModelParameters):
+        for mat in self._composition_materials.values():
+            mat.resolve_defaults(defaults)
+
+    def generate_density(self):
+        """
+        Create a material based on the composition attribute.
+        """
+        sld = 0.0
+        for key, value in self.composition.items():
+            mi = self._composition_materials[key]
+            mi.generate_density()
+            sldi = mi.get_sld()
+            sld += value * sldi
+        mix_str = ";".join([f"{value}x{key}" for key, value in self.composition.items()])
+        self.material = Material(
+            sld=ComplexValue(real=sld.real, imag=sld.imag, unit="1/angstrom^2"),
+            comment=f"composition material: {mix_str}",
+        )
+
+    def get_sld(self):
+        return self.material.get_sld()
 
 
 SPECIAL_MATERIALS = {
@@ -104,13 +145,15 @@ SPECIAL_MATERIALS = {
 class Layer(Header):
     thickness: Optional[Union[float, Value]] = None
     roughness: Optional[Union[float, Value]] = None
-    material: Optional[Union[Material, str]] = None
+    material: Optional[Union[Material, Composit, str]] = None
     composition: Optional[Dict[str, float]] = None
 
     def resolve_names(self, resolvable_items):
         if self.material is not None:
             if isinstance(self.material, Material):
                 pass
+            elif isinstance(self.material, Composit):
+                self.material.resolve_names(resolvable_items)
             elif self.material in resolvable_items:
                 self.material = resolvable_items[self.material]
             elif self.material in SPECIAL_MATERIALS:
@@ -151,15 +194,17 @@ class Layer(Header):
         """
         Create a material based on the composition attribute.
         """
-        sld = 0.
+        sld = 0.0
         for key, value in self.composition.items():
             mi = self._composition_materials[key]
             mi.generate_density()
             sldi = mi.get_sld()
-            sld += value*sldi
-        mix_str = ';'.join([f'{value}x{key}' for key, value in self.composition.items()])
-        self.material = Material(sld=ComplexValue(real=sld.real, imag=sld.imag, unit='1/angstrom^2'),
-                                 comment=f'composition material: {mix_str}')
+            sld += value * sldi
+        mix_str = ";".join([f"{value}x{key}" for key, value in self.composition.items()])
+        self.material = Material(
+            sld=ComplexValue(real=sld.real, imag=sld.imag, unit="1/angstrom^2"),
+            comment=f"composition material: {mix_str}",
+        )
 
 
 @orsodataclass
@@ -193,7 +238,7 @@ class SubStack(Header):
 
                     if item in ri:
                         obj = ri[item]
-                        if isinstance(obj, Material):
+                        if isinstance(obj, Material) or isinstance(obj, Composit):
                             obj = Layer(material=obj, thickness=thickness)
                     else:
                         obj = Layer(material=item, thickness=thickness)
@@ -222,7 +267,7 @@ class SubStack(Header):
             else:
                 obj = layers.pop(i + added)
                 sub_layers = obj.resolve_to_layers()
-                layers = layers[: i + added] + sub_layers + layers[i + added:]
+                layers = layers[: i + added] + sub_layers + layers[i + added :]
                 added += len(sub_layers) - 1
         return layers * self.repetitions
 
@@ -234,7 +279,8 @@ class SampleModel(Header):
     sub_stacks: Optional[Dict[str, SubStack]] = None
     layers: Optional[Dict[str, Layer]] = None
     materials: Optional[Dict[str, Material]] = None
-    globals: Optional[ModelParameters] = ModelParameters()
+    composits: Optional[Dict[str, Composit]] = None
+    globals: Optional[ModelParameters] = None
     reference: Optional[str] = None
 
     @property
@@ -246,9 +292,15 @@ class SampleModel(Header):
             output.update(self.layers)
         if self.materials:
             output.update(self.materials)
+        if self.composits:
+            output.update(self.composits)
         return output
 
     def resolve_stack(self):
+        if self.globals is None:
+            defaults = ModelParameters()
+        else:
+            defaults = self.globals
         stack = self.stack
         ri = self.resolvable_items
         output = []
@@ -271,14 +323,14 @@ class SampleModel(Header):
 
                 if item in ri:
                     obj = ri[item]
-                    if isinstance(obj, Material):
+                    if isinstance(obj, Material) or isinstance(obj, Composit):
                         obj = Layer(material=obj, thickness=thickness)
                 else:
                     obj = Layer(material=item, thickness=thickness)
             if hasattr(obj, "resolve_names"):
                 obj.resolve_names(ri)
             if hasattr(obj, "resolve_defaults"):
-                obj.resolve_defaults(self.globals)
+                obj.resolve_defaults(defaults)
             output.append(obj)
             idx = next_idx + 1
         return output
@@ -294,6 +346,6 @@ class SampleModel(Header):
             else:
                 obj = layers.pop(i + added)
                 sub_layers = obj.resolve_to_layers()
-                layers = layers[: i + added] + sub_layers + layers[i + added:]
+                layers = layers[: i + added] + sub_layers + layers[i + added :]
                 added += len(sub_layers) - 1
         return layers

@@ -427,9 +427,10 @@ class Value(Header):
         """
         Returns the value as converted to the given unit.
         """
-        if output_unit==self.unit:
+        if output_unit == self.unit:
             return self.magnitude
         import pint
+
         val = self.magnitude * pint.UnitRegistry()(self.unit)
         return val.to(output_unit).magnitude
 
@@ -441,7 +442,7 @@ class ComplexValue(Header):
     """
 
     real: Union[float, List[float]]
-    imag: Optional[Union[float, List[float]]] = 0.
+    imag: Optional[Union[float, List[float]]] = 0.0
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
@@ -459,10 +460,11 @@ class ComplexValue(Header):
         """
         Returns the value as converted to the given unit.
         """
-        value = self.real+1j*self.imag
-        if output_unit==self.unit:
+        value = self.real + 1j * self.imag
+        if output_unit == self.unit:
             return value
         import pint
+
         val = value * pint.UnitRegistry()(self.unit)
         return val.to(output_unit).magnitude
 
