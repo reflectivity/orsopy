@@ -2,7 +2,12 @@
 Python script to showcase the simple model language by resolving a stack string
 and plotting SLD and reflectivity for neutrons.
 
-Script requires matplotlib and refnx to run.
+Script requires matplotlib and refnx to run:
+   pip install matplotlib refnx
+
+If ran without installing orsopy, remember to put folder in PYTHONPATH.
+Be aware of other orsopy version that might be installed by pip.
+To be sure run: pip uninstall orsopy
 """
 
 import sys

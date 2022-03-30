@@ -1,5 +1,12 @@
 """
 Example how to export a GenX sample model to the simple model language.
+
+Requires genx3 or genx3server (no WX) to be installed:
+   pip install genx3server
+
+If ran without installing orsopy, remember to put folder in PYTHONPATH.
+Be aware of other orsopy version that might be installed by pip.
+To be sure run: pip uninstall orsopy
 """
 
 import os
