@@ -4,6 +4,7 @@ Implementation of the simplified model language for the ORSO header.
 It includes parsing of models from header or different input information and
 resolving the model to a simple list of slabs.
 """
+import warnings
 
 from typing import Dict, List, Optional, Union
 
@@ -21,7 +22,7 @@ def find_idx(string, start, value):
 
 @orsodataclass
 class ModelParameters(Header):
-    roughness: Optional[Union[float, Value]] = Value(0.3, "nm")
+    roughness: Optional[Value] = Value(0.3, "nm")
     length_unit: Optional[str] = "nm"
     mass_density_unit: Optional[str] = "g/cm^3"
     number_density_unit: Optional[str] = "1/nm^3"
@@ -197,6 +198,8 @@ class Layer(Header):
             self.roughness = defaults.roughness
         elif not isinstance(self.roughness, Value):
             self.roughness = Value(self.roughness, unit=defaults.length_unit)
+        elif self.roughness.unit is None:
+            self.roughness.unit = defaults.length_unit
 
         if self.thickness is None:
             self.thickness = Value(0.0, unit=defaults.length_unit)
@@ -300,6 +303,17 @@ class SampleModel(Header):
     composits: Optional[Dict[str, Composit]] = None
     globals: Optional[ModelParameters] = None
     reference: Optional[str] = None
+
+    def __post_init__(self):
+        super().__post_init__()
+        names = []
+        for di in [self.sub_stacks, self.layers, self.materials, self.composits]:
+            if di is None:
+                continue
+            for ni in di.keys():
+                if ni in names:
+                    warnings.warn(f'Duplicate name "{ni}" in SampleModel definition')
+                names.append(ni)
 
     @property
     def resolvable_items(self):

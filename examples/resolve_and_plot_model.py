@@ -33,6 +33,7 @@ def main(txt=None):
         if "sample" in dtxt:
             dtxt = dtxt["sample"]["model"]
         sample = model_language.SampleModel(**dtxt)
+        txt += f"\n{sample.stack}"
     else:
         sample = model_language.SampleModel(stack=txt)
     # initial model before resolving any names

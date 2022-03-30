@@ -26,7 +26,6 @@ import numpy as np
 import yaml
 
 from matplotlib import pyplot
-from numpy import linspace
 from refnx.reflect import SLD, ReflectModel, Structure
 
 from orsopy.fileio import model_language
