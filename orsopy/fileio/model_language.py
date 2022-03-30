@@ -177,6 +177,11 @@ class Layer(Header):
     material: Optional[Union[Material, Composit, str]] = None
     composition: Optional[Dict[str, float]] = None
 
+    def __post_init__(self):
+        super().__post_init__()
+        if self.material is None and self.composition is None:
+            raise ValueError("Layer has to either define material or composition")
+
     def resolve_names(self, resolvable_items):
         if self.material is not None:
             if isinstance(self.material, Material):
@@ -189,8 +194,6 @@ class Layer(Header):
                 self.material = SPECIAL_MATERIALS[self.material]
             else:
                 self.material = Material(formula=self.material)
-        elif self.composition is None:
-            raise ValueError("Layer has to have either material or composition")
         else:
             self._composition_materials = {}
             for key, value in self.composition.items():
@@ -214,6 +217,8 @@ class Layer(Header):
             self.thickness = Value(0.0, unit=defaults.length_unit)
         elif not isinstance(self.thickness, Value):
             self.thickness = Value(self.thickness, unit=defaults.length_unit)
+        elif self.thickness.unit is None:
+            self.thickness.unit = defaults.length_unit
 
         if self.material is not None:
             self.material.resolve_defaults(defaults)
