@@ -226,3 +226,68 @@ class TestLayer(unittest.TestCase):
 
         assert isinstance(lay.material, ml.Material)
         assert lay.material.sld == ComplexValue(2.0e-6, 0.0, unit="1/angstrom^2")
+
+
+class TestSubStack(unittest.TestCase):
+    def test_empty(self):
+        with self.assertRaises(ValueError):
+            ml.SubStack()
+
+    def test_resolution(self):
+        s = ml.SubStack(stack="air | b 13 |c|d")
+        resolvable_items = {
+            "d": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
+            "b": ml.Material(formula="Co"),
+            "c": ml.Composit({"b": 1.0}),
+        }
+        s.resolve_names(resolvable_items)
+        assert len(s.sequence) == 4
+        assert s.sequence[0] == ml.Layer(thickness=0.0, material=ml.SPECIAL_MATERIALS["air"])
+        assert s.sequence[1] == ml.Layer(thickness=13.0, material=ml.Material(formula="Co"))
+        assert s.sequence[2] == ml.Layer(thickness=0.0, material=ml.Composit({"b": 1.0}))
+        assert s.sequence[3] == resolvable_items["d"]
+
+        s = ml.SubStack(stack="air | 2( b 13 | c 5)|d")
+        s.resolve_names(resolvable_items)
+        assert len(s.sequence) == 3
+        assert s.sequence[0] == ml.Layer(thickness=0.0, material=ml.SPECIAL_MATERIALS["air"])
+        assert s.sequence[1] == ml.SubStack(
+            repetitions=2,
+            stack="b 13 | c 5",
+            sequence=[
+                ml.Layer(thickness=13.0, material=ml.Material(formula="Co")),
+                ml.Layer(thickness=5.0, material=ml.Composit(composition={"b": 1.0})),
+            ],
+        )
+        assert s.sequence[2] == resolvable_items["d"]
+
+        s = ml.SubStack(sequence=[ml.Layer(thickness=13.0, material="b"), ml.Layer(thickness=5.0, material="c")])
+        s.resolve_names(resolvable_items)
+        assert s.sequence == [
+            ml.Layer(thickness=13.0, material=ml.Material(formula="Co")),
+            ml.Layer(thickness=5.0, material=ml.Composit(composition={"b": 1.0})),
+        ]
+
+    def test_defaults(self):
+        defaults = ml.ModelParameters(
+            mass_density_unit="g/cm^3",
+            number_density_unit="1/nm^3",
+            sld_unit="1/angstrom^2",
+            magnetic_moment_unit="muB",
+        )
+
+        s = ml.SubStack(sequence=[ml.Layer(thickness=13.0, material=ml.Material(formula="Co"))])
+        s.resolve_defaults(defaults)
+        assert s.sequence[0].thickness == Value(13.0, defaults.length_unit)
+
+    def test_resolve_layers(self):
+        resolvable_items = {
+            "d": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
+            "b": ml.Material(formula="Co"),
+            "c": ml.Composit({"b": 1.0}),
+            "e": ml.Layer(composition={"b": 1.0}),
+        }
+        s = ml.SubStack(stack="air | 2( b 13 | c 5)|d|e")
+        s.resolve_names(resolvable_items)
+        lays = s.resolve_to_layers()
+        assert len(lays) == 7

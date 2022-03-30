@@ -250,6 +250,11 @@ class SubStack(Header):
     sequence: Optional[List[Layer]] = None
     represents: Optional[str] = None
 
+    def __post_init__(self):
+        super().__post_init__()
+        if self.stack is None and self.sequence is None:
+            raise ValueError("SubStack has to either define stack or sequence")
+
     def resolve_names(self, resolvable_items):
         if self.sequence is None:
             stack = self.stack
@@ -262,7 +267,7 @@ class SubStack(Header):
                     next_idx = find_idx(stack, close_idx, "|")
                     rep, sub_stack = stack[idx:close_idx].split("(", 1)
                     rep = int(rep)
-                    obj = SubStack(name=f"multilayer_{idx}", repetitions=rep, stack=sub_stack.strip())
+                    obj = SubStack(repetitions=rep, stack=sub_stack.strip())
                 else:
                     items = stack[idx:next_idx].strip().rsplit(None, 1)
                     item = items[0].strip()
