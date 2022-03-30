@@ -15,13 +15,13 @@ gmlib.USE_NUMBA = False
 
 
 def get_materialn(li):
-    sld = li.b * li.dens + 0j
-    return ml.Material(sld=ml.ComplexValue(sld.real, sld.imag, "1/angstrom^2"))
+    sld = complex(li.b * li.dens) * 1e-6
+    return ml.Material(sld=ml.ComplexValue(sld.real, sld.imag))
 
 
 def get_materialx(li):
-    sld = li.f * li.dens + 0j
-    return ml.Material(sld=ml.ComplexValue(sld.real, sld.imag, "1/angstrom^2"))
+    sld = complex(li.f * li.dens) * 1e-6
+    return ml.Material(sld=ml.ComplexValue(sld.real, sld.imag))
 
 
 get_material = get_materialn
@@ -44,21 +44,21 @@ def main():
     names = list(sm.__dict__.keys())
     objects = list(sm.__dict__.values())
 
-    defaults = ml.ModelParameters(length_unit="angstrom", number_density_unit="1/angstrom^3")
+    defaults = ml.ModelParameters(length_unit="angstrom", sld_unit="1/angstrom^2")
     layers = {}
     materials = {}
     materials["ambient"] = get_material(sm.Amb)
     materials["substrate"] = get_material(sm.Sub)
     sub_stacks = {}
     stack_order = ["ambient"]
-    for si in sm.sample.Stacks:
+    for si in reversed(sm.sample.Stacks):
         if len(si.Layers) == 0:
             continue
         ni = names[objects.index(si)]
         stack_order.append(ni)
 
         layer_order = []
-        for lj in si.Layers:
+        for lj in reversed(si.Layers):
             nj = names[objects.index(lj)]
             layers[nj] = get_layer(lj)
             layer_order.append(nj)
@@ -75,6 +75,8 @@ def main():
         globals=defaults,
     )
     print(sample.to_yaml())
+    if len(sys.argv) > 2:
+        open(sys.argv[2], "w").write(sample.to_yaml())
 
 
 if __name__ == "__main__":

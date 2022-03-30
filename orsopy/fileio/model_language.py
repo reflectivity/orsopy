@@ -43,14 +43,26 @@ class Material(Header):
             raise ValueError("Material has to either define sld or formula")
 
     def resolve_defaults(self, defaults: ModelParameters):
-        if self.mass_density is not None and not isinstance(self.mass_density, Value):
-            self.mass_density = Value(self.mass_density, unit=defaults.mass_density_unit)
-        if self.number_density is not None and not isinstance(self.number_density, Value):
-            self.number_density = Value(self.number_density, unit=defaults.number_density_unit)
-        if self.sld is not None and not isinstance(self.sld, Value):
-            self.sld = Value(self.sld, unit=defaults.sld_unit)
-        if self.magnetic_moment is not None and not isinstance(self.magnetic_moment, Value):
-            self.magnetic_moment = Value(self.magnetic_moment, unit=defaults.magnetic_moment_unit)
+        if self.mass_density is not None:
+            if isinstance(self.mass_density, Value) and self.mass_density.unit is None:
+                self.mass_density.unit = defaults.mass_density_unit
+            elif not isinstance(self.mass_density, Value):
+                self.mass_density = Value(self.mass_density, unit=defaults.mass_density_unit)
+        if self.number_density is not None:
+            if isinstance(self.number_density, Value) and self.number_density.unit is None:
+                self.number_density.unit = defaults.number_density_unit
+            elif not isinstance(self.number_density, Value):
+                self.number_density = Value(self.number_density, unit=defaults.number_density_unit)
+        if self.sld is not None:
+            if isinstance(self.sld, (Value, ComplexValue)) and self.sld.unit is None:
+                self.sld.unit = defaults.sld_unit
+            elif not isinstance(self.sld, (Value, ComplexValue)):
+                self.sld = Value(self.sld, unit=defaults.sld_unit)
+        if self.magnetic_moment is not None:
+            if isinstance(self.magnetic_moment, Value) and self.magnetic_moment.unit is None:
+                self.magnetic_moment.unit = defaults.magnetic_moment_unit
+            elif not isinstance(self.magnetic_moment, Value):
+                self.magnetic_moment = Value(self.magnetic_moment, unit=defaults.magnetic_moment_unit)
 
     def generate_density(self):
         if self.sld is not None or self.mass_density is not None or self.number_density is not None:
@@ -224,7 +236,6 @@ class SubStack(Header):
     def resolve_names(self, resolvable_items):
         if self.sequence is None:
             stack = self.stack
-            ri = resolvable_items
             output = []
             idx = 0
             while idx < len(stack):
@@ -243,14 +254,14 @@ class SubStack(Header):
                     else:
                         thickness = 0.0
 
-                    if item in ri:
-                        obj = ri[item]
+                    if item in resolvable_items:
+                        obj = resolvable_items[item]
                         if isinstance(obj, Material) or isinstance(obj, Composit):
                             obj = Layer(material=obj, thickness=thickness)
                     else:
                         obj = Layer(material=item, thickness=thickness)
                 if hasattr(obj, "resolve_names"):
-                    obj.resolve_names(ri)
+                    obj.resolve_names(resolvable_items)
                 output.append(obj)
                 idx = next_idx + 1
             self.sequence = output
