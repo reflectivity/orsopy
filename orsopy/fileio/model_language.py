@@ -72,6 +72,11 @@ class Material(Header):
         from orsopy.slddb import api
         from orsopy.slddb.material import Formula
 
+        if self.formula in CACHED_MATERIALS:
+            self.number_density = CACHED_MATERIALS[self.formula][0]
+            self.comment = CACHED_MATERIALS[self.formula][1]
+            return
+
         formula = Formula(self.formula)
         # first search for formula itself
         res = api.search(formula=formula)
@@ -79,6 +84,7 @@ class Material(Header):
             m = api.material(res[0]["ID"])
             self.number_density = Value(magnitude=1e3 * m.fu_dens, unit="1/nm^3")
             self.comment = f"density from ORSO SLD db ID={res[0]['ID']}"
+            CACHED_MATERIALS[self.formula] = (self.number_density, self.comment)
             return
         # mix elemental density to approximate alloys
         n = 0.0
@@ -91,6 +97,7 @@ class Material(Header):
         dens /= n * len(formula)
         self.number_density = Value(magnitude=dens, unit="1/nm^3")
         self.comment = "density from average element density"
+        CACHED_MATERIALS[self.formula] = (self.number_density, self.comment)
 
     def get_sld(self) -> complex:
         if self.sld is not None:
@@ -159,6 +166,8 @@ SPECIAL_MATERIALS = {
     "air": Material(formula="N8O2", mass_density=Value(1.225, unit="kg/m^3")),
     "water": Material(formula="H2O", mass_density=Value(1.0, unit="g/cm^3")),
 }
+
+CACHED_MATERIALS = {}
 
 
 @orsodataclass

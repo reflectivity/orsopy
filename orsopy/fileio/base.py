@@ -403,6 +403,9 @@ class OrsoDumper(yaml.SafeDumper):
             return super().represent_data(data)
 
 
+unit_registry = None
+
+
 @orsodataclass
 class Value(Header):
     """
@@ -429,9 +432,14 @@ class Value(Header):
         """
         if output_unit == self.unit:
             return self.magnitude
-        import pint
 
-        val = self.magnitude * pint.UnitRegistry()(self.unit)
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        val = self.magnitude * unit_registry(self.unit)
         return val.to(output_unit).magnitude
 
 
