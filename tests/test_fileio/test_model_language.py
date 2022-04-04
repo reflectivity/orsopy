@@ -291,3 +291,63 @@ class TestSubStack(unittest.TestCase):
         s.resolve_names(resolvable_items)
         lays = s.resolve_to_layers()
         assert len(lays) == 7
+
+
+class TestSampleModel(unittest.TestCase):
+    def test_resolvable_items(self):
+        sub_stacks = {"a": ml.SubStack(stack="b")}
+        layers = {"b": ml.Layer(thickness=13.4, material="c")}
+        materials = {"c": ml.Material(sld=13.4)}
+        composits = {"d": ml.Composit({"c": 1.0})}
+        sm = ml.SampleModel(
+            stack="c|a|c", sub_stacks=sub_stacks, layers=layers, materials=materials, composits=composits
+        )
+        res = sm.resolvable_items
+        assert list(res.keys()) == ["a", "b", "c", "d"]
+        assert list(res.values()) == [sub_stacks["a"], layers["b"], materials["c"], composits["d"]]
+
+    def test_duplicate_name(self):
+        with pytest.warns(UserWarning):
+            ml.SampleModel(
+                stack="c|a|c",
+                layers={"a": ml.Layer(thickness=13.4, material="c")},
+                materials={"a": ml.Material(sld=13.4)},
+            )
+
+    def test_resolve_stack(self):
+        defaults = ml.ModelParameters(
+            mass_density_unit="g/cm^3",
+            number_density_unit="1/nm^3",
+            sld_unit="1/angstrom^2",
+            magnetic_moment_unit="muB",
+            length_unit="nm",
+            roughness=Value(0.3, "nm"),
+        )
+
+        sub_stacks = {"a": ml.SubStack(stack="b")}
+        layers = {"b": ml.Layer(thickness=13.4, material="c")}
+        materials = {"c": ml.Material(sld=13.4)}
+        composits = {"d": ml.Composit({"c": 1.0})}
+        sm = ml.SampleModel(
+            stack="c|2(a|c 15)|d 14|c",
+            sub_stacks=sub_stacks,
+            layers=layers,
+            materials=materials,
+            composits=composits,
+            defaults=defaults,
+        )
+        stack = sm.resolve_stack()
+        subs = ml.SubStack(repetitions=2, stack="a|c 15")
+        subs.resolve_names({"a": sub_stacks["a"], "c": materials["c"]})
+        subs.resolve_defaults(defaults)
+        assert len(stack) == 4
+        assert stack[0] == ml.Layer(
+            thickness=ml.Value(0.0, "nm"), roughness=defaults.roughness, material=materials["c"]
+        )
+        assert stack[1] == subs
+        assert stack[2] == ml.Layer(
+            thickness=ml.Value(14.0, "nm"), roughness=defaults.roughness, material=composits["d"]
+        )
+        assert stack[3] == ml.Layer(
+            thickness=ml.Value(0.0, "nm"), roughness=defaults.roughness, material=materials["c"]
+        )
