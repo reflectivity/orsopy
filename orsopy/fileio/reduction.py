@@ -33,6 +33,7 @@ class Reduction(Header):
     :param software: Software used for reduction.
     :param timestamp: Datetime of reduced file creation.
     :param creator: The person or routine who created the reduced file.
+    :param corrections: A list of the corrections that have been performed.
     :param computer: Name of the reduction machine.
     :param call: Command line call or similar.
     :param script: Path to reduction script or notebook.
