@@ -6,7 +6,7 @@ resolving the model to a simple list of slabs.
 """
 import warnings
 
-from typing import Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 from .base import ComplexValue, Header, Value, orsodataclass
 
@@ -249,6 +249,8 @@ class SubStack(Header):
     stack: Optional[str] = None
     sequence: Optional[List[Layer]] = None
     represents: Optional[str] = None
+    arguments: Optional[List[Any]] = None
+    keywords: Optional[Dict[str, Any]] = None
 
     def __post_init__(self):
         super().__post_init__()

@@ -171,7 +171,9 @@ class Header:
         :return: Correctly resolved object with required type for orso
             compatibility.
         """
-        if isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
+        if hint is Any:
+            return item
+        elif isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
