@@ -17,7 +17,7 @@ class TestSchema:
             schema = json.load(f)
 
         dct_list, data, version = _read_header_data(os.path.join("tests", "test_example.ort"), validate=True)
-        assert data[0].shape == (2, 4)
+        assert data[0].shape == (4, 2)
         assert version == "0.1"
 
         # d contains datetime.datetime objects, which would fail the
@@ -33,4 +33,4 @@ class TestSchema:
         assert len(dct_list) == 2
         assert dct_list[1]["data_set"] == "spin_down"
         assert data[1].shape == (4, 4)
-        np.testing.assert_allclose(data[1][2:], data[0])
+        np.testing.assert_allclose(data[1][:, 2:], data[0])

@@ -104,8 +104,8 @@ class TestOrso(unittest.TestCase):
         # test write and read of multiple datasets
         info = fileio.Orso.empty()
         info2 = fileio.Orso.empty()
-        data = np.zeros((100, 3))
-        data[:] = np.arange(100.0)[:, None]
+        data = np.zeros((3, 100))
+        data[:] = np.arange(100.0)[None, :]
 
         info.columns = [
             fileio.Column("Qz", "1/angstrom"),
@@ -177,14 +177,14 @@ class TestOrso(unittest.TestCase):
         info2.data_set = 0
         info2.columns = [Column("stuff")] * 4
 
-        ds = OrsoDataset(info, np.empty((2, 4)))
-        ds2 = OrsoDataset(info2, np.empty((2, 4)))
+        ds = OrsoDataset(info, np.empty((4, 2)))
+        ds2 = OrsoDataset(info2, np.empty((4, 2)))
 
         with pytest.raises(ValueError):
             fileio.save_orso([ds, ds2], "test_data_set.ort")
 
         with pytest.raises(ValueError):
-            OrsoDataset(info, np.empty((2, 5)))
+            OrsoDataset(info, np.empty((5, 2)))
 
     def test_user_data(self):
         # test write and read of userdata
@@ -195,8 +195,8 @@ class TestOrso(unittest.TestCase):
             fileio.Column("sR"),
         ]
 
-        data = np.zeros((100, 3))
-        data[:] = np.arange(100.0)[:, None]
+        data = np.zeros((3, 100))
+        data[:] = np.arange(100.0)[None, :]
         dct = {"ci": "1", "foo": ["bar", 1, 2, 3.5]}
         info.user_data = dct
         ds = fileio.OrsoDataset(info, data)

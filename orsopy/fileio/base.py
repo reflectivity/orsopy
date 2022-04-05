@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
 from inspect import isclass
-from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
+from typing import Any, Generator, IO, List, Optional, TextIO, Tuple, Type, Union
 
 import numpy as np
 import yaml
@@ -33,6 +33,8 @@ from ..dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY
 def _noop(self, *args, **kw):
     pass
 
+
+JSON_MIMETYPE = "application/json"
 
 yaml.emitter.Emitter.process_tag = _noop
 
@@ -81,7 +83,11 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
     )
 
 
+ORSO_DATACLASSES = dict()
+
+
 def orsodataclass(cls: type):
+    ORSO_DATACLASSES[cls.__name__] = cls
     attrs = cls.__dict__
     bases = cls.__bases__
     if "__annotations__" in attrs and len([k for k in attrs["__annotations__"].keys() if not k.startswith("_")]) > 0:
@@ -338,6 +344,55 @@ class Header:
         output = self._to_object_dict()
         return dumper.represent_mapping(dumper.DEFAULT_MAPPING_TAG, output, flow_style=True)
 
+    def to_nexus(self, root=None, name=None, data=None):
+        """
+        Produces an HDF5 representation of the Header object, removing
+        any optional attributes with the value :code:`None`.
+
+        :return: HDF5 object
+        """
+        classname = self.__class__.__name__
+        group = root.create_group(classname if name is None else name)
+        group.attrs["ORSO_class"] = classname
+
+        for child_name, value in self.__dict__.items():
+            if child_name.startswith("_") or (value is None and child_name in self._orso_optionals):
+                continue
+
+            if isinstance(value, Column):
+                pass
+            elif value.__class__ in ORSO_DATACLASSES.values():
+                value.to_nexus(root=group, name=child_name)
+            elif isinstance(value, (list, tuple)):
+                child_group = group.create_group(child_name)
+                child_group.attrs["list"] = 1
+                for index, item in enumerate(value):
+                    # use the 'name' attribute of children if it exists, else index:
+                    sub_name = getattr(item, 'name', str(index))
+                    if item.__class__ in ORSO_DATACLASSES.values():
+                        item_out = item.to_nexus(root=child_group, name=sub_name)
+                    else:
+                        t_value = json_datetime_trap(value)
+                        if any(isinstance(t_value, t) for t in (str, float, int, bool, np.ndarray)):
+                            item_out = child_group.create_dataset(sub_name, data=t_value)
+                        else:
+                            item_out = child_group.create_dataset(
+                                sub_name,
+                                data=json.dumps(_todict(value), default=json_datetime_trap)
+                            )
+                            item_out.attrs["mimetype"] = JSON_MIMETYPE
+                    item_out.attrs["sequence_index"] = index
+            else:
+                # here _todict converts objects that aren't derived from Header
+                # and therefore don't have to_dict methods.
+                t_value = json_datetime_trap(value)
+                if any(isinstance(t_value, t) for t in (str, float, int, bool, np.ndarray)):
+                    group.create_dataset(child_name, data=t_value)
+                else:
+                    dset = group.create_dataset(child_name, data=json.dumps(_todict(value), default=json_datetime_trap))
+                    dset.attrs["mimetype"] = JSON_MIMETYPE
+        return group
+
     @staticmethod
     def _check_unit(unit: str):
         """
@@ -542,7 +597,7 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
                 # numerical array  and start collecting the numbers for this
                 # dataset
                 _d = np.array([np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines])
-                data.append(_d)
+                data.append(_d.T)
                 _ds_lines = []
 
                 # append '---' to signify the start of a new yaml document
@@ -555,7 +610,7 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
 
         # append the last numerical array
         _d = np.array([np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines])
-        data.append(_d)
+        data.append(_d.T)
 
         yml = "".join(header)
 
@@ -692,6 +747,12 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
         return data
     else:
         return obj
+
+
+def json_datetime_trap(obj):
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
+    return obj
 
 
 def _nested_update(d: dict, u: dict) -> dict:
