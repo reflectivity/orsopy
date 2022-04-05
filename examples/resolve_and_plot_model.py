@@ -44,7 +44,7 @@ def main(txt=None):
     print("\n".join([repr(li) for li in layers]))
 
     structure = Structure()
-    for lj in reversed(layers):
+    for lj in layers:
         m = SLD(lj.material.get_sld() * 1e6)
         structure |= m(lj.thickness.as_unit("angstrom"), lj.roughness.as_unit("angstrom"))
     model = ReflectModel(structure, bkg=0.0)
@@ -60,8 +60,6 @@ def main(txt=None):
     pyplot.title(txt)
     pyplot.ylabel("SLD / $10^{-6} \\AA^{-2}$")
     pyplot.xlabel("distance / $\\AA$")
-    xlim = pyplot.gca().get_xlim()
-    pyplot.xlim(xlim[1], xlim[0])
     pyplot.show()
 
 
