@@ -334,7 +334,7 @@ class TestSampleModel(unittest.TestCase):
             layers=layers,
             materials=materials,
             composits=composits,
-            defaults=defaults,
+            globals=defaults,
         )
         stack = sm.resolve_stack()
         subs = ml.SubStack(repetitions=2, stack="a|c 15")
@@ -351,3 +351,48 @@ class TestSampleModel(unittest.TestCase):
         assert stack[3] == ml.Layer(
             thickness=ml.Value(0.0, "nm"), roughness=defaults.roughness, material=materials["c"]
         )
+        sm = ml.SampleModel("Si")
+        stack = sm.resolve_stack()
+        assert len(stack) == 1
+        assert stack[0] == ml.Layer(
+            ml.Value(0.0, "nm"), roughness=ml.ModelParameters.roughness, material=ml.Material(formula="Si")
+        )
+
+    def test_resolve_to_layers(self):
+        defaults = ml.ModelParameters(
+            mass_density_unit="g/cm^3",
+            number_density_unit="1/nm^3",
+            sld_unit="1/angstrom^2",
+            magnetic_moment_unit="muB",
+            length_unit="nm",
+            roughness=Value(0.3, "nm"),
+        )
+
+        sub_stacks = {"a": ml.SubStack(stack="b")}
+        layers = {"b": ml.Layer(thickness=13.4, material="c"), "b2": ml.Layer(thickness=2.0, composition={"c": 1.0})}
+        materials = {"c": ml.Material(sld=13.4)}
+        composits = {"d": ml.Composit({"c": 1.0})}
+        sm = ml.SampleModel(
+            stack="c|2(a|c 15)|b|b2|d 14|Si",
+            sub_stacks=sub_stacks,
+            layers=layers,
+            materials=materials,
+            composits=composits,
+            globals=defaults,
+        )
+        mSi = ml.Material(formula="Si")
+        mSi.generate_density()
+        ls = sm.resolve_to_layers()
+        assert len(ls) == 9
+        assert ls[0] == ml.Layer(thickness=ml.Value(0.0, "nm"), roughness=defaults.roughness, material=materials["c"])
+        assert ls[1] == ls[3]
+        assert ls[2] == ls[4]
+        assert ls[5] == ml.Layer(thickness=ml.Value(13.4, "nm"), roughness=defaults.roughness, material=materials["c"])
+        assert ls[6] == ml.Layer(
+            thickness=ml.Value(2.0, "nm"),
+            roughness=defaults.roughness,
+            material=ml.Material(sld=ComplexValue(13.4, 0.0, "1/angstrom^2"), comment="composition material: 1.0xc"),
+            composition={"c": 1.0},
+        )
+        assert ls[7] == ml.Layer(thickness=ml.Value(14.0, "nm"), roughness=defaults.roughness, material=composits["d"])
+        assert ls[8] == ml.Layer(thickness=Value(0.0, "nm"), roughness=defaults.roughness, material=mSi)
