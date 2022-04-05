@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
 from inspect import isclass
-from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
+from typing import Any, Dict, Generator, List, Optional, TextIO, Tuple, Union
 
 import numpy as np
 import yaml
@@ -171,7 +171,7 @@ class Header:
         :return: Correctly resolved object with required type for orso
             compatibility.
         """
-        if isclass(hint) and not getattr(hint, "__origin__", None) in [List, Tuple, Union, Literal]:
+        if isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
@@ -228,10 +228,13 @@ class Header:
                     return [Header._resolve_type(t0, item)]
             elif hbase is dict:
                 value_type = get_args(hint)[1]
-                for key, value in item.items():
-                    # resolve the type of any value in the dictionary
-                    item[key] = Header._resolve_type(value_type, value)
-                return item
+                try:
+                    for key, value in item.items():
+                        # resolve the type of any value in the dictionary
+                        item[key] = Header._resolve_type(value_type, value)
+                    return item
+                except AttributeError:
+                    return None
             elif hbase in [Union, Optional]:
                 subtypes = get_args(hint)
                 if type(item) in subtypes:

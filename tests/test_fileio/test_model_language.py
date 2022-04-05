@@ -102,7 +102,7 @@ class TestMaterial(unittest.TestCase):
 
 class TestComposit(unittest.TestCase):
     def test_wrong_value(self):
-        with self.assertRaises(AttributeError):
+        with pytest.warns(RuntimeWarning):
             ml.Composit(composition="123")
 
     def test_resolution(self):
