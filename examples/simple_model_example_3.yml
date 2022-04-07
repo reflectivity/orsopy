@@ -36,7 +36,7 @@ sample:
               D2O: 0.7
         globals:
           sigma: {magnitude: 5, unit: angstrom}
-          length_units: angstrom
-          mass_density_units: g/cm^3
+          length_unit: angstrom
+          mass_density_unit: g/cm^3
           sld_unit: 1/angstrom^2
         reference: ORSO model language | 1.0 | https://www.reflectometry.org/projects/simple_model
