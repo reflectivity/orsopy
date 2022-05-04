@@ -84,6 +84,7 @@ definitions:
         anyOf:
         - type: string
         - type: 'null'
+        format: date-time
       title:
         anyOf:
         - type: string
@@ -134,18 +135,9 @@ definitions:
         - type: 'null'
       polarization:
         anyOf:
-        - enum:
-          - unpolarized
-          - p
-          - m
-          - mm
-          - mp
-          - pm
-          - pp
-          type: string
+        - $ref: '#/definitions/Polarization'
         - $ref: '#/definitions/ValueVector'
         - type: 'null'
-        default: unpolarized
         description: Polarization described as unpolarized/ p / m / pp / pm / mp /
           mm / vector
       wavelength:
@@ -160,6 +152,14 @@ definitions:
     type: object
   Measurement:
     properties:
+      additional_files:
+        anyOf:
+        - type: array
+        - type: 'null'
+        items:
+          anyOf:
+          - $ref: '#/definitions/File'
+          - type: string
       comment:
         anyOf:
         - type: string
@@ -175,14 +175,6 @@ definitions:
       instrument_settings:
         anyOf:
         - $ref: '#/definitions/InstrumentSettings'
-      references:
-        anyOf:
-        - type: array
-        - type: 'null'
-        items:
-          anyOf:
-          - $ref: '#/definitions/File'
-          - type: string
       scheme:
         anyOf:
         - type: string
@@ -202,9 +194,6 @@ definitions:
       affiliation:
         anyOf:
         - type: string
-        - items:
-            type: string
-          type: array
         - type: 'null'
       comment:
         anyOf:
@@ -224,6 +213,22 @@ definitions:
     - affiliation
     title: Person
     type: object
+  Polarization:
+    description: 'The first symbol indicates the magnetisation direction of the incident
+
+      beam. An optional second symbol indicates the direction of the scattered
+
+      beam, if a spin analyser is present.'
+    enum:
+    - unpolarized
+    - +
+    - '-'
+    - --
+    - -+
+    - +-
+    - ++
+    title: Polarization
+    type: string
   Qz_column:
     properties:
       comment:
@@ -308,8 +313,6 @@ definitions:
       software:
         anyOf:
         - $ref: '#/definitions/Software'
-        - type: string
-        - type: 'null'
       timestamp:
         anyOf:
         - type: string
@@ -337,16 +340,13 @@ definitions:
       description:
         anyOf:
         - type: string
-        - items: {}
-          type: array
         - type: 'null'
       environment:
         anyOf:
-        - type: string
-        - items:
-            type: string
-          type: array
+        - type: array
         - type: 'null'
+        items:
+          type: string
       name:
         anyOf:
         - type: string
@@ -391,9 +391,6 @@ definitions:
       magnitude:
         anyOf:
         - type: number
-        - items:
-            type: number
-          type: array
         - type: 'null'
       unit:
         anyOf:
@@ -413,16 +410,10 @@ definitions:
       max:
         anyOf:
         - type: number
-        - items:
-            type: number
-          type: array
         - type: 'null'
       min:
         anyOf:
         - type: number
-        - items:
-            type: number
-          type: array
         - type: 'null'
       unit:
         anyOf:
@@ -448,23 +439,14 @@ definitions:
       x:
         anyOf:
         - type: number
-        - items:
-            type: number
-          type: array
         - type: 'null'
       y:
         anyOf:
         - type: number
-        - items:
-            type: number
-          type: array
         - type: 'null'
       z:
         anyOf:
         - type: number
-        - items:
-            type: number
-          type: array
         - type: 'null'
     required:
     - x

@@ -13,6 +13,7 @@ import warnings
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
+from enum import Enum
 from inspect import isclass
 from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
 
@@ -114,6 +115,10 @@ def orsodataclass(cls: type):
         return cls
 
 
+class ORSOResolveError(ValueError):
+    pass
+
+
 class Header:
     """
     The super class for all of the items in the orso module.
@@ -129,7 +134,14 @@ class Header:
             if attr is None or type_attr is fld.type:
                 continue
             else:
-                updt = self._resolve_type(fld.type, attr)
+                try:
+                    updt = self._resolve_type(fld.type, attr)
+                except Exception as e:
+                    message = (
+                        f"An exception occurred when trying to resolve value '{attr}' in {self.__class__.__name__}:"
+                    )
+                    message += f" {e.__class__.__name__}: {e}"
+                    raise ORSOResolveError(message) from e
                 if updt is not None:
                     # convert to dataclass instance
                     setattr(self, fld.name, updt)
@@ -388,7 +400,7 @@ class Header:
 
 class OrsoDumper(yaml.SafeDumper):
     def represent_data(self, data):
-        if isinstance(data, Header):
+        if hasattr(data, "yaml_representer"):
             return data.yaml_representer(self)
         elif isinstance(data, datetime.datetime):
             value = data.isoformat("T")
@@ -403,7 +415,7 @@ class Value(Header):
     A value or list of values with an optional unit.
     """
 
-    magnitude: Union[float, List[float]]
+    magnitude: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
@@ -415,8 +427,8 @@ class ValueRange(Header):
     A range or list of ranges with mins, maxs, and an optional unit.
     """
 
-    min: Union[float, List[float]]
-    max: Union[float, List[float]]
+    min: float
+    max: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
@@ -437,9 +449,9 @@ class ValueVector(Header):
     :param unit: SI unit string.
     """
 
-    x: Union[float, List[float]]
-    y: Union[float, List[float]]
-    z: Union[float, List[float]]
+    x: float
+    y: float
+    z: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
 
@@ -451,7 +463,7 @@ class Person(Header):
     """
 
     name: str
-    affiliation: Union[List[str], str]
+    affiliation: str
     contact: Optional[str] = field(default=None, metadata={"description": "Contact (email) address"})
 
 
@@ -674,6 +686,8 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
         for (k, v) in obj.items():
             data[k] = _todict(v, classkey)
         return data
+    elif isinstance(obj, Enum):
+        return obj.value
     elif hasattr(obj, "_ast"):
         return _todict(obj._ast())
     elif hasattr(obj, "__iter__") and not isinstance(obj, str):
@@ -740,4 +754,6 @@ def _dict_diff(old: dict, new: dict) -> dict:
                 out[key] = value
         else:
             out[key] = value
+    for key in [ki for ki in old.keys() if ki not in new]:
+        out[key] = None
     return out

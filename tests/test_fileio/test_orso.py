@@ -113,8 +113,8 @@ class TestOrso(unittest.TestCase):
             fileio.Column("sR"),
         ]
         info2.columns = info.columns
-        info.data_source.measurement.instrument_settings.polarization = "p"
-        info2.data_source.measurement.instrument_settings.polarization = "m"
+        info.data_source.measurement.instrument_settings.polarization = fileio.Polarization.p
+        info2.data_source.measurement.instrument_settings.polarization = fileio.Polarization.m
         info.data_set = "up polarization"
         info2.data_set = "down polarization"
         info2.data_source.sample.comment = "this is a comment"
@@ -141,7 +141,7 @@ class TestOrso(unittest.TestCase):
                     scheme="angle-dispersive",
                 ),
             ),
-            reduction=fileio.Reduction(software="awesome orso"),
+            reduction=fileio.Reduction(software=fileio.Software("awesome orso")),
             data_set="Filled header",
             columns=info.columns,
         )
@@ -279,8 +279,8 @@ class TestFunctions(unittest.TestCase):
             "    instrument: null\n    start_date: null\n    probe: null\n"
             "  sample:\n    name: null\n  measurement:\n"
             "    instrument_settings:\n      incident_angle: {magnitude: null}\n"
-            "      wavelength: {magnitude: null}\n      polarization: unpolarized\n"
-            "    data_files: []\nreduction:\n  software:\n    name: null\n"
+            "      wavelength: {magnitude: null}\n"
+            "    data_files: []\nreduction:\n  software: {name: null}\n"
             "columns:\n- {name: Qz, unit: 1/angstrom}\n- {name: R}\n"
         )
         assert empty.to_yaml() == req

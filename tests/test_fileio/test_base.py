@@ -180,10 +180,10 @@ class TestPerson(unittest.TestCase):
         assert value.affiliation == "Ivy League University"
         assert value.contact == "jauser@ivy.edu"
 
-    def test_creation_with_list(self):
-        value = base.Person("Joe A. User", ["Ivy League University", "Great Neutron Factory"])
+    def test_creation_with_multiline(self):
+        value = base.Person("Joe A. User", "\n".join(["Ivy League University", "Great Neutron Factory"]))
         assert value.name == "Joe A. User"
-        assert value.affiliation == ["Ivy League University", "Great Neutron Factory"]
+        assert value.affiliation == "\n".join(["Ivy League University", "Great Neutron Factory"])
 
     def test_to_yaml(self):
         """

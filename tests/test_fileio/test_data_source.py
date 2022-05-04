@@ -24,7 +24,7 @@ class TestExperiment(unittest.TestCase):
         )
         assert value.title == "My First Experiment"
         assert value.instrument == "A Lab Instrument"
-        assert value.start_date == "1992-07-14"
+        assert value.start_date == datetime(1992, 7, 14)
         assert value.probe == "x-rays"
         assert value.facility is None
         assert value.proposalID is None
@@ -40,7 +40,7 @@ class TestExperiment(unittest.TestCase):
         assert (
             value.to_yaml()
             == "title: My First Experiment\n"
-            + "instrument: A Lab Instrument\nstart_date: '1992-07-14'"
+            + "instrument: A Lab Instrument\nstart_date: 1992-07-14T00:00:00"
             + "\nprobe: x-rays\n"
         )
 
@@ -51,7 +51,7 @@ class TestExperiment(unittest.TestCase):
         value = data_source.Experiment(
             "My First Neutron Experiment",
             "TAS8",
-            datetime(1992, 7, 14).strftime("%Y-%m-%d"),
+            datetime(1992, 7, 14),
             "neutrons",
             facility="Risoe",
             proposalID="abc123",
@@ -59,7 +59,7 @@ class TestExperiment(unittest.TestCase):
         )
         assert value.title == "My First Neutron Experiment"
         assert value.instrument == "TAS8"
-        assert value.start_date == "1992-07-14"
+        assert value.start_date == datetime(1992, 7, 14)
         assert value.probe == "neutrons"
         assert value.facility == "Risoe"
         assert value.proposalID == "abc123"
@@ -80,7 +80,7 @@ class TestExperiment(unittest.TestCase):
         )
         assert value.to_yaml() == (
             "title: My First Neutron Experiment\n"
-            "instrument: TAS8\nstart_date: '1992-07-14'"
+            "instrument: TAS8\nstart_date: 1992-07-14T00:00:00"
             "\nprobe: neutrons\nfacility: Risoe\nproposalID: "
             "abc123\ndoi: 10.0000/abc1234\n"
         )
@@ -118,13 +118,13 @@ class TestSample(unittest.TestCase):
             category="solid/gas",
             composition="Si | SiO2(20 A) | Fe(200 A) | air(beam side)",
             description="The sample is without flaws",
-            environment="Temperature cell",
+            environment=["Temperature cell"],
         )
         assert value.name == "A Perfect Sample"
         assert value.category == "solid/gas"
         assert value.composition == "Si | SiO2(20 A) | " + "Fe(200 A) | air(beam side)"
         assert value.description == "The sample is without flaws"
-        assert value.environment == "Temperature cell"
+        assert value.environment == ["Temperature cell"]
 
     def test_to_yaml_optionals(self):
         """
@@ -135,26 +135,15 @@ class TestSample(unittest.TestCase):
             category="solid/gas",
             composition="Si | SiO2(20 A) | Fe(200 A) | air(beam side)",
             description="The sample is without flaws",
-            environment="Temperature cell",
+            environment=["Temperature cell"],
         )
         assert (
             value.to_yaml()
             == "name: A Perfect Sample\ncategory: "
             + "solid/gas\ncomposition: Si | SiO2(20 A) | Fe(200 A) | air"
             + "(beam side)\ndescription: The sample is without flaws\n"
-            + "environment: Temperature cell\n"
+            + "environment:\n- Temperature cell\n"
         )
-
-    def test_creation_lists(self):
-        # description can be List[any], enironment List[str]
-        value = data_source.Sample(
-            "A Perfect Sample",
-            description=["The sample is without flaws", "now it got scratched", 314.2, 41],
-            environment=["Temperature cell", "Super magnet"],
-        )
-        assert value.name == "A Perfect Sample"
-        assert value.description == ["The sample is without flaws", "now it got scratched", 314.2, 41]
-        assert value.environment == ["Temperature cell", "Super magnet"]
 
 
 class TestDataSource(unittest.TestCase):
@@ -182,7 +171,7 @@ class TestDataSource(unittest.TestCase):
         assert value.owner.affiliation == "Some Uni"
         assert value.experiment.title == "My First Experiment"
         assert value.experiment.instrument == "A Lab Instrument"
-        assert value.experiment.start_date == "1992-07-14"
+        assert value.experiment.start_date == datetime(1992, 7, 14)
         assert value.experiment.probe == "x-rays"
         assert value.sample.name == "A Perfect Sample"
 
@@ -202,7 +191,7 @@ class TestInstrumentSettings(unittest.TestCase):
         assert value.wavelength.min == 2.0
         assert value.wavelength.max == 12.0
         assert value.wavelength.unit == "angstrom"
-        assert value.polarization == "unpolarized"
+        assert value.polarization is None
         assert value.configuration is None
 
     def test_to_yaml(self):
@@ -212,9 +201,7 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),)
         assert (
             value.to_yaml()
-            == "incident_angle: {magnitude: 4.0, unit: deg}\n"
-            + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
-            + "polarization: unpolarized\n"
+            == "incident_angle: {magnitude: 4.0, unit: deg}\n" + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
         )
 
     def test_creation_config_and_polarization(self):
@@ -224,7 +211,7 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(
             base.Value(4.0, "deg"),
             base.ValueRange(2.0, 12.0, "angstrom"),
-            polarization="p",
+            polarization="+",
             configuration="liquid surface",
         )
         assert value.incident_angle.magnitude == 4.0
@@ -232,7 +219,7 @@ class TestInstrumentSettings(unittest.TestCase):
         assert value.wavelength.min == 2.0
         assert value.wavelength.max == 12.0
         assert value.wavelength.unit == "angstrom"
-        assert value.polarization == "p"
+        assert value.polarization == data_source.Polarization.p
         assert value.configuration == "liquid surface"
 
     def test_to_yaml_config_and_polarization(self):
@@ -242,14 +229,14 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(
             base.Value(4.0, "deg"),
             base.ValueRange(2.0, 12.0, "angstrom"),
-            polarization="p",
+            polarization="+",
             configuration="liquid surface",
         )
         assert (
             value.to_yaml()
             == "incident_angle: {magnitude: 4.0, unit: deg}\n"
             + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
-            + "polarization: p\n"
+            + "polarization: +\n"
             + "configuration: liquid surface\n"
         )
 
@@ -288,8 +275,7 @@ class TestMeasurement(unittest.TestCase):
             value.to_yaml()
             == "instrument_settings:\n  incident_angle:"
             + " {magnitude: 4.0, unit: deg}\n  wavelength: {min: "
-            + "2.0, max: 12.0, unit: angstrom}\n  polarization: "
-            + "unpolarized\ndata_files:\n- file: "
+            + "2.0, max: 12.0, unit: angstrom}\ndata_files:\n- file: "
             + f"{str(fname.absolute())}\n  timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )
@@ -310,8 +296,10 @@ class TestMeasurement(unittest.TestCase):
         assert value.instrument_settings.wavelength.unit == "angstrom"
         assert value.data_files[0].file == str(pathlib.Path().resolve().joinpath("README.rst"))
         assert value.data_files[0].timestamp == datetime.fromtimestamp(pathlib.Path("README.rst").stat().st_mtime)
-        assert value.references[0].file == str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))
-        assert value.references[0].timestamp == datetime.fromtimestamp(pathlib.Path("AUTHORS.rst").stat().st_mtime)
+        assert value.additional_files[0].file == str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))
+        assert value.additional_files[0].timestamp == datetime.fromtimestamp(
+            pathlib.Path("AUTHORS.rst").stat().st_mtime
+        )
 
     def test_to_yaml_optionals(self):
         """
@@ -329,11 +317,10 @@ class TestMeasurement(unittest.TestCase):
             value.to_yaml()
             == "instrument_settings:\n  incident_angle:"
             + " {magnitude: 4.0, unit: deg}\n  wavelength: {min: "
-            + "2.0, max: 12.0, unit: angstrom}\n  polarization: "
-            + "unpolarized\ndata_files:\n- file: "
+            + "2.0, max: 12.0, unit: angstrom}\ndata_files:\n- file: "
             + f"{str(fname.absolute())}\n  timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
-            + "references:\n- file: "
+            + "additional_files:\n- file: "
             + f"{str(gname.absolute())}\n  timestamp: "
             + f"{datetime.fromtimestamp(gname.stat().st_mtime).isoformat()}\n"
             + "scheme: energy-dispersive\n"

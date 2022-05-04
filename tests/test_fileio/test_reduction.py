@@ -27,14 +27,14 @@ class TestSoftware(unittest.TestCase):
         Transform to yaml.
         """
         value = reduction.Software("Reducer", "1.2.3", "Ubuntu-20.04")
-        assert value.to_yaml() == "name: Reducer\nversion: 1.2.3\nplatform: Ubuntu-20.04\n"
+        assert value.to_yaml() == "{name: Reducer, version: 1.2.3, platform: Ubuntu-20.04}\n"
 
     def test_no_name_to_yaml(self):
         """
         Transform to yaml with no name.
         """
         value = reduction.Software(None, "1.0.0", "WindowsXP")
-        assert value.to_yaml() == "name: null\nversion: 1.0.0\nplatform: WindowsXP\n"
+        assert value.to_yaml() == "{name: null, version: 1.0.0, platform: WindowsXP}\n"
 
 
 class TestReduction(unittest.TestCase):
@@ -69,8 +69,8 @@ class TestReduction(unittest.TestCase):
         )
         assert (
             value.to_yaml()
-            == "software:\n  name: Reducer\n  version: 1.2.3\n  "
-            + "platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n"
+            == "software: {name: Reducer, version: 1.2.3, platform: Ubuntu-20.04}\n"
+            + "timestamp: 2021-07-07T09:11:20\n"
             + "creator:\n  name: A Person\n  affiliation: University\n"
             + "corrections:\n- footprint doi\n- background\n"
         )
@@ -87,8 +87,8 @@ class TestReduction(unittest.TestCase):
             call="sh myreducer.sh 1 0",
         )
         assert value.to_yaml() == (
-            "software:\n  name: Reducer\n  version: 1.2.3\n  "
-            "platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n"
+            "software: {name: Reducer, version: 1.2.3, platform: Ubuntu-20.04}\n"
+            "timestamp: 2021-07-07T09:11:20\n"
             "creator:\n  name: A Person\n  affiliation: University\n"
             "corrections:\n- footprint doi\n- background\ncall: "
             "sh myreducer.sh 1 0\n"
@@ -107,8 +107,8 @@ class TestReduction(unittest.TestCase):
         )
         assert (
             value.to_yaml()
-            == "software:\n  name: Reducer\n  version: 1.2.3\n  "
-            + "platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n"
+            == "software: {name: Reducer, version: 1.2.3, platform: Ubuntu-20.04}\n"
+            + "timestamp: 2021-07-07T09:11:20\n"
             + "creator:\n  name: A Person\n  affiliation: University\n"
             + "corrections:\n- footprint doi\n- background\nscript: "
             + "/home/user/user1/scripts/reducer.py\n"
@@ -127,8 +127,8 @@ class TestReduction(unittest.TestCase):
         )
         assert (
             value.to_yaml()
-            == "software:\n  name: Reducer\n  version: 1.2.3\n  "
-            + "platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n"
+            == "software: {name: Reducer, version: 1.2.3, platform: Ubuntu-20.04}\n"
+            + "timestamp: 2021-07-07T09:11:20\n"
             + "creator:\n  name: A Person\n  affiliation: University\n"
             + "corrections:\n- footprint doi\n- background\ncomputer: "
             + "cluster.esss.dk\n"
@@ -147,8 +147,8 @@ class TestReduction(unittest.TestCase):
         )
         assert (
             value.to_yaml()
-            == "software:\n  name: Reducer\n  version: 1.2.3\n  "
-            + "platform: Ubuntu-20.04\ntimestamp: 2021-07-07T09:11:20\n"
+            == "software: {name: Reducer, version: 1.2.3, platform: Ubuntu-20.04}\n"
+            + "timestamp: 2021-07-07T09:11:20\n"
             + "creator:\n  name: A Person\n  affiliation: University\n"
             + "corrections:\n- footprint doi\n- background\nbinary: "
             + "/home/users/user1/bin/file\n"
