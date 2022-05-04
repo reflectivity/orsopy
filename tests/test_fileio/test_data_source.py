@@ -19,9 +19,7 @@ class TestExperiment(unittest.TestCase):
         """
         Creation with minimal set.
         """
-        value = data_source.Experiment(
-            "My First Experiment", "A Lab Instrument", datetime(1992, 7, 14).strftime("%Y-%m-%d"), "x-rays"
-        )
+        value = data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-rays")
         assert value.title == "My First Experiment"
         assert value.instrument == "A Lab Instrument"
         assert value.start_date == datetime(1992, 7, 14)
@@ -34,9 +32,7 @@ class TestExperiment(unittest.TestCase):
         """
         Transformation to yaml with minimal set.
         """
-        value = data_source.Experiment(
-            "My First Experiment", "A Lab Instrument", datetime(1992, 7, 14).strftime("%Y-%m-%d"), "x-rays"
-        )
+        value = data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-rays")
         assert (
             value.to_yaml()
             == "title: My First Experiment\n"
@@ -72,7 +68,7 @@ class TestExperiment(unittest.TestCase):
         value = data_source.Experiment(
             "My First Neutron Experiment",
             "TAS8",
-            datetime(1992, 7, 14).strftime("%Y-%m-%d"),
+            datetime(1992, 7, 14),
             "neutrons",
             facility="Risoe",
             proposalID="abc123",
@@ -161,9 +157,7 @@ class TestDataSource(unittest.TestCase):
 
         value = data_source.DataSource(
             base.Person("A Person", "Some Uni"),
-            data_source.Experiment(
-                "My First Experiment", "A Lab Instrument", datetime(1992, 7, 14).strftime("%Y-%m-%d"), "x-rays"
-            ),
+            data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-rays"),
             data_source.Sample("A Perfect Sample"),
             m,
         )
