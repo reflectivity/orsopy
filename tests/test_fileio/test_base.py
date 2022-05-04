@@ -58,6 +58,10 @@ class TestValue(unittest.TestCase):
         value = base.Value(None)
         assert value.to_yaml() == "{magnitude: null}\n"
 
+    def test_user_data(self):
+        value = base.Value(13.4, my_attr="hallo ORSO")
+        assert value.user_data == {"my_attr": "hallo ORSO"}
+
 
 class TestValueVector(unittest.TestCase):
     """
