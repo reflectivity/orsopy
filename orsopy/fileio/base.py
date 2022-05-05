@@ -397,6 +397,9 @@ class OrsoDumper(yaml.SafeDumper):
             return super().represent_data(data)
 
 
+unit_registry = None
+
+
 @orsodataclass
 class Value(Header):
     """
@@ -408,6 +411,31 @@ class Value(Header):
 
     yaml_representer = Header.yaml_representer_compact
 
+    def __repr__(self):
+        """
+        Make representation more readability by removing names of default arguments.
+        """
+        output = super().__repr__()
+        output = output.replace("magnitude=", "")
+        output = output.replace("unit=", "")
+        return output
+
+    def as_unit(self, output_unit):
+        """
+        Returns the value as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return self.magnitude
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        val = self.magnitude * unit_registry(self.unit)
+        return val.to(output_unit).magnitude
+
 
 @orsodataclass
 class ComplexValue(Header):
@@ -416,7 +444,7 @@ class ComplexValue(Header):
     """
 
     real: Union[float, List[float]]
-    imag: Optional[Union[float, List[float]]] = 0.0
+    imag: Optional[Union[float, List[float]]] = None
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
@@ -431,6 +459,26 @@ class ComplexValue(Header):
         output = output.replace("unit=", "")
         return output
 
+    def as_unit(self, output_unit):
+        """
+        Returns the complex value as converted to the given unit.
+        """
+        if self.imag is None:
+            value = self.real + 0j
+        else:
+            value = self.real + 1j * self.imag
+        if output_unit == self.unit:
+            return value
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        val = value * unit_registry(self.unit)
+        return val.to(output_unit).magnitude
+
 
 @orsodataclass
 class ValueRange(Header):
@@ -443,6 +491,23 @@ class ValueRange(Header):
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
+
+    def as_unit(self, output_unit):
+        """
+        Returns a (min, max) tuple of values as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return (self.min, self.max)
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        vmin = self.min * unit_registry(self.unit)
+        vmax = self.min * unit_registry(self.unit)
+        return (vmin.to(output_unit).magnitude, vmax.to(output_unit).magnitude)
 
 
 @orsodataclass
@@ -464,6 +529,24 @@ class ValueVector(Header):
     y: Union[float, List[float]]
     z: Union[float, List[float]]
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+
+    def as_unit(self, output_unit):
+        """
+        Returns a (x, y, z) tuple of values as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return (self.x, self.y, self.z)
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        vx = self.x * unit_registry(self.unit)
+        vy = self.y * unit_registry(self.unit)
+        vz = self.z * unit_registry(self.unit)
+        return (vx.to(output_unit).magnitude, vy.to(output_unit).magnitude, vz.to(output_unit).magnitude)
 
 
 @orsodataclass
