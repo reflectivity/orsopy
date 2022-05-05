@@ -14,7 +14,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
 from inspect import isclass
-from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
+from typing import Any, Dict, Generator, List, Optional, TextIO, Tuple, Union
 
 import numpy as np
 import yaml
@@ -171,7 +171,9 @@ class Header:
         :return: Correctly resolved object with required type for orso
             compatibility.
         """
-        if isclass(hint) and not getattr(hint, "__origin__", None) in [List, Tuple, Union, Literal]:
+        if hint is Any:
+            return item
+        elif isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
@@ -192,7 +194,7 @@ class Header:
                 except ValueError:
                     # string wasn't ISO8601 format
                     return None
-            if issubclass(hint, Header):
+            if issubclass(hint, Header) and hasattr(item, "keys"):
                 # convert to dataclass instance
                 attribs = hint.__annotations__.keys()
                 realised_items = {k: item[k] for k in item.keys() if k in attribs}
@@ -218,7 +220,7 @@ class Header:
                 except (ValueError, TypeError):
                     return None
         else:
-            # the hint is a combined type (Union/List etc.)
+            # the hint is a combined type (Union/List/Dict etc.)
             hbase = get_origin(hint)
             if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
@@ -226,6 +228,15 @@ class Header:
                     return type(item)([Header._resolve_type(t0, i) for i in item])
                 else:
                     return [Header._resolve_type(t0, item)]
+            elif hbase is dict:
+                value_type = get_args(hint)[1]
+                try:
+                    for key, value in item.items():
+                        # resolve the type of any value in the dictionary
+                        item[key] = Header._resolve_type(value_type, value)
+                    return item
+                except AttributeError:
+                    return None
             elif hbase in [Union, Optional]:
                 subtypes = get_args(hint)
                 if type(item) in subtypes:
@@ -506,7 +517,7 @@ class ValueRange(Header):
             unit_registry = pint.UnitRegistry()
 
         vmin = self.min * unit_registry(self.unit)
-        vmax = self.min * unit_registry(self.unit)
+        vmax = self.max * unit_registry(self.unit)
         return (vmin.to(output_unit).magnitude, vmax.to(output_unit).magnitude)
 
 
