@@ -235,9 +235,12 @@ class Header:
             if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
                 if isinstance(item, (list, tuple)):
-                    return type(item)([Header._resolve_type(t0, i) for i in item])
+                    if hbase is list:
+                        return list([Header._resolve_type(t0, i) for i in item])
+                    else:
+                        return tuple([Header._resolve_type(ti, i) for ti, i in zip(get_args(hint), item)])
                 else:
-                    return [Header._resolve_type(t0, item)]
+                    return hbase([Header._resolve_type(t0, item)])
             elif hbase in [Union, Optional]:
                 subtypes = get_args(hint)
                 if type(item) in subtypes:
@@ -478,6 +481,40 @@ class Column(Header):
     dimension: Optional[str] = field(default=None, metadata={"dimension": "A description of the column"})
 
     yaml_representer = Header.yaml_representer_compact
+
+
+@orsodataclass
+class ErrorColumn(Header):
+    """
+    Information about a data column.
+    """
+
+    error_of: str
+    error_type: Optional[Literal["uncertainty", "resolution"]]
+    distribution: Optional[Tuple[Literal["gaussian", "triangular", "uniform", "lorentzian"], Literal["sigma", "FWHM"]]]
+
+    yaml_representer = Header.yaml_representer_compact
+
+    def to_sigma(self):
+        """
+        Returns the multiplicative factor needed to convert a FWHM to sigma.
+        """
+        if getattr(self, "distribution", None) and self.distribution[1] == "FWHM":
+            from math import log, sqrt
+
+            if self.distribution[0] == "gaussian":
+                return 1.0 / (2.0 * sqrt(2.0 * log(2.0)))
+            elif self.distribution[0] == "triangular":
+                return 1.0 / sqrt(24.0)
+            elif self.distribution[0] == "uniform":
+                return 1.0 / sqrt(12.0)
+            elif self.distribution[0] == "lorentzian":
+                raise ValueError("Lorentzian distribution does not have a sigma value")
+            else:
+                raise NotImplementedError(f"Unknown distribution {self.distribution[0]}")
+        else:
+            # Value is already sigma
+            return 1.0
 
 
 @orsodataclass

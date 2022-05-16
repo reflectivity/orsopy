@@ -8,7 +8,8 @@ from typing import Any, List, Optional, TextIO, Union
 import numpy as np
 import yaml
 
-from .base import Column, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data, orsodataclass
+from .base import (Column, ErrorColumn, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data,
+                   orsodataclass)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -36,7 +37,7 @@ class Orso(Header):
 
     data_source: DataSource
     reduction: Reduction
-    columns: List[Column]
+    columns: List[Union[Column, ErrorColumn]]
     data_set: Optional[Union[int, str]] = None
 
     __repr__ = Header._staggered_repr
@@ -45,7 +46,7 @@ class Orso(Header):
         self,
         data_source: DataSource,
         reduction: Reduction,
-        columns: List[Column],
+        columns: List[Union[Column, ErrorColumn]],
         data_set: Optional[Union[int, str]] = None,
         **user_data,
     ):
