@@ -192,7 +192,7 @@ class TestOrso(unittest.TestCase):
         info.columns = [
             fileio.Column("Qz", "1/angstrom"),
             fileio.Column("R"),
-            fileio.ErrorColumn("sR"),
+            fileio.ErrorColumn("R"),
         ]
 
         data = np.zeros((100, 3))

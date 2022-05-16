@@ -14,7 +14,7 @@ def main():
     info.columns = [
         fileio.Column("Qz", "1/angstrom"),
         fileio.Column("R"),
-        fileio.ErrorColumn("sR"),
+        fileio.ErrorColumn("R"),
     ]
     info2.columns = info.columns
     info.data_source.measurement.instrument_settings.polarization = "+"
