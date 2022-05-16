@@ -274,23 +274,23 @@ class TestErrorColumn(unittest.TestCase):
         assert value.error_type == "resolution"
         assert value.distribution == ("gaussian", "sigma")
 
-    # def test_bad_type(self):
-    #     """
-    #     Rejection of non-ASCII unit.
-    #     """
-    #     with self.assertRaises(ValueError):
-    #         _ = base.ErrorColumn("q", "nm")
+    def test_bad_type(self):
+        """
+        Rejection of non-ASCII unit.
+        """
+        with self.assertRaises(ValueError):
+            _ = base.ErrorColumn("q", "nm")
 
-    # def test_bad_distribution(self):
-    #     """
-    #     Rejection of non-ASCII unit.
-    #     """
-    #     with self.assertRaises(ValueError):
-    #         _ = base.ErrorColumn("q", "uncertainty", ("undefined", "FWHM"))
-    #     with self.assertRaises(ValueError):
-    #         _ = base.ErrorColumn("q", "uncertainty", ("triangular", "HWHM"))
-    #     with self.assertRaises(ValueError):
-    #         _ = base.ErrorColumn("q", "uncertainty", "wrong")
+    def test_bad_distribution(self):
+        """
+        Rejection of non-ASCII unit.
+        """
+        with self.assertRaises(ValueError):
+            _ = base.ErrorColumn("q", "uncertainty", ("undefined", "FWHM"))
+        with self.assertRaises(ValueError):
+            _ = base.ErrorColumn("q", "uncertainty", ("triangular", "HWHM"))
+        with self.assertRaises(ValueError):
+            _ = base.ErrorColumn("q", "uncertainty", "wrong")
 
     def test_to_yaml(self):
         """

@@ -255,6 +255,8 @@ class Header:
             elif hbase is Literal:
                 if item in get_args(hint):
                     return item
+                else:
+                    raise ValueError(f"Has to be one of {get_args(hint)}")
         return None
 
     @classmethod
