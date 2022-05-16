@@ -205,7 +205,7 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(
             base.Value(4.0, "deg"),
             base.ValueRange(2.0, 12.0, "angstrom"),
-            polarization="+",
+            polarization="p",
             configuration="liquid surface",
         )
         assert value.incident_angle.magnitude == 4.0
@@ -223,14 +223,14 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(
             base.Value(4.0, "deg"),
             base.ValueRange(2.0, 12.0, "angstrom"),
-            polarization="+",
+            polarization="p",
             configuration="liquid surface",
         )
         assert (
             value.to_yaml()
             == "incident_angle: {magnitude: 4.0, unit: deg}\n"
             + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
-            + "polarization: +\n"
+            + "polarization: p\n"
             + "configuration: liquid surface\n"
         )
 

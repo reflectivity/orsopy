@@ -79,12 +79,12 @@ class Polarization(str, Enum):
     """
 
     unpolarized = "unpolarized"
-    p = "+"
-    m = "-"
-    mm = "--"
-    mp = "-+"
-    pm = "+-"
-    pp = "++"
+    p = "p"
+    m = "m"
+    mm = "mm"
+    mp = "mp"
+    pm = "pm"
+    pp = "pp"
 
     def yaml_representer(self, dumper: yaml.Dumper):
         output = self.value

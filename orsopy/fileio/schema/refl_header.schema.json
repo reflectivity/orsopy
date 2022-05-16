@@ -403,12 +403,12 @@
       "description": "The first symbol indicates the magnetisation direction of the incident\nbeam. An optional second symbol indicates the direction of the scattered\nbeam, if a spin analyser is present.",
       "enum": [
         "unpolarized",
-        "+",
-        "-",
-        "--",
-        "-+",
-        "+-",
-        "++"
+        "p",
+        "m",
+        "mm",
+        "mp",
+        "pm",
+        "pp"
       ],
       "type": "string"
     },
@@ -921,6 +921,80 @@
         "name"
       ]
     },
+    "ErrorColumn": {
+      "title": "ErrorColumn",
+      "type": "object",
+      "properties": {
+        "error_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error_type": {
+          "enum": [
+            "uncertainty",
+            "resolution",
+            null
+          ],
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "distribution": {
+          "minItems": 2,
+          "maxItems": 2,
+          "items": [
+            {
+              "enum": [
+                "gaussian",
+                "triangular",
+                "uniform",
+                "lorentzian"
+              ],
+              "type": "string"
+            },
+            {
+              "enum": [
+                "sigma",
+                "FWHM"
+              ],
+              "type": "string"
+            }
+          ],
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "error_of"
+      ]
+    },
     "Qz_column": {
       "title": "Qz",
       "type": "object",
@@ -1009,30 +1083,17 @@
       "title": "sR",
       "type": "object",
       "properties": {
-        "name": {
+        "error_of": {
           "enum": [
-            "sR"
+            "R"
           ]
         },
-        "unit": {
+        "error_type": {
           "enum": [
-            "1/angstrom",
-            "1/nm",
-            null
-          ]
-        },
-        "dimension": {
-          "dimension": "dimension of column",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "comment": {
+            "uncertainty",
+            "resolution",
+            "null"
+          ],
           "anyOf": [
             {
               "type": "string"
@@ -1044,37 +1105,24 @@
         }
       },
       "required": [
-        "name"
+        "error_of"
       ]
     },
     "sQz_column": {
       "title": "sQz",
       "type": "object",
       "properties": {
-        "name": {
+        "error_of": {
           "enum": [
-            "sQz"
+            "Qz"
           ]
         },
-        "unit": {
+        "error_type": {
           "enum": [
-            "1/angstrom",
-            "1/nm",
-            null
-          ]
-        },
-        "dimension": {
-          "dimension": "dimension of column",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "comment": {
+            "uncertainty",
+            "resolution",
+            "null"
+          ],
           "anyOf": [
             {
               "type": "string"
@@ -1086,7 +1134,7 @@
         }
       },
       "required": [
-        "name"
+        "error_of"
       ]
     }
   }

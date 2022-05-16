@@ -50,6 +50,45 @@ definitions:
     - measurement
     title: DataSource
     type: object
+  ErrorColumn:
+    properties:
+      comment:
+        anyOf:
+        - type: string
+        - type: 'null'
+      distribution:
+        anyOf:
+        - type: array
+        - type: 'null'
+        items:
+        - enum:
+          - gaussian
+          - triangular
+          - uniform
+          - lorentzian
+          type: string
+        - enum:
+          - sigma
+          - FWHM
+          type: string
+        maxItems: 2
+        minItems: 2
+      error_of:
+        anyOf:
+        - type: string
+        - type: 'null'
+      error_type:
+        anyOf:
+        - type: string
+        - type: 'null'
+        enum:
+        - uncertainty
+        - resolution
+        - null
+    required:
+    - error_of
+    title: ErrorColumn
+    type: object
   Experiment:
     properties:
       comment:
@@ -221,12 +260,12 @@ definitions:
       beam, if a spin analyser is present.'
     enum:
     - unpolarized
-    - +
-    - '-'
-    - --
-    - -+
-    - +-
-    - ++
+    - p
+    - m
+    - mm
+    - mp
+    - pm
+    - pp
     title: Polarization
     type: string
   Qz_column:
@@ -456,48 +495,36 @@ definitions:
     type: object
   sQz_column:
     properties:
-      comment:
+      error_of:
+        enum:
+        - Qz
+      error_type:
         anyOf:
         - type: string
         - type: 'null'
-      dimension:
-        anyOf:
-        - type: string
-        - type: 'null'
-        dimension: dimension of column
-      name:
         enum:
-        - sQz
-      unit:
-        enum:
-        - 1/angstrom
-        - 1/nm
-        - null
+        - uncertainty
+        - resolution
+        - 'null'
     required:
-    - name
+    - error_of
     title: sQz
     type: object
   sR_column:
     properties:
-      comment:
+      error_of:
+        enum:
+        - R
+      error_type:
         anyOf:
         - type: string
         - type: 'null'
-      dimension:
-        anyOf:
-        - type: string
-        - type: 'null'
-        dimension: dimension of column
-      name:
         enum:
-        - sR
-      unit:
-        enum:
-        - 1/angstrom
-        - 1/nm
-        - null
+        - uncertainty
+        - resolution
+        - 'null'
     required:
-    - name
+    - error_of
     title: sR
     type: object
 properties:

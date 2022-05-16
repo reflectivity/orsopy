@@ -490,8 +490,10 @@ class ErrorColumn(Header):
     """
 
     error_of: str
-    error_type: Optional[Literal["uncertainty", "resolution"]]
-    distribution: Optional[Tuple[Literal["gaussian", "triangular", "uniform", "lorentzian"], Literal["sigma", "FWHM"]]]
+    error_type: Optional[Literal["uncertainty", "resolution"]] = None
+    distribution: Optional[
+        Tuple[Literal["gaussian", "triangular", "uniform", "lorentzian"], Literal["sigma", "FWHM"]]
+    ] = None
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -669,7 +671,7 @@ def _validate_header_data(dct_list: List[dict]):
         cols = dct["columns"]
 
         ncols = min(4, len(cols))
-        col_names = [col["name"] for col in cols]
+        col_names = [col["name"] if "name" in col else "s" + col["error_of"] for col in cols]
         units = [col.get("unit") for col in cols]
 
         if col_names[:ncols] != req_cols[:ncols]:
@@ -677,9 +679,6 @@ def _validate_header_data(dct_list: List[dict]):
 
         if units[0] not in acceptable_Qz_units:
             raise ValueError("The Qz column must have units of '1/angstrom'" " or '1/nm'")
-
-        if len(units) >= 4 and units[0] != units[3]:
-            raise ValueError("Columns Qz and sQz must have the same units'")
 
 
 @contextmanager

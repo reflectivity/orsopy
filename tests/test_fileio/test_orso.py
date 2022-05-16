@@ -110,7 +110,7 @@ class TestOrso(unittest.TestCase):
         info.columns = [
             fileio.Column("Qz", "1/angstrom"),
             fileio.Column("R"),
-            fileio.Column("sR"),
+            fileio.ErrorColumn("R"),
         ]
         info2.columns = info.columns
         info.data_source.measurement.instrument_settings.polarization = fileio.Polarization.p
@@ -192,7 +192,7 @@ class TestOrso(unittest.TestCase):
         info.columns = [
             fileio.Column("Qz", "1/angstrom"),
             fileio.Column("R"),
-            fileio.Column("sR"),
+            fileio.ErrorColumn("sR"),
         ]
 
         data = np.zeros((100, 3))

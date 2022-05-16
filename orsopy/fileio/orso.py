@@ -90,10 +90,13 @@ class Orso(Header):
         """
         out = "# "
         for ci in self.columns:
-            if ci.unit is None:
-                out += f"{ci.name:<23}"
+            if isinstance(ci, Column):
+                if ci.unit is None:
+                    out += f"{ci.name:<23}"
+                else:
+                    out += f"{f'{ci.name} ({ci.unit})':<23}"
             else:
-                out += f"{f'{ci.name} ({ci.unit})':<23}"
+                out += f"s{ci.error_of:<22}"
             if ci is self.columns[0]:
                 # strip two characters from first column to align
                 out = out[:-4]
