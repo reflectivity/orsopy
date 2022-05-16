@@ -256,6 +256,57 @@ class TestColumn(unittest.TestCase):
         assert value.to_yaml() == "{name: q, unit: 1/angstrom}\n"
 
 
+class TestErrorColumn(unittest.TestCase):
+    """
+    Testing the Column class
+    """
+
+    def test_creation(self):
+        """
+        Creation of a column.
+        """
+        value = base.ErrorColumn("q", "uncertainty", ("triangular", "FWHM"))
+        assert value.error_of == "q"
+        assert value.error_type == "uncertainty"
+        assert value.distribution == ("triangular", "FWHM")
+        value = base.ErrorColumn("q", "resolution", ("gaussian", "sigma"))
+        assert value.error_of == "q"
+        assert value.error_type == "resolution"
+        assert value.distribution == ("gaussian", "sigma")
+
+    # def test_bad_type(self):
+    #     """
+    #     Rejection of non-ASCII unit.
+    #     """
+    #     with self.assertRaises(ValueError):
+    #         _ = base.ErrorColumn("q", "nm")
+
+    # def test_bad_distribution(self):
+    #     """
+    #     Rejection of non-ASCII unit.
+    #     """
+    #     with self.assertRaises(ValueError):
+    #         _ = base.ErrorColumn("q", "uncertainty", ("undefined", "FWHM"))
+    #     with self.assertRaises(ValueError):
+    #         _ = base.ErrorColumn("q", "uncertainty", ("triangular", "HWHM"))
+    #     with self.assertRaises(ValueError):
+    #         _ = base.ErrorColumn("q", "uncertainty", "wrong")
+
+    def test_to_yaml(self):
+        """
+        Transformation to yaml.
+        """
+        value = base.ErrorColumn("q", "uncertainty", ("triangular", "FWHM"))
+        assert value.to_yaml() == "{error_of: q, error_type: uncertainty, distribution: [triangular, FWHM]}\n"
+
+    def test_minimal_to_yaml(self):
+        """
+        Transformation to yaml.
+        """
+        value = base.ErrorColumn("q")
+        assert value.to_yaml() == "{error_of: q}\n"
+
+
 class TestFile(unittest.TestCase):
     """
     Testing the File class.
