@@ -194,7 +194,7 @@ class Header:
                 except ValueError:
                     # string wasn't ISO8601 format
                     return None
-            if issubclass(hint, Header) and hasattr(item, "keys"):
+            if issubclass(hint, Header) and isinstance(item, dict):
                 # convert to dataclass instance
                 attribs = hint.__annotations__.keys()
                 realised_items = {k: item[k] for k in item.keys() if k in attribs}
