@@ -15,7 +15,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from enum import Enum
 from inspect import isclass
-from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
+from typing import Any, Dict, Generator, List, Optional, TextIO, Tuple, Union
 
 import numpy as np
 import yaml
@@ -183,7 +183,9 @@ class Header:
         :return: Correctly resolved object with required type for orso
             compatibility.
         """
-        if isclass(hint) and not getattr(hint, "__origin__", None) in [List, Tuple, Union, Literal]:
+        if hint is Any:
+            return item
+        elif isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
@@ -204,7 +206,7 @@ class Header:
                 except ValueError:
                     # string wasn't ISO8601 format
                     return None
-            if issubclass(hint, Header):
+            if issubclass(hint, Header) and isinstance(item, dict):
                 # convert to dataclass instance
                 attribs = hint.__annotations__.keys()
                 realised_items = {k: item[k] for k in item.keys() if k in attribs}
@@ -230,7 +232,7 @@ class Header:
                 except (ValueError, TypeError):
                     return None
         else:
-            # the hint is a combined type (Union/List etc.)
+            # the hint is a combined type (Union/List/Dict etc.)
             hbase = get_origin(hint)
             if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
@@ -241,6 +243,15 @@ class Header:
                         return tuple([Header._resolve_type(ti, i) for ti, i in zip(get_args(hint), item)])
                 else:
                     return hbase([Header._resolve_type(t0, item)])
+            elif hbase is dict:
+                value_type = get_args(hint)[1]
+                try:
+                    for key, value in item.items():
+                        # resolve the type of any value in the dictionary
+                        item[key] = Header._resolve_type(value_type, value)
+                    return item
+                except AttributeError:
+                    return None
             elif hbase in [Union, Optional]:
                 subtypes = get_args(hint)
                 if type(item) in subtypes:
@@ -414,6 +425,9 @@ class OrsoDumper(yaml.SafeDumper):
             return super().represent_data(data)
 
 
+unit_registry = None
+
+
 @orsodataclass
 class Value(Header):
     """
@@ -424,6 +438,74 @@ class Value(Header):
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
+
+    def __repr__(self):
+        """
+        Make representation more readability by removing names of default arguments.
+        """
+        output = super().__repr__()
+        output = output.replace("magnitude=", "")
+        output = output.replace("unit=", "")
+        return output
+
+    def as_unit(self, output_unit):
+        """
+        Returns the value as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return self.magnitude
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        val = self.magnitude * unit_registry(self.unit)
+        return val.to(output_unit).magnitude
+
+
+@orsodataclass
+class ComplexValue(Header):
+    """
+    A value or list of values with an optional unit.
+    """
+
+    real: Union[float, List[float]]
+    imag: Optional[Union[float, List[float]]] = None
+    unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+
+    yaml_representer = Header.yaml_representer_compact
+
+    def __repr__(self):
+        """
+        Make representation more readability by removing names of default arguments.
+        """
+        output = super().__repr__()
+        output = output.replace("real=", "")
+        output = output.replace("imag=", "")
+        output = output.replace("unit=", "")
+        return output
+
+    def as_unit(self, output_unit):
+        """
+        Returns the complex value as converted to the given unit.
+        """
+        if self.imag is None:
+            value = self.real + 0j
+        else:
+            value = self.real + 1j * self.imag
+        if output_unit == self.unit:
+            return value
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        val = value * unit_registry(self.unit)
+        return val.to(output_unit).magnitude
 
 
 @orsodataclass
@@ -437,6 +519,23 @@ class ValueRange(Header):
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
 
     yaml_representer = Header.yaml_representer_compact
+
+    def as_unit(self, output_unit):
+        """
+        Returns a (min, max) tuple of values as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return (self.min, self.max)
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        vmin = self.min * unit_registry(self.unit)
+        vmax = self.max * unit_registry(self.unit)
+        return (vmin.to(output_unit).magnitude, vmax.to(output_unit).magnitude)
 
 
 @orsodataclass
@@ -458,6 +557,24 @@ class ValueVector(Header):
     y: float
     z: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+
+    def as_unit(self, output_unit):
+        """
+        Returns a (x, y, z) tuple of values as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return (self.x, self.y, self.z)
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        vx = self.x * unit_registry(self.unit)
+        vy = self.y * unit_registry(self.unit)
+        vz = self.z * unit_registry(self.unit)
+        return (vx.to(output_unit).magnitude, vy.to(output_unit).magnitude, vz.to(output_unit).magnitude)
 
 
 @orsodataclass
