@@ -626,7 +626,7 @@ class ErrorColumn(Header):
             if self.distribution[0] == "gaussian":
                 return 1.0 / (2.0 * sqrt(2.0 * log(2.0)))
             elif self.distribution[0] == "triangular":
-                return 1.0 / sqrt(24.0)
+                return 1.0 / sqrt(6.0)
             elif self.distribution[0] == "uniform":
                 return 1.0 / sqrt(12.0)
             elif self.distribution[0] == "lorentzian":
