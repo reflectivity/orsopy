@@ -616,18 +616,37 @@ class ErrorColumn(Header):
 
     yaml_representer = Header.yaml_representer_compact
 
+    @property
+    def name(self):
+        """
+        A convenience property to allow programs to get a valid name attribute for any column.
+        """
+        return f"s{self.error_of}"
+
     def to_sigma(self):
         """
         Returns the multiplicative factor needed to convert a FWHM to sigma.
+
+        The conversion factors can be found in common statistics and experimental physics text books or derived
+        manually solving the variance definition integral.
+        (e.g. Dekking, Michel (2005).
+        A modern introduction to probability and statistics : understanding why and how.
+        Springer, London, UK:)
+        Values and some references available on Wikipedia, too.
         """
         if getattr(self, "distribution", None) and self.distribution[1] == "FWHM":
             from math import log, sqrt
 
             if self.distribution[0] == "gaussian":
+                # Solving for the gaussian function = 0.5 yields:
                 return 1.0 / (2.0 * sqrt(2.0 * log(2.0)))
             elif self.distribution[0] == "triangular":
+                # See solution of integral e.g. https://math.stackexchange.com/questions/4271314/
+                # what-is-the-proof-for-variance-of-triangular-distribution/4273147#4273147
+                # setting c=0 and a=b=FWHM for the symmetric triangle around 0.
                 return 1.0 / sqrt(6.0)
             elif self.distribution[0] == "uniform":
+                # Variance is just the integral of x² from -0.5*FWHM to 0.5*FWHM => 1/12.
                 return 1.0 / sqrt(12.0)
             elif self.distribution[0] == "lorentzian":
                 raise ValueError("Lorentzian distribution does not have a sigma value")
