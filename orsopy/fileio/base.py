@@ -626,9 +626,10 @@ class ErrorColumn(Header):
         """
         return f"s{self.error_of}"
 
+    @property
     def to_sigma(self):
         """
-        Returns the multiplicative factor needed to convert a FWHM to sigma.
+        The multiplicative factor needed to convert a FWHM to sigma.
 
         The conversion factors can be found in common statistics and experimental physics text books or derived
         manually solving the variance definition integral.

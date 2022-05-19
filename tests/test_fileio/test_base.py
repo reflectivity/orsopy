@@ -400,17 +400,17 @@ class TestErrorColumn(unittest.TestCase):
     def test_sigma_conversion(self):
         with self.subTest("gauss"):
             value = base.ErrorColumn("q", "uncertainty", ("gaussian", "FWHM"))
-            self.assertEqual(value.to_sigma(), 1.0 / (2.0 * sqrt(2.0 * log(2.0))))
+            self.assertEqual(value.to_sigma, 1.0 / (2.0 * sqrt(2.0 * log(2.0))))
         with self.subTest("uniform"):
             value = base.ErrorColumn("q", "uncertainty", ("uniform", "FWHM"))
-            self.assertEqual(value.to_sigma(), 1.0 / sqrt(12.0))
+            self.assertEqual(value.to_sigma, 1.0 / sqrt(12.0))
         with self.subTest("triangular"):
             value = base.ErrorColumn("q", "uncertainty", ("triangular", "FWHM"))
-            self.assertEqual(value.to_sigma(), 1.0 / sqrt(6.0))
+            self.assertEqual(value.to_sigma, 1.0 / sqrt(6.0))
         with self.subTest("lorentizan"):
             value = base.ErrorColumn("q", "uncertainty", ("lorentzian", "FWHM"))
             with self.assertRaises(ValueError):
-                value.to_sigma()
+                value.to_sigma
 
 
 class TestFile(unittest.TestCase):
