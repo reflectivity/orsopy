@@ -267,7 +267,10 @@ class Header:
                 if item in get_args(hint):
                     return item
                 else:
-                    raise ValueError(f"Has to be one of {get_args(hint)}")
+                    warnings.warn(
+                        f"Has to be one of {get_args(hint)} got {item}", RuntimeWarning,
+                    )
+                    return str(item)
         return None
 
     @classmethod

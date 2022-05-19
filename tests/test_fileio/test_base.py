@@ -7,6 +7,7 @@ import pathlib
 import unittest
 
 from datetime import datetime
+from math import log, sqrt
 from os.path import join as pjoin
 
 import pint
@@ -30,11 +31,12 @@ class TestValue(unittest.TestCase):
         assert value.magnitude == 1.0
         assert value.unit == "m"
 
-    def test_list(self):
+    def test_list_warning(self):
         """
         Creation of an object with a a list of values and a unit.
         """
-        value = base.Value([1, 2, 3], "m")
+        with self.assertWarns(RuntimeWarning):
+            value = base.Value([1, 2, 3], "m")
         assert_equal(value.magnitude, [1, 2, 3])
         assert value.unit == "m"
 
@@ -144,11 +146,12 @@ class TestValueVector(unittest.TestCase):
         assert value.z == 3
         assert value.unit == "m"
 
-    def test_list(self):
+    def test_list_warns(self):
         """
         Creation of an object with three dimensions of lists and unit.
         """
-        value = base.ValueVector([1, 2], [2, 3], [3, 4], "m")
+        with self.assertWarns(RuntimeWarning):
+            value = base.ValueVector([1, 2], [2, 3], [3, 4], "m")
         assert_equal(value.x, [1, 2])
         assert_equal(value.y, [2, 3])
         assert_equal(value.z, [3, 4])
@@ -200,11 +203,12 @@ class TestValueRange(unittest.TestCase):
         assert value.max == 2
         assert value.unit == "m"
 
-    def test_list(self):
+    def test_list_warns(self):
         """
         Creation of an object of a list of max and list of min and a unit.
         """
-        value = base.ValueRange([1, 2, 3], [2, 3, 4], "m")
+        with self.assertWarns(RuntimeWarning):
+            value = base.ValueRange([1, 2, 3], [2, 3, 4], "m")
         assert_equal(value.min, [1, 2, 3])
         assert_equal(value.max, [2, 3, 4])
         assert value.unit == "m"
@@ -359,23 +363,24 @@ class TestErrorColumn(unittest.TestCase):
         assert value.error_of == "q"
         assert value.error_type == "resolution"
         assert value.distribution == ("gaussian", "sigma")
+        assert value.name == "sq"
 
     def test_bad_type(self):
         """
         Rejection of non-ASCII unit.
         """
-        with self.assertRaises(ValueError):
+        with self.assertWarns(RuntimeWarning):
             _ = base.ErrorColumn("q", "nm")
 
     def test_bad_distribution(self):
         """
         Rejection of non-ASCII unit.
         """
-        with self.assertRaises(ValueError):
+        with self.assertWarns(RuntimeWarning):
             _ = base.ErrorColumn("q", "uncertainty", ("undefined", "FWHM"))
-        with self.assertRaises(ValueError):
+        with self.assertWarns(RuntimeWarning):
             _ = base.ErrorColumn("q", "uncertainty", ("triangular", "HWHM"))
-        with self.assertRaises(ValueError):
+        with self.assertWarns(RuntimeWarning):
             _ = base.ErrorColumn("q", "uncertainty", "wrong")
 
     def test_to_yaml(self):
@@ -391,6 +396,21 @@ class TestErrorColumn(unittest.TestCase):
         """
         value = base.ErrorColumn("q")
         assert value.to_yaml() == "{error_of: q}\n"
+
+    def test_sigma_conversion(self):
+        with self.subTest("gauss"):
+            value = base.ErrorColumn("q", "uncertainty", ("gaussian", "FWHM"))
+            self.assertEqual(value.to_sigma(), 1.0 / (2.0 * sqrt(2.0 * log(2.0))))
+        with self.subTest("uniform"):
+            value = base.ErrorColumn("q", "uncertainty", ("uniform", "FWHM"))
+            self.assertEqual(value.to_sigma(), 1.0 / sqrt(12.0))
+        with self.subTest("triangular"):
+            value = base.ErrorColumn("q", "uncertainty", ("triangular", "FWHM"))
+            self.assertEqual(value.to_sigma(), 1.0 / sqrt(6.0))
+        with self.subTest("lorentizan"):
+            value = base.ErrorColumn("q", "uncertainty", ("lorentzian", "FWHM"))
+            with self.assertRaises(ValueError):
+                value.to_sigma()
 
 
 class TestFile(unittest.TestCase):
