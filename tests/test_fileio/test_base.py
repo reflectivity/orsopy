@@ -355,14 +355,16 @@ class TestErrorColumn(unittest.TestCase):
         """
         Creation of a column.
         """
-        value = base.ErrorColumn("q", "uncertainty", ("triangular", "FWHM"))
+        value = base.ErrorColumn("q", "uncertainty", "FWHM", "triangular")
         assert value.error_of == "q"
         assert value.error_type == "uncertainty"
-        assert value.distribution == ("triangular", "FWHM")
-        value = base.ErrorColumn("q", "resolution", ("gaussian", "sigma"))
+        assert value.distribution == "triangular"
+        assert value.value_is == "FWHM"
+        value = base.ErrorColumn("q", "resolution", "sigma", "gaussian")
         assert value.error_of == "q"
         assert value.error_type == "resolution"
-        assert value.distribution == ("gaussian", "sigma")
+        assert value.distribution == "gaussian"
+        assert value.value_is == "sigma"
         assert value.name == "sq"
 
     def test_bad_type(self):
@@ -377,9 +379,9 @@ class TestErrorColumn(unittest.TestCase):
         Rejection of non-ASCII unit.
         """
         with self.assertWarns(RuntimeWarning):
-            _ = base.ErrorColumn("q", "uncertainty", ("undefined", "FWHM"))
+            _ = base.ErrorColumn("q", "uncertainty", "FWHM", "undefined")
         with self.assertWarns(RuntimeWarning):
-            _ = base.ErrorColumn("q", "uncertainty", ("triangular", "HWHM"))
+            _ = base.ErrorColumn("q", "uncertainty", "HWHM", "triangular")
         with self.assertWarns(RuntimeWarning):
             _ = base.ErrorColumn("q", "uncertainty", "wrong")
 
@@ -387,8 +389,8 @@ class TestErrorColumn(unittest.TestCase):
         """
         Transformation to yaml.
         """
-        value = base.ErrorColumn("q", "uncertainty", ("triangular", "FWHM"))
-        assert value.to_yaml() == "{error_of: q, error_type: uncertainty, distribution: [triangular, FWHM]}\n"
+        value = base.ErrorColumn("q", "uncertainty", "FWHM", "triangular")
+        assert value.to_yaml() == "{error_of: q, error_type: uncertainty, value_is: FWHM, distribution: triangular}\n"
 
     def test_minimal_to_yaml(self):
         """
@@ -399,16 +401,16 @@ class TestErrorColumn(unittest.TestCase):
 
     def test_sigma_conversion(self):
         with self.subTest("gauss"):
-            value = base.ErrorColumn("q", "uncertainty", ("gaussian", "FWHM"))
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "gaussian")
             self.assertEqual(value.to_sigma, 1.0 / (2.0 * sqrt(2.0 * log(2.0))))
         with self.subTest("uniform"):
-            value = base.ErrorColumn("q", "uncertainty", ("uniform", "FWHM"))
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "uniform")
             self.assertEqual(value.to_sigma, 1.0 / sqrt(12.0))
         with self.subTest("triangular"):
-            value = base.ErrorColumn("q", "uncertainty", ("triangular", "FWHM"))
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "triangular")
             self.assertEqual(value.to_sigma, 1.0 / sqrt(6.0))
         with self.subTest("lorentizan"):
-            value = base.ErrorColumn("q", "uncertainty", ("lorentzian", "FWHM"))
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "lorentzian")
             with self.assertRaises(ValueError):
                 value.to_sigma
 

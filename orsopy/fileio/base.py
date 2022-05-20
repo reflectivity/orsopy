@@ -613,9 +613,8 @@ class ErrorColumn(Header):
 
     error_of: str
     error_type: Optional[Literal["uncertainty", "resolution"]] = None
-    distribution: Optional[
-        Tuple[Literal["gaussian", "triangular", "uniform", "lorentzian"], Literal["sigma", "FWHM"]]
-    ] = None
+    value_is: Optional[Literal["sigma", "FWHM"]] = None
+    distribution: Optional[Literal["gaussian", "triangular", "uniform", "lorentzian"]] = None
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -638,24 +637,24 @@ class ErrorColumn(Header):
         Springer, London, UK:)
         Values and some references available on Wikipedia, too.
         """
-        if getattr(self, "distribution", None) and self.distribution[1] == "FWHM":
+        if self.value_is == "FWHM":
             from math import log, sqrt
 
-            if self.distribution[0] == "gaussian":
+            if self.distribution in ["gaussian", None]:
                 # Solving for the gaussian function = 0.5 yields:
                 return 1.0 / (2.0 * sqrt(2.0 * log(2.0)))
-            elif self.distribution[0] == "triangular":
+            elif self.distribution == "triangular":
                 # See solution of integral e.g. https://math.stackexchange.com/questions/4271314/
                 # what-is-the-proof-for-variance-of-triangular-distribution/4273147#4273147
                 # setting c=0 and a=b=FWHM for the symmetric triangle around 0.
                 return 1.0 / sqrt(6.0)
-            elif self.distribution[0] == "uniform":
+            elif self.distribution == "uniform":
                 # Variance is just the integral of x² from -0.5*FWHM to 0.5*FWHM => 1/12.
                 return 1.0 / sqrt(12.0)
-            elif self.distribution[0] == "lorentzian":
+            elif self.distribution == "lorentzian":
                 raise ValueError("Lorentzian distribution does not have a sigma value")
             else:
-                raise NotImplementedError(f"Unknown distribution {self.distribution[0]}")
+                raise NotImplementedError(f"Unknown distribution {self.distribution}")
         else:
             # Value is already sigma
             return 1.0
