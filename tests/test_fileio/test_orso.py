@@ -113,8 +113,8 @@ class TestOrso(unittest.TestCase):
             fileio.ErrorColumn("R"),
         ]
         info2.columns = info.columns
-        info.data_source.measurement.instrument_settings.polarization = fileio.Polarization.p
-        info2.data_source.measurement.instrument_settings.polarization = fileio.Polarization.m
+        info.data_source.measurement.instrument_settings.polarization = fileio.Polarization.po
+        info2.data_source.measurement.instrument_settings.polarization = fileio.Polarization.mo
         info.data_set = "up polarization"
         info2.data_set = "down polarization"
         info2.data_source.sample.comment = "this is a comment"

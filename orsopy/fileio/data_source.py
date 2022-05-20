@@ -79,8 +79,12 @@ class Polarization(str, Enum):
     """
 
     unpolarized = "unpolarized"
-    p = "p"
-    m = "m"
+    # half polairzed states
+    po = "po"
+    mo = "mo"
+    op = "op"
+    om = "om"
+    # full polarization analysis
     mm = "mm"
     mp = "mp"
     pm = "pm"

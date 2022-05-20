@@ -58,21 +58,14 @@ definitions:
         - type: 'null'
       distribution:
         anyOf:
-        - type: array
+        - type: string
         - type: 'null'
-        items:
-        - enum:
-          - gaussian
-          - triangular
-          - uniform
-          - lorentzian
-          type: string
-        - enum:
-          - sigma
-          - FWHM
-          type: string
-        maxItems: 2
-        minItems: 2
+        enum:
+        - gaussian
+        - triangular
+        - uniform
+        - lorentzian
+        - null
       error_of:
         anyOf:
         - type: string
@@ -84,6 +77,14 @@ definitions:
         enum:
         - uncertainty
         - resolution
+        - null
+      value_is:
+        anyOf:
+        - type: string
+        - type: 'null'
+        enum:
+        - sigma
+        - FWHM
         - null
     required:
     - error_of
@@ -260,8 +261,10 @@ definitions:
       beam, if a spin analyser is present.'
     enum:
     - unpolarized
-    - p
-    - m
+    - po
+    - mo
+    - op
+    - om
     - mm
     - mp
     - pm

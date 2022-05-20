@@ -403,8 +403,10 @@
       "description": "The first symbol indicates the magnetisation direction of the incident\nbeam. An optional second symbol indicates the direction of the scattered\nbeam, if a spin analyser is present.",
       "enum": [
         "unpolarized",
-        "p",
-        "m",
+        "po",
+        "mo",
+        "op",
+        "om",
         "mm",
         "mp",
         "pm",
@@ -950,30 +952,32 @@
             }
           ]
         },
-        "distribution": {
-          "minItems": 2,
-          "maxItems": 2,
-          "items": [
-            {
-              "enum": [
-                "gaussian",
-                "triangular",
-                "uniform",
-                "lorentzian"
-              ],
-              "type": "string"
-            },
-            {
-              "enum": [
-                "sigma",
-                "FWHM"
-              ],
-              "type": "string"
-            }
+        "value_is": {
+          "enum": [
+            "sigma",
+            "FWHM",
+            null
           ],
           "anyOf": [
             {
-              "type": "array"
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "distribution": {
+          "enum": [
+            "gaussian",
+            "triangular",
+            "uniform",
+            "lorentzian",
+            null
+          ],
+          "anyOf": [
+            {
+              "type": "string"
             },
             {
               "type": "null"

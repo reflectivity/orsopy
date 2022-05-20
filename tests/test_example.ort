@@ -43,7 +43,7 @@
 #                  resolution:
 #                      type: proportional
 #                      value: 0.022 # Delta lambda / lambda
-#             polarization: p
+#             polarization: po
 #         data_files:
 #             - file      : amor2020n001925.hdf
 #               timestamp : 2020-02-03T14:27:45+01:00
