@@ -36,7 +36,7 @@ class Experiment(Header):
     title: str
     instrument: str
     start_date: datetime
-    probe: Literal["neutrons", "x-rays"]
+    probe: Literal["neutron", "x-ray"]
     facility: Optional[str] = None
     proposalID: Optional[str] = None
     doi: Optional[str] = None
