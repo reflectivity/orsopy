@@ -7,6 +7,7 @@ import pathlib
 import unittest
 
 from datetime import datetime
+from math import log, sqrt
 from os.path import join as pjoin
 
 import pint
@@ -30,11 +31,12 @@ class TestValue(unittest.TestCase):
         assert value.magnitude == 1.0
         assert value.unit == "m"
 
-    def test_list(self):
+    def test_list_warning(self):
         """
         Creation of an object with a a list of values and a unit.
         """
-        value = base.Value([1, 2, 3], "m")
+        with self.assertWarns(RuntimeWarning):
+            value = base.Value([1, 2, 3], "m")
         assert_equal(value.magnitude, [1, 2, 3])
         assert value.unit == "m"
 
@@ -58,6 +60,10 @@ class TestValue(unittest.TestCase):
         """
         value = base.Value(None)
         assert value.to_yaml() == "{magnitude: null}\n"
+
+    def test_user_data(self):
+        value = base.Value(13.4, my_attr="hallo ORSO")
+        assert value.user_data == {"my_attr": "hallo ORSO"}
 
     def test_unit_conversion(self):
         value = base.Value(1.0, "mm")
@@ -140,11 +146,12 @@ class TestValueVector(unittest.TestCase):
         assert value.z == 3
         assert value.unit == "m"
 
-    def test_list(self):
+    def test_list_warns(self):
         """
         Creation of an object with three dimensions of lists and unit.
         """
-        value = base.ValueVector([1, 2], [2, 3], [3, 4], "m")
+        with self.assertWarns(RuntimeWarning):
+            value = base.ValueVector([1, 2], [2, 3], [3, 4], "m")
         assert_equal(value.x, [1, 2])
         assert_equal(value.y, [2, 3])
         assert_equal(value.z, [3, 4])
@@ -171,6 +178,16 @@ class TestValueVector(unittest.TestCase):
         value = base.ValueVector(1.0, 2.0, None, "m")
         assert value.to_yaml() == "x: 1.0\ny: 2.0\nz: null\nunit: m\n"
 
+    def test_unit_conversion(self):
+        value = base.ValueVector(1.0, 2.0, 3.0, "mm")
+        assert value.as_unit("m") == (1.0e-3, 2.0e-3, 3.0e-3)
+        value = base.ValueVector(1.0, 2.0, 3.0, "1/nm^3")
+        assert value.as_unit("1/angstrom^3") == (1.0e-3, 2.0e-3, 3.0e-3)
+
+        with self.assertRaises(pint.DimensionalityError):
+            value = base.ValueVector(1.0, 2.0, 3.0, "1/m")
+            value.as_unit("m")
+
 
 class TestValueRange(unittest.TestCase):
     """
@@ -186,11 +203,12 @@ class TestValueRange(unittest.TestCase):
         assert value.max == 2
         assert value.unit == "m"
 
-    def test_list(self):
+    def test_list_warns(self):
         """
         Creation of an object of a list of max and list of min and a unit.
         """
-        value = base.ValueRange([1, 2, 3], [2, 3, 4], "m")
+        with self.assertWarns(RuntimeWarning):
+            value = base.ValueRange([1, 2, 3], [2, 3, 4], "m")
         assert_equal(value.min, [1, 2, 3])
         assert_equal(value.max, [2, 3, 4])
         assert value.unit == "m"
@@ -223,6 +241,16 @@ class TestValueRange(unittest.TestCase):
         value = base.ValueRange(None, 1.0)
         assert value.to_yaml() == "{min: null, max: 1.0}\n"
 
+    def test_unit_conversion(self):
+        value = base.ValueRange(1.0, 2.0, "mm")
+        assert value.as_unit("m") == (1.0e-3, 2.0e-3)
+        value = base.ValueRange(1.0, 2.0, "1/nm^3")
+        assert value.as_unit("1/angstrom^3") == (1.0e-3, 2.0e-3)
+
+        with self.assertRaises(pint.DimensionalityError):
+            value = base.ValueRange(1.0, 2.0, "1/m")
+            value.as_unit("m")
+
 
 class TestPerson(unittest.TestCase):
     """
@@ -246,10 +274,10 @@ class TestPerson(unittest.TestCase):
         assert value.affiliation == "Ivy League University"
         assert value.contact == "jauser@ivy.edu"
 
-    def test_creation_with_list(self):
-        value = base.Person("Joe A. User", ["Ivy League University", "Great Neutron Factory"])
+    def test_creation_with_multiline(self):
+        value = base.Person("Joe A. User", "\n".join(["Ivy League University", "Great Neutron Factory"]))
         assert value.name == "Joe A. User"
-        assert value.affiliation == ["Ivy League University", "Great Neutron Factory"]
+        assert value.affiliation == "\n".join(["Ivy League University", "Great Neutron Factory"])
 
     def test_to_yaml(self):
         """
@@ -316,6 +344,75 @@ class TestColumn(unittest.TestCase):
         """
         value = base.Column("q", "1/angstrom")
         assert value.to_yaml() == "{name: q, unit: 1/angstrom}\n"
+
+
+class TestErrorColumn(unittest.TestCase):
+    """
+    Testing the Column class
+    """
+
+    def test_creation(self):
+        """
+        Creation of a column.
+        """
+        value = base.ErrorColumn("q", "uncertainty", "FWHM", "triangular")
+        assert value.error_of == "q"
+        assert value.error_type == "uncertainty"
+        assert value.distribution == "triangular"
+        assert value.value_is == "FWHM"
+        value = base.ErrorColumn("q", "resolution", "sigma", "gaussian")
+        assert value.error_of == "q"
+        assert value.error_type == "resolution"
+        assert value.distribution == "gaussian"
+        assert value.value_is == "sigma"
+        assert value.name == "sq"
+
+    def test_bad_type(self):
+        """
+        Rejection of non-ASCII unit.
+        """
+        with self.assertWarns(RuntimeWarning):
+            _ = base.ErrorColumn("q", "nm")
+
+    def test_bad_distribution(self):
+        """
+        Rejection of non-ASCII unit.
+        """
+        with self.assertWarns(RuntimeWarning):
+            _ = base.ErrorColumn("q", "uncertainty", "FWHM", "undefined")
+        with self.assertWarns(RuntimeWarning):
+            _ = base.ErrorColumn("q", "uncertainty", "HWHM", "triangular")
+        with self.assertWarns(RuntimeWarning):
+            _ = base.ErrorColumn("q", "uncertainty", "wrong")
+
+    def test_to_yaml(self):
+        """
+        Transformation to yaml.
+        """
+        value = base.ErrorColumn("q", "uncertainty", "FWHM", "triangular")
+        assert value.to_yaml() == "{error_of: q, error_type: uncertainty, value_is: FWHM, distribution: triangular}\n"
+
+    def test_minimal_to_yaml(self):
+        """
+        Transformation to yaml.
+        """
+        value = base.ErrorColumn("q")
+        assert value.to_yaml() == "{error_of: q}\n"
+
+    def test_sigma_conversion(self):
+        with self.subTest("gauss"):
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "gaussian")
+            self.assertEqual(value.to_sigma, 1.0 / (2.0 * sqrt(2.0 * log(2.0))))
+        with self.subTest("uniform"):
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "uniform")
+            self.assertEqual(value.to_sigma, 1.0 / sqrt(12.0))
+        with self.subTest("triangular"):
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "triangular")
+            self.assertEqual(value.to_sigma, 1.0 / sqrt(6.0))
+        with self.subTest("lorentizan"):
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "lorentzian")
+            with self.assertRaises(ValueError):
+                value.to_sigma
 
 
 class TestFile(unittest.TestCase):
