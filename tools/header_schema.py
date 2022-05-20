@@ -2,34 +2,37 @@
 Generates the schema for an ORSO file,
 based on the Orso class (from orsopy.fileio.orso)
 """
-from copy import deepcopy
-import os
 import functools
-from typing import Dict, List, Any
+import os
+
+from copy import deepcopy
+from typing import Any, Dict, List
 
 from pydantic.dataclasses import dataclass as _dataclass
 
 
 class PydanticConfig:
     """ for schema generation, otherwise unused """
+
     @staticmethod
     def schema_extra(schema: Dict[str, Any]) -> None:
-        for prop, value in schema.get('properties', {}).items():
+        for prop, value in schema.get("properties", {}).items():
             value.pop("title", None)
 
             # make the schema accept None as a value for any of the
             # Header class attributes.
-            if 'enum' in value:
-                value['enum'].append(None)
+            if "enum" in value:
+                value["enum"].append(None)
 
-            if 'type' in value:
-                value['anyOf'] = [{'type': value.pop('type')}]
-                value['anyOf'].append({'type': 'null'})
+            if "type" in value:
+                value["anyOf"] = [{"type": value.pop("type")}]
+                value["anyOf"].append({"type": "null"})
             elif "anyOf" in value:
-                value['anyOf'].append({'type': 'null'})
+                value["anyOf"].append({"type": "null"})
             # only one $ref e.g. from other model
-            elif '$ref' in value:
-                value['anyOf'] = [{'$ref': value.pop('$ref')}]
+            elif "$ref" in value:
+                value["anyOf"] = [{"$ref": value.pop("$ref")}]
+
 
 pydantic_dataclass = functools.partial(_dataclass, config=PydanticConfig)
 
@@ -43,19 +46,21 @@ column_schema = {
     "title": "<cname>",
     "type": "object",
     "properties": {
-        "name": {
-            "enum": [
-                "<cname>",
-            ]
-        },
+        "name": {"enum": ["<cname>"]},
         "unit": {"enum": ["1/angstrom", "1/nm", None]},
-        "dimension": {
-            "dimension": "dimension of column",
-            "anyOf": [{"type": "string"}, {"type": "null"}],
-        },
+        "dimension": {"dimension": "dimension of column", "anyOf": [{"type": "string"}, {"type": "null"}]},
         "comment": {"anyOf": [{"type": "string"}, {"type": "null"}]},
     },
     "required": ["name"],
+}
+error_schema = {
+    "title": "<cname>",
+    "type": "object",
+    "properties": {
+        "error_of": {"enum": ["<cname>"]},
+        "error_type": {"enum": ["uncertainty", "resolution", "null"], "anyOf": [{"type": "string"}, {"type": "null"}]},
+    },
+    "required": ["error_of"],
 }
 
 
@@ -73,28 +78,31 @@ def add_column_ordering(schema: Dict, column_order: List[str] = COLUMN_ORDER):
     """
     columns = {}
     for cname in column_order:
-        cdef = deepcopy(column_schema)
-        cdef["title"] = cname
-        cdef["properties"]["name"]["enum"][0] = cname
-        columns[f"{cname}_column"] = cdef
+        if cname.startswith("s"):
+            cdef = deepcopy(error_schema)
+            cdef["title"] = cname
+            cdef["properties"]["error_of"]["enum"][0] = cname[1:]
+            columns[f"{cname}_column"] = cdef
+        else:
+            cdef = deepcopy(column_schema)
+            cdef["title"] = cname
+            cdef["properties"]["name"]["enum"][0] = cname
+            columns[f"{cname}_column"] = cdef
 
     schema["definitions"].update(columns)
-    schema["properties"]["columns"]["items"] = [
-        {"$ref": f"#/definitions/{cname}_column"} for cname in column_order
-    ]
-    schema["properties"]["columns"]["additionalItems"] = {
-        "$ref": "#/definitions/Column"
-    }
+    schema["properties"]["columns"]["items"] = [{"$ref": f"#/definitions/{cname}_column"} for cname in column_order]
+    schema["properties"]["columns"]["additionalItems"] = {"$ref": "#/definitions/Column"}
 
-        
 
 def main():
     # replace the dataclass function in the local import:
     from orsopy import dataclasses
+
     dataclasses.dataclass = pydantic_dataclass
 
     import orsopy
-    from orsopy.fileio.orso import Orso, ORSO_VERSION
+
+    from orsopy.fileio.orso import ORSO_VERSION, Orso
 
     schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -111,18 +119,14 @@ def main():
     print(f"writing JSON schema: {json_output_file}")
     import json
 
-    open(json_output_file, "wt").write(
-        json.dumps(schema, indent=2)
-    )
+    open(json_output_file, "wt").write(json.dumps(schema, indent=2))
 
     # generate yaml schema, and write out:
     yaml_output_file = os.path.join(schema_path, "refl_header.schema.yaml")
     print(f"writing YAML schema: {yaml_output_file}")
     import yaml
 
-    open(yaml_output_file, "w").write(
-        yaml.dump(schema)
-    )
+    open(yaml_output_file, "w").write(yaml.dump(schema))
 
 
 if __name__ == "__main__":

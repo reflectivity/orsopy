@@ -8,7 +8,8 @@ from typing import Any, List, Optional, TextIO, Union
 import numpy as np
 import yaml
 
-from .base import Column, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data, orsodataclass
+from .base import (Column, ErrorColumn, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data,
+                   orsodataclass)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -36,7 +37,7 @@ class Orso(Header):
 
     data_source: DataSource
     reduction: Reduction
-    columns: List[Column]
+    columns: List[Union[Column, ErrorColumn]]
     data_set: Optional[Union[int, str]] = None
 
     __repr__ = Header._staggered_repr
@@ -45,7 +46,7 @@ class Orso(Header):
         self,
         data_source: DataSource,
         reduction: Reduction,
-        columns: List[Column],
+        columns: List[Union[Column, ErrorColumn]],
         data_set: Optional[Union[int, str]] = None,
         **user_data,
     ):
@@ -89,10 +90,13 @@ class Orso(Header):
         """
         out = "# "
         for ci in self.columns:
-            if ci.unit is None:
-                out += f"{ci.name:<23}"
+            if isinstance(ci, Column):
+                if ci.unit is None:
+                    out += f"{ci.name:<23}"
+                else:
+                    out += f"{f'{ci.name} ({ci.unit})':<23}"
             else:
-                out += f"{f'{ci.name} ({ci.unit})':<23}"
+                out += f"s{ci.error_of:<22}"
             if ci is self.columns[0]:
                 # strip two characters from first column to align
                 out = out[:-4]
