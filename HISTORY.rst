@@ -2,6 +2,18 @@
 History
 =======
 
+0.1.0 (2022-05-19)
+------------------
+
+* Revise .ort file header speicifcation according to ORSO discussions.
+* Implement option for automatic unit conversion based on pint library
+* Improve yaml export to support compact on-line layout for e.g. Value
+* Add a ErrorColumn for clear separation between data and error columns
+  and allow specification of type/distribution of error with conversion
+  factors to get standard deviation (sigma)
+* Add a ComplexValue class
+* Fix some type conversions where e.g. lists have been converted to str
+
 0.0.5 (2022-02-04)
 ------------------
 
