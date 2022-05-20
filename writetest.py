@@ -33,7 +33,7 @@ def main():
         data_source=fileio.DataSource(
             sample=fileio.Sample(name="My Sample", type="solid", description="Something descriptive",),
             experiment=fileio.Experiment(
-                title="Main experiment", instrument="Reflectometer", date=datetime.now(), probe="x-rays",
+                title="Main experiment", instrument="Reflectometer", date=datetime.now(), probe="x-ray",
             ),
             owner=fileio.Person("someone", "important"),
             measurement=fileio.Measurement(

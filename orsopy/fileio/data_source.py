@@ -25,8 +25,8 @@ class Experiment(Header):
     :param title: Proposal or project title.
     :param instrument: Reflectometer identifier.
     :param start_date: Start date for the experiment.
-    :param probe: Radiation probe, either :code:`'neutrons'` or
-        :code:`'x-rays'`.
+    :param probe: Radiation probe, either :code:`'neutron'` or
+        :code:`'x-ray'`.
     :param facility: Facility where the experiment was performed.
     :param proposalID: Identifier for experiment at a facility.
     :param doi: Digital object identifier for the experiment, possibly

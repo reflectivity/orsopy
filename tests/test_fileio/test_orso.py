@@ -27,7 +27,7 @@ class TestOrso(unittest.TestCase):
         """
         Creation of Orso object.
         """
-        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutrons")
+        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutron")
         s = Sample("The sample")
         inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"))
         df = [File("README.rst", None)]
@@ -67,7 +67,7 @@ class TestOrso(unittest.TestCase):
         """
         Creation of Orso object with a non-zero data_set.
         """
-        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutrons")
+        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutron")
         s = Sample("The sample")
         inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"))
         df = [File("README.rst", None)]
@@ -129,7 +129,7 @@ class TestOrso(unittest.TestCase):
                     title="Main experiment",
                     instrument="Reflectometer",
                     start_date=datetime.now().strftime("%Y-%m-%d"),
-                    probe="x-rays",
+                    probe="x-ray",
                 ),
                 owner=fileio.Person("someone", "important"),
                 measurement=fileio.Measurement(

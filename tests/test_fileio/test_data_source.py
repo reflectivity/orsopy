@@ -19,11 +19,11 @@ class TestExperiment(unittest.TestCase):
         """
         Creation with minimal set.
         """
-        value = data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-rays")
+        value = data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-ray")
         assert value.title == "My First Experiment"
         assert value.instrument == "A Lab Instrument"
         assert value.start_date == datetime(1992, 7, 14)
-        assert value.probe == "x-rays"
+        assert value.probe == "x-ray"
         assert value.facility is None
         assert value.proposalID is None
         assert value.doi is None
@@ -32,12 +32,12 @@ class TestExperiment(unittest.TestCase):
         """
         Transformation to yaml with minimal set.
         """
-        value = data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-rays")
+        value = data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-ray")
         assert (
             value.to_yaml()
             == "title: My First Experiment\n"
             + "instrument: A Lab Instrument\nstart_date: 1992-07-14T00:00:00"
-            + "\nprobe: x-rays\n"
+            + "\nprobe: x-ray\n"
         )
 
     def test_creation_optionals(self):
@@ -48,7 +48,7 @@ class TestExperiment(unittest.TestCase):
             "My First Neutron Experiment",
             "TAS8",
             datetime(1992, 7, 14),
-            "neutrons",
+            "neutron",
             facility="Risoe",
             proposalID="abc123",
             doi="10.0000/abc1234",
@@ -56,7 +56,7 @@ class TestExperiment(unittest.TestCase):
         assert value.title == "My First Neutron Experiment"
         assert value.instrument == "TAS8"
         assert value.start_date == datetime(1992, 7, 14)
-        assert value.probe == "neutrons"
+        assert value.probe == "neutron"
         assert value.facility == "Risoe"
         assert value.proposalID == "abc123"
         assert value.doi == "10.0000/abc1234"
@@ -69,7 +69,7 @@ class TestExperiment(unittest.TestCase):
             "My First Neutron Experiment",
             "TAS8",
             datetime(1992, 7, 14),
-            "neutrons",
+            "neutron",
             facility="Risoe",
             proposalID="abc123",
             doi="10.0000/abc1234",
@@ -77,7 +77,7 @@ class TestExperiment(unittest.TestCase):
         assert value.to_yaml() == (
             "title: My First Neutron Experiment\n"
             "instrument: TAS8\nstart_date: 1992-07-14T00:00:00"
-            "\nprobe: neutrons\nfacility: Risoe\nproposalID: "
+            "\nprobe: neutron\nfacility: Risoe\nproposalID: "
             "abc123\ndoi: 10.0000/abc1234\n"
         )
 
@@ -157,7 +157,7 @@ class TestDataSource(unittest.TestCase):
 
         value = data_source.DataSource(
             base.Person("A Person", "Some Uni"),
-            data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-rays"),
+            data_source.Experiment("My First Experiment", "A Lab Instrument", datetime(1992, 7, 14), "x-ray"),
             data_source.Sample("A Perfect Sample"),
             m,
         )
@@ -166,7 +166,7 @@ class TestDataSource(unittest.TestCase):
         assert value.experiment.title == "My First Experiment"
         assert value.experiment.instrument == "A Lab Instrument"
         assert value.experiment.start_date == datetime(1992, 7, 14)
-        assert value.experiment.probe == "x-rays"
+        assert value.experiment.probe == "x-ray"
         assert value.sample.name == "A Perfect Sample"
 
 

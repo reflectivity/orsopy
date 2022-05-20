@@ -163,8 +163,8 @@
         },
         "probe": {
           "enum": [
-            "neutrons",
-            "x-rays",
+            "neutron",
+            "x-ray",
             null
           ],
           "anyOf": [

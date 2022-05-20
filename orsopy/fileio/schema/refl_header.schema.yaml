@@ -113,8 +113,8 @@ definitions:
         - type: string
         - type: 'null'
         enum:
-        - neutrons
-        - x-rays
+        - neutron
+        - x-ray
         - null
       proposalID:
         anyOf:
