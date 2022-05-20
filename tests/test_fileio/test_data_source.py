@@ -223,16 +223,22 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(
             base.Value(4.0, "deg"),
             base.ValueRange(2.0, 12.0, "angstrom"),
-            polarization="p",
+            polarization="po",
             configuration="liquid surface",
         )
         assert (
             value.to_yaml()
             == "incident_angle: {magnitude: 4.0, unit: deg}\n"
             + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
-            + "polarization: p\n"
+            + "polarization: po\n"
             + "configuration: liquid surface\n"
         )
+
+    def test_wrong_polarization(self):
+        with self.assertWarns(RuntimeWarning):
+            data_source.InstrumentSettings(
+                base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"), polarization="p",
+            )
 
 
 class TestMeasurement(unittest.TestCase):

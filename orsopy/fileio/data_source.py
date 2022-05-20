@@ -114,7 +114,9 @@ class InstrumentSettings(Header):
     wavelength: Union[Value, ValueRange]
     polarization: Optional[Union[Polarization, ValueVector]] = field(
         default=None,
-        metadata={"description": "Polarization described as unpolarized/ p " "/ m / pp / pm / mp / mm / vector"},
+        metadata={
+            "description": "Polarization described as unpolarized/ po/ mo / op / om / pp / pm / mp / mm / vector"
+        },
     )
     configuration: Optional[str] = field(
         default=None, metadata={"description": "half / full polarized | liquid_surface | etc"}
