@@ -8,7 +8,11 @@ import warnings
 
 from typing import Any, Dict, List, Optional, Union
 
+from ..utils.chemical_formula import Formula
+from ..utils.density_resolver import DensityResolver
 from .base import ComplexValue, Header, Value, orsodataclass
+
+DENSITY_RESOLVERS: List[DensityResolver] = []
 
 
 def find_idx(string, start, value):
@@ -69,8 +73,10 @@ class Material(Header):
         if self.sld is not None or self.mass_density is not None or self.number_density is not None:
             # this material already contains density information
             return
-        from orsopy.slddb import api
-        from orsopy.slddb.material import Formula
+        if len(DENSITY_RESOLVERS) == 0:
+            from ..utils.resolver_slddb import ResolverSLDDB
+
+            DENSITY_RESOLVERS.append(ResolverSLDDB())
 
         if self.formula in CACHED_MATERIALS:
             self.number_density = CACHED_MATERIALS[self.formula][0]
@@ -79,31 +85,30 @@ class Material(Header):
 
         formula = Formula(self.formula)
         # first search for formula itself
-        res = api.search(formula=formula)
-        if len(res) > 0:
-            m = api.material(res[0]["ID"])
-            self.number_density = Value(magnitude=1e3 * m.fu_dens, unit="1/nm^3")
-            self.comment = f"density from ORSO SLD db ID={res[0]['ID']}"
-            CACHED_MATERIALS[self.formula] = (self.number_density, self.comment)
-            return
+        for ri in DENSITY_RESOLVERS:
+            try:
+                dens = ri.resolve_formula(formula)
+            except ValueError:
+                pass
+            else:
+                self.number_density = Value(magnitude=dens, unit="1/nm^3")
+                CACHED_MATERIALS[self.formula] = (self.number_density, ri.comment)
+                return
         # mix elemental density to approximate alloys
-        n = 0.0
-        dens = 0.0
-        for i in range(len(formula)):
-            res = api.search(formula=formula[i][0])
-            m = api.material(res[0]["ID"])
-            n += formula[i][1]
-            dens += 1e3 * m.fu_dens
-        dens /= n * len(formula)
-        self.number_density = Value(magnitude=dens, unit="1/nm^3")
-        self.comment = "density from average element density"
-        CACHED_MATERIALS[self.formula] = (self.number_density, self.comment)
+        for ri in DENSITY_RESOLVERS:
+            try:
+                dens = ri.resolve_formula(formula)
+            except ValueError:
+                pass
+            else:
+                self.number_density = Value(magnitude=dens, unit="1/nm^3")
+                CACHED_MATERIALS[self.formula] = (self.number_density, ri.comment)
 
-    def get_sld(self) -> complex:
+    def get_sld(self, xray_energy=None) -> complex:
         if self.sld is not None:
             return self.sld.as_unit("1/angstrom^2") + 0j
 
-        from orsopy.slddb.material import Formula, Material, get_element
+        from orsopy.slddb.material import Material, get_element
 
         formula = Formula(self.formula)
         if self.mass_density is not None:
@@ -111,13 +116,19 @@ class Material(Header):
                 [(get_element(element), amount) for element, amount in formula],
                 dens=self.mass_density.as_unit("g/cm^3"),
             )
-            return material.rho_n
+            if xray_energy is None:
+                return material.rho_n
+            else:
+                return material.rho_of_E(xray_energy)
         elif self.number_density is not None:
             material = Material(
                 [(get_element(element), amount) for element, amount in formula],
                 fu_dens=self.number_density.as_unit("1/angstrom^3"),
             )
-            return material.rho_n
+            if xray_energy is None:
+                return material.rho_n
+            else:
+                return material.rho_of_E(xray_energy)
         else:
             return 0.0j
 
@@ -157,8 +168,8 @@ class Composit(Header):
             comment=f"composition material: {mix_str}",
         )
 
-    def get_sld(self):
-        return self.material.get_sld()
+    def get_sld(self, xray_enerty=None):
+        return self.material.get_sld(xray_enerty=xray_enerty)
 
 
 SPECIAL_MATERIALS = {
