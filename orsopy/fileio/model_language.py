@@ -168,8 +168,8 @@ class Composit(Header):
             comment=f"composition material: {mix_str}",
         )
 
-    def get_sld(self, xray_enerty=None):
-        return self.material.get_sld(xray_enerty=xray_enerty)
+    def get_sld(self, xray_energy=None):
+        return self.material.get_sld(xray_energy=xray_energy)
 
 
 SPECIAL_MATERIALS = {
