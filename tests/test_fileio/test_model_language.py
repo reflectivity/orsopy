@@ -66,7 +66,7 @@ class TestMaterial(unittest.TestCase):
             m = ml.Material(formula=element)
             m.generate_density()
             assert m.number_density is not None
-            assert m.comment == "density from average element density"
+            assert m.comment == "density from average element density from ORSO SLD db"
 
     def test_sld(self):
         m = ml.Material(sld=ComplexValue(3.4e-6, -2e-6, "1/angstrom^2"))

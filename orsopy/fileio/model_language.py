@@ -92,17 +92,22 @@ class Material(Header):
                 pass
             else:
                 self.number_density = Value(magnitude=dens, unit="1/nm^3")
+                self.comment = ri.comment
                 CACHED_MATERIALS[self.formula] = (self.number_density, ri.comment)
                 return
         # mix elemental density to approximate alloys
         for ri in DENSITY_RESOLVERS:
             try:
-                dens = ri.resolve_formula(formula)
+                dens = ri.resolve_elemental(formula)
             except ValueError:
                 pass
             else:
                 self.number_density = Value(magnitude=dens, unit="1/nm^3")
+                self.comment = ri.comment
                 CACHED_MATERIALS[self.formula] = (self.number_density, ri.comment)
+                return
+        self.number_density = Value(magnitude=0.0, unit="1/nm^3")
+        self.comment = "could not locate density information for material"
 
     def get_sld(self, xray_energy=None) -> complex:
         if self.sld is not None:
