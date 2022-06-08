@@ -49,7 +49,7 @@ DB_MATERIALS_COLUMNS = [
     ("name", cstr, None, "*"),
     ("description", cstr, None, None),
     ("formula", cformula, None, "*"),
-    ("HR_fomula", cstr, None, None),
+    ("HR_formula", cstr, None, None),
     ("density", cposfloat, None, "g/cm³ **"),
     ("FU_volume", cposfloat, None, "Å³ **"),
     ("SLD_n", ccomplex, None, "Å⁻² **"),
