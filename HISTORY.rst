@@ -2,7 +2,14 @@
 History
 =======
 
-0.1.0 (2022-06-08)
+1.0.0 (2022-06-10)
+------------------
+
+* ORSO general assembly has voted to release the first version of orsopy together with the
+  text representation of the text file (.ort) specification.
+  See https://www.reflectometry.org/workshops/workshop_2022/
+
+0.1.1 (2022-06-08)
 ------------------
 
 * Fix missing data files in distribution
