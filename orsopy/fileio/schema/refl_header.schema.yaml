@@ -1,4 +1,4 @@
-$id: https://raw.githubusercontent.com/reflectivity/orsopy/v0.1/orsopy/fileio/schema/refl_header.schema.json
+$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.0/orsopy/fileio/schema/refl_header.schema.json
 $schema: http://json-schema.org/draft-07/schema#
 definitions:
   Column:
@@ -178,8 +178,8 @@ definitions:
         - $ref: '#/definitions/Polarization'
         - $ref: '#/definitions/ValueVector'
         - type: 'null'
-        description: Polarization described as unpolarized/ p / m / pp / pm / mp /
-          mm / vector
+        description: Polarization described as unpolarized/ po/ mo / op / om / pp
+          / pm / mp / mm / vector
       wavelength:
         anyOf:
         - $ref: '#/definitions/Value'

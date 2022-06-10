@@ -13,7 +13,7 @@ from .base import (Column, ErrorColumn, Header, _dict_diff, _nested_update, _pos
 from .data_source import DataSource
 from .reduction import Reduction
 
-ORSO_VERSION = "0.1"
+ORSO_VERSION = "1.0"
 ORSO_DESIGNATE = (
     f"# ORSO reflectivity data file | {ORSO_VERSION} standard " "| YAML encoding | https://www.reflectometry.org/"
 )
