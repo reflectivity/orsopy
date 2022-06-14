@@ -359,9 +359,7 @@ class Header:
             if child_name.startswith("_") or (value is None and child_name in self._orso_optionals):
                 continue
 
-            if isinstance(value, Column):
-                pass
-            elif value.__class__ in ORSO_DATACLASSES.values():
+            if value.__class__ in ORSO_DATACLASSES.values():
                 value.to_nexus(root=group, name=child_name)
             elif isinstance(value, (list, tuple)):
                 child_group = group.create_group(child_name)
