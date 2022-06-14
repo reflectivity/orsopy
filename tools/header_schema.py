@@ -23,8 +23,7 @@ class PydanticConfig:
                 value['enum'].append(None)
 
             if 'type' in value:
-                value['anyOf'] = [{'type': value.pop('type')}]
-                value['anyOf'].append({'type': 'null'})
+                value['type'] = [value.pop('type'), "null"]
             elif "anyOf" in value:
                 value['anyOf'].append({'type': 'null'})
             # only one $ref e.g. from other model
