@@ -140,7 +140,7 @@ class Measurement(Header):
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
     additional_files: Optional[List[Union[File, str]]] = None
-    scheme: Optional[Union[Literal["angle- and energy-dispersive", "angle-dispersive", "energy-dispersive"]]] = None
+    scheme: Optional[Literal["angle- and energy-dispersive", "angle-dispersive", "energy-dispersive"]] = None
 
     __repr__ = Header._staggered_repr
 
