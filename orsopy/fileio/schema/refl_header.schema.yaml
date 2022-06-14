@@ -4,23 +4,23 @@ definitions:
   Column:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       dimension:
-        anyOf:
-        - type: string
-        - type: 'null'
         dimension: A description of the column
+        type:
+        - string
+        - 'null'
       name:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       unit:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: SI unit string
+        type:
+        - string
+        - 'null'
     required:
     - name
     title: Column
@@ -28,9 +28,9 @@ definitions:
   DataSource:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       experiment:
         anyOf:
         - $ref: '#/definitions/Experiment'
@@ -53,39 +53,39 @@ definitions:
   ErrorColumn:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       distribution:
-        anyOf:
-        - type: string
-        - type: 'null'
         enum:
         - gaussian
         - triangular
         - uniform
         - lorentzian
         - null
+        type:
+        - string
+        - 'null'
       error_of:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       error_type:
-        anyOf:
-        - type: string
-        - type: 'null'
         enum:
         - uncertainty
         - resolution
         - null
+        type:
+        - string
+        - 'null'
       value_is:
-        anyOf:
-        - type: string
-        - type: 'null'
         enum:
         - sigma
         - FWHM
         - null
+        type:
+        - string
+        - 'null'
     required:
     - error_of
     title: ErrorColumn
@@ -93,42 +93,42 @@ definitions:
   Experiment:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       doi:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       facility:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       instrument:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       probe:
-        anyOf:
-        - type: string
-        - type: 'null'
         enum:
         - neutron
         - x-ray
         - null
+        type:
+        - string
+        - 'null'
       proposalID:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       start_date:
-        anyOf:
-        - type: string
-        - type: 'null'
         format: date-time
+        type:
+        - string
+        - 'null'
       title:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
     required:
     - title
     - instrument
@@ -139,20 +139,20 @@ definitions:
   File:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       file:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       timestamp:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: Last modified timestamp. If it's not specified, then an attempt
           will be made to check on the file itself
         format: date-time
+        type:
+        - string
+        - 'null'
     required:
     - file
     title: File
@@ -160,14 +160,14 @@ definitions:
   InstrumentSettings:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       configuration:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: half / full polarized | liquid_surface | etc
+        type:
+        - string
+        - 'null'
       incident_angle:
         anyOf:
         - $ref: '#/definitions/Value'
@@ -193,37 +193,37 @@ definitions:
   Measurement:
     properties:
       additional_files:
-        anyOf:
-        - type: array
-        - type: 'null'
         items:
           anyOf:
           - $ref: '#/definitions/File'
           - type: string
+        type:
+        - array
+        - 'null'
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       data_files:
-        anyOf:
-        - type: array
-        - type: 'null'
         items:
           anyOf:
           - $ref: '#/definitions/File'
           - type: string
+        type:
+        - array
+        - 'null'
       instrument_settings:
         anyOf:
         - $ref: '#/definitions/InstrumentSettings'
       scheme:
-        anyOf:
-        - type: string
-        - type: 'null'
         enum:
         - angle- and energy-dispersive
         - angle-dispersive
         - energy-dispersive
         - null
+        type:
+        - string
+        - 'null'
     required:
     - instrument_settings
     - data_files
@@ -232,22 +232,22 @@ definitions:
   Person:
     properties:
       affiliation:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       contact:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: Contact (email) address
+        type:
+        - string
+        - 'null'
       name:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
     required:
     - name
     - affiliation
@@ -320,47 +320,47 @@ definitions:
   Reduction:
     properties:
       binary:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: Path to full information file
+        type:
+        - string
+        - 'null'
       call:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: The command line call used
+        type:
+        - string
+        - 'null'
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       computer:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: Computer used for reduction
+        type:
+        - string
+        - 'null'
       corrections:
-        anyOf:
-        - type: array
-        - type: 'null'
         items:
           type: string
+        type:
+        - array
+        - 'null'
       creator:
         anyOf:
         - $ref: '#/definitions/Person'
       script:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: Path to reduction script or notebook
+        type:
+        - string
+        - 'null'
       software:
         anyOf:
         - $ref: '#/definitions/Software'
       timestamp:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: Timestamp string, formatted as ISO 8601 datetime
         format: date-time
+        type:
+        - string
+        - 'null'
     required:
     - software
     title: Reduction
@@ -368,36 +368,36 @@ definitions:
   Sample:
     properties:
       category:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       composition:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       description:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       environment:
-        anyOf:
-        - type: array
-        - type: 'null'
         items:
           type: string
+        type:
+        - array
+        - 'null'
       name:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       sample_parameters:
-        anyOf:
-        - type: object
-        - type: 'null'
         description: Using keys for parameters and Value* objects for values.
+        type:
+        - object
+        - 'null'
     required:
     - name
     title: Sample
@@ -405,21 +405,21 @@ definitions:
   Software:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       name:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       platform:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       version:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
     required:
     - name
     title: Software
@@ -427,18 +427,18 @@ definitions:
   Value:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       magnitude:
-        anyOf:
-        - type: number
-        - type: 'null'
+        type:
+        - number
+        - 'null'
       unit:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: SI unit string
+        type:
+        - string
+        - 'null'
     required:
     - magnitude
     title: Value
@@ -446,22 +446,22 @@ definitions:
   ValueRange:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       max:
-        anyOf:
-        - type: number
-        - type: 'null'
+        type:
+        - number
+        - 'null'
       min:
-        anyOf:
-        - type: number
-        - type: 'null'
+        type:
+        - number
+        - 'null'
       unit:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: SI unit string
+        type:
+        - string
+        - 'null'
     required:
     - min
     - max
@@ -470,26 +470,26 @@ definitions:
   ValueVector:
     properties:
       comment:
-        anyOf:
-        - type: string
-        - type: 'null'
+        type:
+        - string
+        - 'null'
       unit:
-        anyOf:
-        - type: string
-        - type: 'null'
         description: SI unit string
+        type:
+        - string
+        - 'null'
       x:
-        anyOf:
-        - type: number
-        - type: 'null'
+        type:
+        - number
+        - 'null'
       y:
-        anyOf:
-        - type: number
-        - type: 'null'
+        type:
+        - number
+        - 'null'
       z:
-        anyOf:
-        - type: number
-        - type: 'null'
+        type:
+        - number
+        - 'null'
     required:
     - x
     - y
@@ -534,18 +534,18 @@ properties:
   columns:
     additionalItems:
       $ref: '#/definitions/Column'
-    anyOf:
-    - type: array
-    - type: 'null'
     items:
     - $ref: '#/definitions/Qz_column'
     - $ref: '#/definitions/R_column'
     - $ref: '#/definitions/sR_column'
     - $ref: '#/definitions/sQz_column'
+    type:
+    - array
+    - 'null'
   comment:
-    anyOf:
-    - type: string
-    - type: 'null'
+    type:
+    - string
+    - 'null'
   data_set:
     anyOf:
     - type: integer

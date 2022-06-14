@@ -33,13 +33,9 @@
           "$ref": "#/definitions/sQz_column"
         }
       ],
-      "anyOf": [
-        {
-          "type": "array"
-        },
-        {
-          "type": "null"
-        }
+      "type": [
+        "array",
+        "null"
       ],
       "additionalItems": {
         "$ref": "#/definitions/Column"
@@ -59,13 +55,9 @@
       ]
     },
     "comment": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
+      "type": [
+        "string",
+        "null"
       ]
     }
   },
@@ -80,44 +72,28 @@
       "type": "object",
       "properties": {
         "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "affiliation": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "contact": {
           "description": "Contact (email) address",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -131,34 +107,22 @@
       "type": "object",
       "properties": {
         "title": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "instrument": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "start_date": {
           "format": "date-time",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "probe": {
@@ -167,53 +131,33 @@
             "x-ray",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "facility": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "proposalID": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "doi": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -229,77 +173,49 @@
       "type": "object",
       "properties": {
         "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "category": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "composition": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "environment": {
           "items": {
             "type": "string"
           },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "array",
+            "null"
           ]
         },
         "sample_parameters": {
           "description": "Using keys for parameters and Value* objects for values.",
-          "anyOf": [
-            {
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "object",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -312,34 +228,22 @@
       "type": "object",
       "properties": {
         "magnitude": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "unit": {
           "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -352,44 +256,28 @@
       "type": "object",
       "properties": {
         "min": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "max": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "unit": {
           "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -419,54 +307,34 @@
       "type": "object",
       "properties": {
         "x": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "y": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "z": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "unit": {
           "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -522,23 +390,15 @@
         },
         "configuration": {
           "description": "half / full polarized | liquid_surface | etc",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -552,35 +412,23 @@
       "type": "object",
       "properties": {
         "file": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "timestamp": {
           "description": "Last modified timestamp. If it's not specified, then an attempt will be made to check on the file itself",
           "format": "date-time",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -610,13 +458,9 @@
               }
             ]
           },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "array",
+            "null"
           ]
         },
         "additional_files": {
@@ -630,13 +474,9 @@
               }
             ]
           },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "array",
+            "null"
           ]
         },
         "scheme": {
@@ -646,23 +486,15 @@
             "energy-dispersive",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -704,13 +536,9 @@
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -726,43 +554,27 @@
       "type": "object",
       "properties": {
         "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "version": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "platform": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -784,13 +596,9 @@
         "timestamp": {
           "description": "Timestamp string, formatted as ISO 8601 datetime",
           "format": "date-time",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "creator": {
@@ -804,67 +612,43 @@
           "items": {
             "type": "string"
           },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "array",
+            "null"
           ]
         },
         "computer": {
           "description": "Computer used for reduction",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "call": {
           "description": "The command line call used",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "script": {
           "description": "Path to reduction script or notebook",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "binary": {
           "description": "Path to full information file",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -877,45 +661,29 @@
       "type": "object",
       "properties": {
         "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "unit": {
           "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "dimension": {
           "dimension": "A description of the column",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -928,13 +696,9 @@
       "type": "object",
       "properties": {
         "error_of": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "error_type": {
@@ -943,13 +707,9 @@
             "resolution",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "value_is": {
@@ -958,13 +718,9 @@
             "FWHM",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "distribution": {
@@ -975,23 +731,15 @@
             "lorentzian",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
