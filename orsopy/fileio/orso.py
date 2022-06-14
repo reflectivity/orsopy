@@ -3,7 +3,7 @@ Implementation of the top level class for the ORSO header.
 """
 
 from dataclasses import dataclass
-from typing import Any, BinaryIO, List, Optional, TextIO, Union
+from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 
 import numpy as np
 import yaml
@@ -160,7 +160,7 @@ class OrsoDataset:
     """
 
     info: Orso
-    data: Any
+    data: Union[np.ndarray, Sequence[np.ndarray], Sequence[Sequence]]
 
     def __post_init__(self):
         if len(self.data) != len(self.info.columns):
@@ -340,16 +340,21 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
             entry = f.create_group(info.data_set)
             entry.attrs["ORSO_class"] = "OrsoDataset"
             entry.attrs["NX_class"] = "NXentry"
+            entry.attrs["default"] = "plottable_data"
             info.to_nexus(root=entry, name="info")
             data_group = entry.create_group("data")
-            data_group.attrs["NX_class"] = "NXdata"
-            data_group.attrs["list"] = 1
-            data_group.attrs["axes"] = [info.columns[0].name]
-            data_group.attrs["signal"] = info.columns[1].name
-            data_group.attrs[f"{info.columns[0].name}_indices"] = [0]
+            plottable_data_group = entry.create_group("plottable_data")
+            plottable_data_group.attrs["NX_class"] = "NXdata"
+            plottable_data_group.attrs["list"] = 1
+            plottable_data_group.attrs["axes"] = [info.columns[0].name]
+            plottable_data_group.attrs["signal"] = info.columns[1].name
+            plottable_data_group.attrs[f"{info.columns[0].name}_indices"] = [0]
             for column_index, column in enumerate(info.columns):
                 # assume that dataset.data has dimension == ncolumns along first dimension
                 # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
                 col_data = data_group.create_dataset(column.name, data=dsi.data[column_index])
+                col_data.attrs["target"] = col_data.name
+                nexus_colname = column.name if column_index != 2 else column.name.replace("s", "", 1) + "_error"
+                plottable_data_group[nexus_colname] = h5py.SoftLink(col_data.name)
                 if column.unit is not None:
-                    col_data.attrs["unit"] = column.unit
+                    col_data.attrs["units"] = column.unit
