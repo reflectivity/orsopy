@@ -25,6 +25,35 @@ definitions:
     - name
     title: Column
     type: object
+  ComplexValue:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      imag:
+        anyOf:
+        - type: number
+        - items:
+            type: number
+          type: array
+        - type: 'null'
+      real:
+        anyOf:
+        - type: number
+        - items:
+            type: number
+          type: array
+        - type: 'null'
+      unit:
+        description: SI unit string
+        type:
+        - string
+        - 'null'
+    required:
+    - real
+    title: ComplexValue
+    type: object
   DataSource:
     properties:
       comment:
@@ -289,6 +318,8 @@ definitions:
         enum:
         - 1/angstrom
         - 1/nm
+        - '1'
+        - 1/s
         - null
     required:
     - name
@@ -312,6 +343,8 @@ definitions:
         enum:
         - 1/angstrom
         - 1/nm
+        - '1'
+        - 1/s
         - null
     required:
     - name
@@ -394,6 +427,12 @@ definitions:
         - string
         - 'null'
       sample_parameters:
+        additionalProperties:
+          anyOf:
+          - $ref: '#/definitions/Value'
+          - $ref: '#/definitions/ValueRange'
+          - $ref: '#/definitions/ValueVector'
+          - $ref: '#/definitions/ComplexValue'
         description: Using keys for parameters and Value* objects for values.
         type:
         - object

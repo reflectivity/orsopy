@@ -168,61 +168,6 @@
         "probe"
       ]
     },
-    "Sample": {
-      "title": "Sample",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "category": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "composition": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "description": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "environment": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "sample_parameters": {
-          "description": "Using keys for parameters and Value* objects for values.",
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
     "Value": {
       "title": "Value",
       "type": "object",
@@ -286,22 +231,6 @@
         "max"
       ]
     },
-    "Polarization": {
-      "title": "Polarization",
-      "description": "The first symbol indicates the magnetisation direction of the incident\nbeam. An optional second symbol indicates the direction of the scattered\nbeam, if a spin analyser is present.",
-      "enum": [
-        "unpolarized",
-        "po",
-        "mo",
-        "op",
-        "om",
-        "mm",
-        "mp",
-        "pm",
-        "pp"
-      ],
-      "type": "string"
-    },
     "ValueVector": {
       "title": "ValueVector",
       "type": "object",
@@ -343,6 +272,147 @@
         "y",
         "z"
       ]
+    },
+    "ComplexValue": {
+      "title": "ComplexValue",
+      "type": "object",
+      "properties": {
+        "real": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "imag": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "description": "SI unit string",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "real"
+      ]
+    },
+    "Sample": {
+      "title": "Sample",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "category": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "composition": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "environment": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "sample_parameters": {
+          "description": "Using keys for parameters and Value* objects for values.",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/Value"
+              },
+              {
+                "$ref": "#/definitions/ValueRange"
+              },
+              {
+                "$ref": "#/definitions/ValueVector"
+              },
+              {
+                "$ref": "#/definitions/ComplexValue"
+              }
+            ]
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "Polarization": {
+      "title": "Polarization",
+      "description": "The first symbol indicates the magnetisation direction of the incident\nbeam. An optional second symbol indicates the direction of the scattered\nbeam, if a spin analyser is present.",
+      "enum": [
+        "unpolarized",
+        "po",
+        "mo",
+        "op",
+        "om",
+        "mm",
+        "mp",
+        "pm",
+        "pp"
+      ],
+      "type": "string"
     },
     "InstrumentSettings": {
       "title": "InstrumentSettings",
@@ -760,6 +830,8 @@
           "enum": [
             "1/angstrom",
             "1/nm",
+            "1",
+            "1/s",
             null
           ]
         },
@@ -802,6 +874,8 @@
           "enum": [
             "1/angstrom",
             "1/nm",
+            "1",
+            "1/s",
             null
           ]
         },
