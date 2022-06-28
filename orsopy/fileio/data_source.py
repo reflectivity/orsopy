@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Union
 
 import yaml
 
-from .base import File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
+from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
 
 # typing stuff introduced in python 3.8
 try:
@@ -66,7 +66,7 @@ class Sample(Header):
     composition: Optional[str] = None
     description: Optional[str] = None
     environment: Optional[List[str]] = None
-    sample_parameters: Optional[Dict] = field(
+    sample_parameters: Optional[Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue]]] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
     )
 
