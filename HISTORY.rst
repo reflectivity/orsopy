@@ -2,6 +2,14 @@
 History
 =======
 
+1.0.1 (2022-06-28)
+------------------
+
+* Fix bug that did allow some dictionary type values to be created in Sample.
+* Update the schema files for released .ort standard.
+* Sample.sample_parameters keys to be strings and values restricted to
+  Value, ValueRange, ValueVector or ComplexValue.
+
 1.0.0 (2022-06-10)
 ------------------
 
