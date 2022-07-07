@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v0.1/orsopy/fileio/schema/refl_header.schema.json",
+  "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v1.0/orsopy/fileio/schema/refl_header.schema.json",
   "title": "Orso",
   "type": "object",
   "properties": {
@@ -33,13 +33,9 @@
           "$ref": "#/definitions/sQz_column"
         }
       ],
-      "anyOf": [
-        {
-          "type": "array"
-        },
-        {
-          "type": "null"
-        }
+      "type": [
+        "array",
+        "null"
       ],
       "additionalItems": {
         "$ref": "#/definitions/Column"
@@ -59,13 +55,9 @@
       ]
     },
     "comment": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
+      "type": [
+        "string",
+        "null"
       ]
     }
   },
@@ -80,44 +72,28 @@
       "type": "object",
       "properties": {
         "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "affiliation": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "contact": {
           "description": "Contact (email) address",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -131,34 +107,22 @@
       "type": "object",
       "properties": {
         "title": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "instrument": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "start_date": {
           "format": "date-time",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "probe": {
@@ -167,53 +131,33 @@
             "x-ray",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "facility": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "proposalID": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "doi": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -224,122 +168,27 @@
         "probe"
       ]
     },
-    "Sample": {
-      "title": "Sample",
-      "type": "object",
-      "properties": {
-        "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "category": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "composition": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "description": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "environment": {
-          "items": {
-            "type": "string"
-          },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "sample_parameters": {
-          "description": "Using keys for parameters and Value* objects for values.",
-          "anyOf": [
-            {
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
     "Value": {
       "title": "Value",
       "type": "object",
       "properties": {
         "magnitude": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "unit": {
           "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -352,19 +201,108 @@
       "type": "object",
       "properties": {
         "min": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "max": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unit": {
+          "description": "SI unit string",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ]
+    },
+    "ValueVector": {
+      "title": "ValueVector",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "y": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "z": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unit": {
+          "description": "SI unit string",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ]
+    },
+    "ComplexValue": {
+      "title": "ComplexValue",
+      "type": "object",
+      "properties": {
+        "real": {
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             },
             {
               "type": "null"
             }
           ]
         },
-        "max": {
+        "imag": {
           "anyOf": [
             {
               "type": "number"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
             },
             {
               "type": "null"
@@ -373,29 +311,91 @@
         },
         "unit": {
           "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
       "required": [
-        "min",
-        "max"
+        "real"
+      ]
+    },
+    "Sample": {
+      "title": "Sample",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "category": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "composition": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "environment": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "sample_parameters": {
+          "description": "Using keys for parameters and Value* objects for values.",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/Value"
+              },
+              {
+                "$ref": "#/definitions/ValueRange"
+              },
+              {
+                "$ref": "#/definitions/ValueVector"
+              },
+              {
+                "$ref": "#/definitions/ComplexValue"
+              }
+            ]
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "name"
       ]
     },
     "Polarization": {
@@ -413,68 +413,6 @@
         "pp"
       ],
       "type": "string"
-    },
-    "ValueVector": {
-      "title": "ValueVector",
-      "type": "object",
-      "properties": {
-        "x": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "y": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "z": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "x",
-        "y",
-        "z"
-      ]
     },
     "InstrumentSettings": {
       "title": "InstrumentSettings",
@@ -507,7 +445,7 @@
           ]
         },
         "polarization": {
-          "description": "Polarization described as unpolarized/ p / m / pp / pm / mp / mm / vector",
+          "description": "Polarization described as unpolarized/ po/ mo / op / om / pp / pm / mp / mm / vector",
           "anyOf": [
             {
               "$ref": "#/definitions/Polarization"
@@ -522,23 +460,15 @@
         },
         "configuration": {
           "description": "half / full polarized | liquid_surface | etc",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -552,35 +482,23 @@
       "type": "object",
       "properties": {
         "file": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "timestamp": {
           "description": "Last modified timestamp. If it's not specified, then an attempt will be made to check on the file itself",
           "format": "date-time",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -610,13 +528,9 @@
               }
             ]
           },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "array",
+            "null"
           ]
         },
         "additional_files": {
@@ -630,13 +544,9 @@
               }
             ]
           },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "array",
+            "null"
           ]
         },
         "scheme": {
@@ -646,23 +556,15 @@
             "energy-dispersive",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -704,13 +606,9 @@
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -726,43 +624,27 @@
       "type": "object",
       "properties": {
         "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "version": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "platform": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -784,13 +666,9 @@
         "timestamp": {
           "description": "Timestamp string, formatted as ISO 8601 datetime",
           "format": "date-time",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "creator": {
@@ -804,67 +682,43 @@
           "items": {
             "type": "string"
           },
-          "anyOf": [
-            {
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "array",
+            "null"
           ]
         },
         "computer": {
           "description": "Computer used for reduction",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "call": {
           "description": "The command line call used",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "script": {
           "description": "Path to reduction script or notebook",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "binary": {
           "description": "Path to full information file",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -877,45 +731,29 @@
       "type": "object",
       "properties": {
         "name": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "unit": {
           "description": "SI unit string",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "dimension": {
           "dimension": "A description of the column",
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -928,13 +766,9 @@
       "type": "object",
       "properties": {
         "error_of": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "error_type": {
@@ -943,13 +777,9 @@
             "resolution",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "value_is": {
@@ -958,13 +788,9 @@
             "FWHM",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "distribution": {
@@ -975,23 +801,15 @@
             "lorentzian",
             null
           ],
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         },
         "comment": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
@@ -1012,6 +830,8 @@
           "enum": [
             "1/angstrom",
             "1/nm",
+            "1",
+            "1/s",
             null
           ]
         },
@@ -1054,6 +874,8 @@
           "enum": [
             "1/angstrom",
             "1/nm",
+            "1",
+            "1/s",
             null
           ]
         },

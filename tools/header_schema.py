@@ -25,8 +25,7 @@ class PydanticConfig:
                 value["enum"].append(None)
 
             if "type" in value:
-                value["anyOf"] = [{"type": value.pop("type")}]
-                value["anyOf"].append({"type": "null"})
+                value["type"] = [value.pop("type"), "null"]
             elif "anyOf" in value:
                 value["anyOf"].append({"type": "null"})
             # only one $ref e.g. from other model
@@ -47,7 +46,7 @@ column_schema = {
     "type": "object",
     "properties": {
         "name": {"enum": ["<cname>"]},
-        "unit": {"enum": ["1/angstrom", "1/nm", None]},
+        "unit": {"enum": ["1/angstrom", "1/nm", "1", "1/s", None]},
         "dimension": {"dimension": "dimension of column", "anyOf": [{"type": "string"}, {"type": "null"}]},
         "comment": {"anyOf": [{"type": "string"}, {"type": "null"}]},
     },

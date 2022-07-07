@@ -2,7 +2,22 @@
 History
 =======
 
-0.1.0 (2022-06-08)
+1.0.1 (2022-06-28)
+------------------
+
+* Fix bug that did allow some dictionary type values to be created in Sample.
+* Update the schema files for released .ort standard.
+* Sample.sample_parameters keys to be strings and values restricted to
+  Value, ValueRange, ValueVector or ComplexValue.
+
+1.0.0 (2022-06-10)
+------------------
+
+* ORSO general assembly has voted to release the first version of orsopy together with the
+  text representation of the text file (.ort) specification.
+  See https://www.reflectometry.org/workshops/workshop_2022/
+
+0.1.1 (2022-06-08)
 ------------------
 
 * Fix missing data files in distribution

@@ -115,12 +115,14 @@ class TestSample(unittest.TestCase):
             composition="Si | SiO2(20 A) | Fe(200 A) | air(beam side)",
             description="The sample is without flaws",
             environment=["Temperature cell"],
+            sample_parameters={},
         )
         assert value.name == "A Perfect Sample"
         assert value.category == "solid/gas"
         assert value.composition == "Si | SiO2(20 A) | " + "Fe(200 A) | air(beam side)"
         assert value.description == "The sample is without flaws"
         assert value.environment == ["Temperature cell"]
+        assert value.sample_parameters == {}
 
     def test_to_yaml_optionals(self):
         """

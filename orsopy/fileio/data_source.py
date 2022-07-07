@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Union
 
 import yaml
 
-from .base import File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
+from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
 from .model_language import SampleModel
 
 # typing stuff introduced in python 3.8
@@ -67,7 +67,7 @@ class Sample(Header):
     composition: Optional[str] = None
     description: Optional[str] = None
     environment: Optional[List[str]] = None
-    sample_parameters: Optional[Dict] = field(
+    sample_parameters: Optional[Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue]]] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
     )
     model: Optional[SampleModel] = None
@@ -142,7 +142,7 @@ class Measurement(Header):
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
     additional_files: Optional[List[Union[File, str]]] = None
-    scheme: Optional[Union[Literal["angle- and energy-dispersive", "angle-dispersive", "energy-dispersive"]]] = None
+    scheme: Optional[Literal["angle- and energy-dispersive", "angle-dispersive", "energy-dispersive"]] = None
 
     __repr__ = Header._staggered_repr
 

@@ -244,7 +244,14 @@ class Header:
                 else:
                     return hbase([Header._resolve_type(t0, item)])
             elif hbase is dict:
-                value_type = get_args(hint)[1]
+                try:
+                    value_type = get_args(hint)[1]
+                except IndexError:
+                    warnings.warn(
+                        "The evaluation of type hints requires key/value definition for Dict, "
+                        "if you want to use unspecified dictionaries use dict instead of Dict."
+                    )
+                    raise
                 try:
                     for key, value in item.items():
                         # resolve the type of any value in the dictionary
