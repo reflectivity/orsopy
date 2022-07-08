@@ -268,12 +268,9 @@ class SubStack(Header):
     arguments: Optional[List[Any]] = None
     keywords: Optional[Dict[str, Any]] = None
 
-    def __post_init__(self):
-        super().__post_init__()
+    def resolve_names(self, resolvable_items):
         if self.stack is None and self.sequence is None:
             raise ValueError("SubStack has to either define stack or sequence")
-
-    def resolve_names(self, resolvable_items):
         if self.sequence is None:
             stack = self.stack
             output = []
