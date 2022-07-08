@@ -230,8 +230,9 @@ class TestLayer(unittest.TestCase):
 
 class TestSubStack(unittest.TestCase):
     def test_empty(self):
+        empty = ml.SubStack.empty()
         with self.assertRaises(ValueError):
-            ml.SubStack()
+            empty.resolve_names({})
 
     def test_resolution(self):
         s = ml.SubStack(stack="air | b 13 |c|d")
