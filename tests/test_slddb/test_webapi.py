@@ -43,12 +43,8 @@ class TestWebAPI(unittest.TestCase):
                 return
         # clear all modules of slddb
         for key in list(sys.modules.keys()):
-            if key.startswith("slddb"):
+            if key.startswith("orsopy.slddb"):
                 del sys.modules[key]
-
-        # try extracting the zip file
-        with zipfile.ZipFile(os.path.join(cls.path, "slddb.zip")) as zf:
-            zf.extractall(cls.path)
 
         # use the local api version to make sure test coverage works
         global api, slddb
@@ -80,7 +76,7 @@ class TestWebAPI(unittest.TestCase):
 
         # clear all modules of slddb
         for key in list(sys.modules.keys()):
-            if key.startswith("slddb"):
+            if key.startswith("orsopy.slddb"):
                 del sys.modules[key]
 
     def test_a_downloaddb(self):
