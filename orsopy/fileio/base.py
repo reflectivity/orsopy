@@ -439,6 +439,20 @@ unit_registry = None
 
 
 @orsodataclass
+class ErrorValue(Header):
+    """
+    Information about errors on a value.
+    """
+
+    error_value: float
+    error_type: Optional[Literal["uncertainty", "resolution"]] = None
+    value_is: Optional[Literal["sigma", "FWHM"]] = None
+    distribution: Optional[Literal["gaussian", "triangular", "uniform", "lorentzian"]] = None
+
+    yaml_representer = Header.yaml_representer_compact
+
+
+@orsodataclass
 class Value(Header):
     """
     A value or list of values with an optional unit.
@@ -446,6 +460,7 @@ class Value(Header):
 
     magnitude: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -484,6 +499,7 @@ class ComplexValue(Header):
     real: Union[float, List[float]]
     imag: Optional[Union[float, List[float]]] = None
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -567,6 +583,7 @@ class ValueVector(Header):
     y: float
     z: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
 
     def as_unit(self, output_unit):
         """
