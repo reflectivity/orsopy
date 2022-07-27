@@ -607,7 +607,9 @@ class Column(Header):
 
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
-    dimension: Optional[str] = field(default=None, metadata={"dimension": "A description of the column"})
+    physical_quantity: Optional[str] = field(
+        default=None, metadata={"physical_quantity": "A description of the column"}
+    )
 
     yaml_representer = Header.yaml_representer_compact
 

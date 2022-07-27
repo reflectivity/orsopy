@@ -320,7 +320,7 @@ class TestColumn(unittest.TestCase):
         Creation of a column.
         """
         value = base.Column("q", "1/angstrom", "qz vector")
-        assert value.dimension == "qz vector"
+        assert value.physical_quantity == "qz vector"
         assert value.name == "q"
         assert value.unit == "1/angstrom"
 
@@ -336,7 +336,7 @@ class TestColumn(unittest.TestCase):
         Transformation to yaml.
         """
         value = base.Column("q", "1/angstrom", "qz vector")
-        assert value.to_yaml() == "{name: q, unit: 1/angstrom, dimension: qz vector}\n"
+        assert value.to_yaml() == "{name: q, unit: 1/angstrom, physical_quantity: qz vector}\n"
 
     def test_no_description_to_yaml(self):
         """
