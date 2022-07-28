@@ -234,14 +234,14 @@ class TestValueVector(unittest.TestCase):
         Transform to yaml.
         """
         value = base.ValueVector(1.0, 2.0, 3.0, "m")
-        assert value.to_yaml() == "x: 1.0\ny: 2.0\nz: 3.0\nunit: m\n"
+        assert value.to_yaml() == "{x: 1.0, y: 2.0, z: 3.0, unit: m}\n"
 
     def test_two_dimensional_to_yaml(self):
         """
         Transform to yaml with only two dimensions.
         """
         value = base.ValueVector(1.0, 2.0, None, "m")
-        assert value.to_yaml() == "x: 1.0\ny: 2.0\nz: null\nunit: m\n"
+        assert value.to_yaml() == "{x: 1.0, y: 2.0, z: null, unit: m}\n"
 
     def test_unit_conversion(self):
         value = base.ValueVector(1.0, 2.0, 3.0, "mm")

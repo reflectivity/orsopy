@@ -57,6 +57,7 @@ class Sample(Header):
         :code:`Si | SiO2 (20 angstrom) | Fe (200 angstrom) |
         air (beam side)`.
     :param description: Further details of the sample, e.g. size.
+    :param size: Sample size in x, y, z direction, where z is parallel to the surface normal.
     :param environment: Name of the sample environment device(s).
     :param sample_parameters: Dictionary of sample parameters.
     """
@@ -65,6 +66,7 @@ class Sample(Header):
     category: Optional[str] = None
     composition: Optional[str] = None
     description: Optional[str] = None
+    size: Optional[ValueVector] = None
     environment: Optional[List[str]] = None
     sample_parameters: Optional[Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue]]] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}

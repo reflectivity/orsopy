@@ -96,7 +96,9 @@ class TestSample(unittest.TestCase):
         assert value.category is None
         assert value.composition is None
         assert value.description is None
+        assert value.size is None
         assert value.environment is None
+        assert value.sample_parameters is None
 
     def test_to_yaml(self):
         """
@@ -115,14 +117,16 @@ class TestSample(unittest.TestCase):
             composition="Si | SiO2(20 A) | Fe(200 A) | air(beam side)",
             description="The sample is without flaws",
             environment=["Temperature cell"],
-            sample_parameters={},
+            size=base.ValueVector(1.0, 2.0, 3.0, "mm"),
+            sample_parameters={"a": base.Value(13.4)},
         )
         assert value.name == "A Perfect Sample"
         assert value.category == "solid/gas"
         assert value.composition == "Si | SiO2(20 A) | " + "Fe(200 A) | air(beam side)"
         assert value.description == "The sample is without flaws"
+        assert value.size == base.ValueVector(1.0, 2.0, 3.0, "mm")
         assert value.environment == ["Temperature cell"]
-        assert value.sample_parameters == {}
+        assert value.sample_parameters == {"a": base.Value(13.4)}
 
     def test_to_yaml_optionals(self):
         """
@@ -134,13 +138,17 @@ class TestSample(unittest.TestCase):
             composition="Si | SiO2(20 A) | Fe(200 A) | air(beam side)",
             description="The sample is without flaws",
             environment=["Temperature cell"],
+            size=base.ValueVector(1.0, 2.0, 3.0, "mm"),
+            sample_parameters={"a": base.Value(13.4)},
         )
         assert (
             value.to_yaml()
             == "name: A Perfect Sample\ncategory: "
             + "solid/gas\ncomposition: Si | SiO2(20 A) | Fe(200 A) | air"
             + "(beam side)\ndescription: The sample is without flaws\n"
+            + "size: {x: 1.0, y: 2.0, z: 3.0, unit: mm}\n"
             + "environment:\n- Temperature cell\n"
+            + "sample_parameters:\n  a: {magnitude: 13.4}\n"
         )
 
 

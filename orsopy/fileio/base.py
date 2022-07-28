@@ -621,6 +621,8 @@ class ValueVector(Header):
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     error: Optional[ErrorValue] = None
 
+    yaml_representer = Header.yaml_representer_compact
+
     def as_unit(self, output_unit):
         """
         Returns a (x, y, z) tuple of values as converted to the given unit.
