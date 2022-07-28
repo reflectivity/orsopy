@@ -92,6 +92,15 @@ class Polarization(str, Enum):
     mp = "mp"
     pm = "pm"
     pp = "pp"
+    # x-ray polarizations
+    pi = "pi"  # in scattering plane
+    sigma = "sigma"  # perpendicular to scattering plane
+    left = "left"  # circular left
+    right = "right"  # circular right
+    pi_pi = "pi_pi"
+    sigma_sigma = "sigma_sigma"
+    pi_sigma = "pi_sigma"
+    sigma_pi = "sigma_pi"
 
     def yaml_representer(self, dumper: yaml.Dumper):
         output = self.value
