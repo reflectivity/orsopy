@@ -18,6 +18,79 @@ from numpy.testing import assert_equal
 from orsopy.fileio import base, orso
 
 
+class TestErrorValue(unittest.TestCase):
+    """
+    Testing the Value class.
+    """
+
+    def test_single_value(self):
+        """
+        Creation of an object with a magnitude and unit.
+        """
+        error = base.ErrorValue(1.0)
+        assert error.error_value == 1.0
+
+    def test_optionals(self):
+        """
+        Creation of an object with a magnitude and unit.
+        """
+        error = base.ErrorValue(1.0, "resolution", "FWHM", "uniform")
+        assert error.error_value == 1.0
+        assert error.error_type == "resolution"
+        assert error.value_is == "FWHM"
+        assert error.distribution == "uniform"
+
+    def test_sigma(self):
+        """
+        Creation of an object with a magnitude and unit.
+        """
+        error = base.ErrorValue(1.0)
+        assert error.sigma == 1.0
+        for dist in ["gaussian", "triangular", "uniform", "lorentzian"]:
+            error = base.ErrorValue(1.0, "resolution", "sigma", dist)
+            assert error.sigma == 1.0
+        error = base.ErrorValue(1.0, "resolution", "FWHM", "gaussian")
+        assert error.sigma == 1.0 / (2.0 * sqrt(2.0 * log(2.0)))
+        error = base.ErrorValue(1.0, "resolution", "FWHM", "triangular")
+        assert error.sigma == 1.0 / sqrt(6)
+        error = base.ErrorValue(1.0, "resolution", "FWHM", "uniform")
+        assert error.sigma == 1.0 / sqrt(12)
+
+        error = base.ErrorValue(1.0, "resolution", "FWHM", "lorentzian")
+        with self.assertRaises(ValueError):
+            error.sigma
+
+        with self.assertWarns(RuntimeWarning):
+            error = base.ErrorValue(1.0, "resolution", "FWHM", "undefined")
+        with self.assertRaises(NotImplementedError):
+            error.sigma
+
+    def test_to_yaml(self):
+        """
+        Transform to yaml.
+        """
+        error = base.ErrorValue(1.0)
+        assert error.to_yaml() == "{error_value: 1.0}\n"
+
+    def test_no_value_to_yaml(self):
+        """
+        Transform to yaml with a non-optional ORSO item.
+        """
+        error = base.ErrorValue(None)
+        assert error.to_yaml() == "{error_value: null}\n"
+
+    def test_optionals_to_yaml(self):
+        """
+        Transform to yaml.
+        """
+        error = base.ErrorValue(1.0)
+        assert error.to_yaml() == "{error_value: 1.0}\n"
+
+    def test_user_data(self):
+        error = base.ErrorValue(13.4, my_attr="hallo ORSO")
+        assert error.user_data == {"my_attr": "hallo ORSO"}
+
+
 class TestValue(unittest.TestCase):
     """
     Testing the Value class.
@@ -36,9 +109,7 @@ class TestValue(unittest.TestCase):
         Creation of an object with a a list of values and a unit.
         """
         with self.assertWarns(RuntimeWarning):
-            value = base.Value([1, 2, 3], "m")
-        assert_equal(value.magnitude, [1, 2, 3])
-        assert value.unit == "m"
+            base.Value([1, 2, 3], "m")
 
     def test_bad_unit(self):
         """
@@ -90,14 +161,12 @@ class TestComplexValue(unittest.TestCase):
         assert value.imag == 2.0
         assert value.unit == "m"
 
-    def test_list(self):
+    def test_list_warning(self):
         """
         Creation of an object with a a list of values and a unit.
         """
-        value = base.ComplexValue([1, 2, 3], [4, 5, 6], "m")
-        assert_equal(value.real, [1, 2, 3])
-        assert_equal(value.imag, [4, 5, 6])
-        assert value.unit == "m"
+        with self.assertWarns(RuntimeWarning):
+            base.ComplexValue([1, 2, 3], [1, 2, 3], "m")
 
     def test_bad_unit(self):
         """
@@ -151,11 +220,7 @@ class TestValueVector(unittest.TestCase):
         Creation of an object with three dimensions of lists and unit.
         """
         with self.assertWarns(RuntimeWarning):
-            value = base.ValueVector([1, 2], [2, 3], [3, 4], "m")
-        assert_equal(value.x, [1, 2])
-        assert_equal(value.y, [2, 3])
-        assert_equal(value.z, [3, 4])
-        assert value.unit == "m"
+            base.ValueVector([1, 2], [2, 3], [3, 4], "m")
 
     def test_bad_unit(self):
         """
@@ -208,10 +273,7 @@ class TestValueRange(unittest.TestCase):
         Creation of an object of a list of max and list of min and a unit.
         """
         with self.assertWarns(RuntimeWarning):
-            value = base.ValueRange([1, 2, 3], [2, 3, 4], "m")
-        assert_equal(value.min, [1, 2, 3])
-        assert_equal(value.max, [2, 3, 4])
-        assert value.unit == "m"
+            base.ValueRange([1, 2, 3], [2, 3, 4], "m")
 
     def test_bad_unit(self):
         """
