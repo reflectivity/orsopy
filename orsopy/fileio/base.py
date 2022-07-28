@@ -496,8 +496,8 @@ class ComplexValue(Header):
     A value or list of values with an optional unit.
     """
 
-    real: Union[float, List[float]]
-    imag: Optional[Union[float, List[float]]] = None
+    real: float
+    imag: Optional[float] = None
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     error: Optional[ErrorValue] = None
 
