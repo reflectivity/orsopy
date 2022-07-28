@@ -76,9 +76,18 @@ class Sample(Header):
 
 class Polarization(str, Enum):
     """
+    Polarization of the beam used for the reflectivity.
+
+    Neutrons:
     The first symbol indicates the magnetisation direction of the incident
-    beam. An optional second symbol indicates the direction of the scattered
-    beam, if a spin analyser is present.
+    beam, the second symbol indicates the direction of the scattered
+    beam. If either polarization or analysis are not employed the
+    symbol is replaced by "o".
+
+    X-rays:
+    Uses the conventional names pi, sigma, left and right. In experiments
+    with polarization analysis the incident and outgoing polarizations
+    are separated with an underscore "_".
     """
 
     unpolarized = "unpolarized"
