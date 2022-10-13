@@ -47,7 +47,10 @@ column_schema = {
     "properties": {
         "name": {"enum": ["<cname>"]},
         "unit": {"enum": ["1/angstrom", "1/nm", "1", "1/s", None]},
-        "dimension": {"dimension": "dimension of column", "anyOf": [{"type": "string"}, {"type": "null"}]},
+        "physical_quantity": {
+            "physical_quantity": "physical quantity the column describes",
+            "anyOf": [{"type": "string"}, {"type": "null"}],
+        },
         "comment": {"anyOf": [{"type": "string"}, {"type": "null"}]},
     },
     "required": ["name"],
