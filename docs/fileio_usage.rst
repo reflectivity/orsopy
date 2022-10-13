@@ -22,7 +22,7 @@ For example, if we want to identify the probing radiation as neutrons, we includ
 Full details of the different components that can be populated can be found in the `documentation`_ here or in the `file format specification`_.
 Note that this specification includes information regarding the **required** and optional components to be included for a file to be considered a **valid** .ort file.
 It is not possible to write a .ort file without defining the columns present in the dataset, in this example we will have four columns of data, namely q, R, dR and dq (the final column is a description of the resolution function). 
-Columns are defined as follows, using the :code:`orso.fileio.base.Column` class objects
+Columns are defined as follows, using the :code:`orso.fileio.base.Column` class objects (note that there are other `base classes`_ that can be used for a variety of objects).
 
 .. code-block:: python 
 
@@ -52,3 +52,4 @@ Note that if you want to save more than one dataset in a single file, this can b
 
 .. _`documentation`: ./modules.html#fileio
 .. _`file format specification`: https://www.reflectometry.org/file_format/specification
+.. _`base classes`: ./orsopy.fileio.base.html
