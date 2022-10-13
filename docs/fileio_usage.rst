@@ -3,7 +3,7 @@ Usage
 =====
 
 The easiest way to use :py:mod:`orsopy.fileio` (the module of :py:mod:`orsopy` that includes file reading and writing) to produce **metadata-rich .ort reduced reflectometry files** involves integrating this into your data reduction workflow.
-Early in the workflow, the :py:mod:`orsopy.fileio` should be imported and an empty :code:`fileio.orso.Orso` header object (here we also import :py:mod:`numpy` which will be used later). 
+Early in the workflow, the :py:mod:`orsopy.fileio` should be imported and an empty :code:`orsopy.fileio.orso.Orso` header object (here we also import :py:mod:`numpy` which will be used later). 
 
 .. code-block:: python 
 
@@ -22,14 +22,16 @@ For example, if we want to identify the probing radiation as neutrons, we includ
 Full details of the different components that can be populated can be found in the `documentation`_ here or in the `file format specification`_.
 Note that this specification includes information regarding the **required** and optional components to be included for a file to be considered a **valid** .ort file.
 It is not possible to write a .ort file without defining the columns present in the dataset, in this example we will have four columns of data, namely q, R, dR and dq (the final column is a description of the resolution function). 
-Columns are defined as follows, using the :code:`orso.fileio.base.Column` class objects (note that there are other `base classes`_ that can be used for a variety of objects).
+Columns are defined as follows, using the :code:`orsopy.fileio.base.Column` and :code:`orsopy.fileio.base.ErrorColumn` class objects (note that there are other `base classes`_ that can be used for a variety of objects).
 
 .. code-block:: python 
 
-    q_column = fileio.base.Column('Qz', '1/angstrom', 'wavevector transfer')
-    r_column = fileio.base.Column('R', None, 'reflectivity')
-    dr_column = fileio.base.Column('sR', None, 'standard deivation of reflectivity')
-    dq_column = fileio.base.Column('sQz', '1/angstrom', 'standard deviation of wavevector transfer resolution')
+    from orsopy.fileio.base import Column, ErrorColumn
+    
+    q_column = Column('Qz', '1/angstrom', 'wavevector transfer')
+    r_column = Column('R', None, 'reflectivity')
+    dr_column = ErrorColumn('R', 'uncertainty', 'sigma')
+    dq_column = ErrorColumn('Qz', 'resolution', 'sigma')
 
     header.columns = [q_column, r_column, dr_column, dq_column]
 
