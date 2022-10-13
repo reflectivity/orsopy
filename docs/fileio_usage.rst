@@ -2,8 +2,8 @@
 Usage
 =====
 
-The easiest way to use :py:mod:`orsopy.fileio` (the module of :py:mod:`orsopy` that includes file reading and writing) to produce metadata-rich .ort reducted reflectometry files involves integrating this into your data reduction workflow.
-Early in the workflow, the :py:mod:`orsopy.fileio` should be imported and an empty :code:`fileio.orso.Orso` header object. 
+The easiest way to use :py:mod:`orsopy.fileio` (the module of :py:mod:`orsopy` that includes file reading and writing) to produce **metadata-rich .ort reduced reflectometry files** involves integrating this into your data reduction workflow.
+Early in the workflow, the :py:mod:`orsopy.fileio` should be imported and an empty :code:`fileio.orso.Orso` header object (here we also import :py:mod:`numpy` which will be used later). 
 
 .. code-block:: python 
 
@@ -20,8 +20,8 @@ For example, if we want to identify the probing radiation as neutrons, we includ
     header.data_source.experiment.probe = 'neutrons'
 
 Full details of the different components that can be populated can be found in the `documentation`_ here or in the `file format specification`_.
-Note that this specification includes information regarding the required and optional components to be included for a file to be considered a valid .ort file.
-It is not possible to write a .ort file without defining the columns present in the dataset, in this example we will have four columns of data, namely q, R, dR and dq (the final is a description of the resolution function). 
+Note that this specification includes information regarding the **required** and optional components to be included for a file to be considered a **valid** .ort file.
+It is not possible to write a .ort file without defining the columns present in the dataset, in this example we will have four columns of data, namely q, R, dR and dq (the final column is a description of the resolution function). 
 Columns are defined as follows, using the :code:`orso.fileio.base.Column` class objects
 
 .. code-block:: python 
@@ -33,7 +33,7 @@ Columns are defined as follows, using the :code:`orso.fileio.base.Column` class 
 
     header.columns = [q_column, r_column, dr_column, dq_column]
 
-Any required metadata that is not included in the head will be written in the file as containing :code:`null`. 
+Any **required** metadata that is not included in the head will be written in the file as containing :code:`null`. 
 Having populated the metadata for the header, we then want to assign the data that we want to write (this will be after your data reduction has been performed).
 This is achieved by producing a :code:`fileio.orso.OrsoDataset` object, which takes the header and the relevant data columns (below these are :code:`q`, :code:`R`, :code:`dR`, and :code:`dq`) as inputs. 
 
