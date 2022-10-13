@@ -8,7 +8,7 @@ Early in the workflow, the :py:mod:`orsopy.fileio` should be imported and an emp
 .. code-block:: python 
 
     import numpy as np
-    from orsopy import fileio
+    from orsopy.fileio.orso import Orso
 
     header = fileio.orso.Orso.empty()
 
@@ -28,10 +28,10 @@ Columns are defined as follows, using the :code:`orsopy.fileio.base.Column` and 
 
     from orsopy.fileio.base import Column, ErrorColumn
     
-    q_column = Column('Qz', '1/angstrom', 'wavevector transfer')
-    r_column = Column('R', None, 'reflectivity')
-    dr_column = ErrorColumn('R', 'uncertainty', 'sigma')
-    dq_column = ErrorColumn('Qz', 'resolution', 'sigma')
+    q_column = Column(name='Qz', unit='1/angstrom', physical_quantity='wavevector transfer')
+    r_column = Column(name='R', unit=None, physical_quantity='reflectivity')
+    dr_column = ErrorColumn(error_of='R', error_type='uncertainty', value_is='sigma')
+    dq_column = ErrorColumn(error_of='Qz', error_type='resolution', value_is='sigma')
 
     header.columns = [q_column, r_column, dr_column, dq_column]
 
@@ -41,13 +41,17 @@ This is achieved by producing a :code:`fileio.orso.OrsoDataset` object, which ta
 
 .. code-block:: python 
 
-    dataset = fileio.orso.OrsoDataset(header, np.array([q, R, dR, dq]).T)
+    from orsopy.fileio.orso import OrsoDataset
+
+    dataset = OrsoDataset(info=header, data=np.array([q, R, dR, dq]).T)
 
 The dataset can then be saved with the following function, where :code:`'my_file.ort'` is the name for the file to be saved under. 
 
 .. code-block:: python
 
-    fileio.orso.save_orso([dataset], 'my_file.ort') 
+    from orsopy.fileio.orso import save_orso
+
+    save_orso(datasets=[dataset], fname='my_file.ort') 
 
 Note that if you want to save more than one dataset in a single file, this can be achieved by including these in the list that is passed to this function. 
 
