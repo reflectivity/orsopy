@@ -1,39 +1,74 @@
+$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.0/orsopy/fileio/schema/refl_header.schema.json
+$schema: http://json-schema.org/draft-07/schema#
 definitions:
-  Creator:
+  Column:
     properties:
-      affiliation:
-        anyOf:
-        - type: string
-        - items:
-            type: string
-          type: array
-      computer:
-        default: ''
-        type: string
-      contact:
-        description: Contact (email) address
-        type: string
+      comment:
+        type:
+        - string
+        - 'null'
       name:
-        type: string
-      time:
-        description: timestamp string, formatted as ISO 8601 datetime
-        format: date-time
-        type: string
+        type:
+        - string
+        - 'null'
+      physical_quantity:
+        physical_quantity: A description of the column
+        type:
+        - string
+        - 'null'
+      unit:
+        description: SI unit string
+        type:
+        - string
+        - 'null'
     required:
     - name
-    - affiliation
-    title: Creator
+    title: Column
+    type: object
+  ComplexValue:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      error:
+        anyOf:
+        - $ref: '#/definitions/ErrorValue'
+      imag:
+        type:
+        - number
+        - 'null'
+      real:
+        type:
+        - number
+        - 'null'
+      unit:
+        description: SI unit string
+        type:
+        - string
+        - 'null'
+    required:
+    - real
+    title: ComplexValue
     type: object
   DataSource:
     properties:
+      comment:
+        type:
+        - string
+        - 'null'
       experiment:
-        $ref: '#/definitions/Experiment'
+        anyOf:
+        - $ref: '#/definitions/Experiment'
       measurement:
-        $ref: '#/definitions/Measurement'
+        anyOf:
+        - $ref: '#/definitions/Measurement'
       owner:
-        $ref: '#/definitions/Person'
+        anyOf:
+        - $ref: '#/definitions/Person'
       sample:
-        $ref: '#/definitions/Sample'
+        anyOf:
+        - $ref: '#/definitions/Sample'
     required:
     - owner
     - experiment
@@ -41,48 +76,221 @@ definitions:
     - measurement
     title: DataSource
     type: object
+  ErrorColumn:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      distribution:
+        enum:
+        - gaussian
+        - triangular
+        - uniform
+        - lorentzian
+        - null
+        type:
+        - string
+        - 'null'
+      error_of:
+        type:
+        - string
+        - 'null'
+      error_type:
+        enum:
+        - uncertainty
+        - resolution
+        - null
+        type:
+        - string
+        - 'null'
+      value_is:
+        enum:
+        - sigma
+        - FWHM
+        - null
+        type:
+        - string
+        - 'null'
+    required:
+    - error_of
+    title: ErrorColumn
+    type: object
+  ErrorValue:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      distribution:
+        enum:
+        - gaussian
+        - triangular
+        - uniform
+        - lorentzian
+        - null
+        type:
+        - string
+        - 'null'
+      error_type:
+        enum:
+        - uncertainty
+        - resolution
+        - null
+        type:
+        - string
+        - 'null'
+      error_value:
+        type:
+        - number
+        - 'null'
+      value_is:
+        enum:
+        - sigma
+        - FWHM
+        - null
+        type:
+        - string
+        - 'null'
+    required:
+    - error_value
+    title: ErrorValue
+    type: object
   Experiment:
     properties:
-      ID:
-        type: string
-      start_date:
-        description: timestamp string, formatted as ISO 8601 datetime
-        format: date-time
-        type: string
+      comment:
+        type:
+        - string
+        - 'null'
+      doi:
+        type:
+        - string
+        - 'null'
       facility:
-        type: string
+        type:
+        - string
+        - 'null'
       instrument:
-        type: string
+        type:
+        - string
+        - 'null'
       probe:
         enum:
-        - neutrons
-        - x-rays
-        type: string
+        - neutron
+        - x-ray
+        - null
+        type:
+        - string
+        - 'null'
+      proposalID:
+        type:
+        - string
+        - 'null'
+      start_date:
+        format: date-time
+        type:
+        - string
+        - 'null'
       title:
-        type: string
+        type:
+        - string
+        - 'null'
     required:
+    - title
     - instrument
+    - start_date
     - probe
     title: Experiment
     type: object
+  File:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      file:
+        type:
+        - string
+        - 'null'
+      timestamp:
+        description: Last modified timestamp. If it's not specified, then an attempt
+          will be made to check on the file itself
+        format: date-time
+        type:
+        - string
+        - 'null'
+    required:
+    - file
+    title: File
+    type: object
+  InstrumentSettings:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      configuration:
+        description: half / full polarized | liquid_surface | etc
+        type:
+        - string
+        - 'null'
+      incident_angle:
+        anyOf:
+        - $ref: '#/definitions/Value'
+        - $ref: '#/definitions/ValueRange'
+        - type: 'null'
+      polarization:
+        anyOf:
+        - $ref: '#/definitions/Polarization'
+        - $ref: '#/definitions/ValueVector'
+        - type: 'null'
+        description: Polarization described as unpolarized/ po/ mo / op / om / pp
+          / pm / mp / mm / vector
+      wavelength:
+        anyOf:
+        - $ref: '#/definitions/Value'
+        - $ref: '#/definitions/ValueRange'
+        - type: 'null'
+    required:
+    - incident_angle
+    - wavelength
+    title: InstrumentSettings
+    type: object
   Measurement:
     properties:
+      additional_files:
+        items:
+          anyOf:
+          - $ref: '#/definitions/File'
+          - type: string
+        type:
+        - array
+        - 'null'
+      comment:
+        type:
+        - string
+        - 'null'
       data_files:
         items:
           anyOf:
-          - $ref: '#/definitions/data_file'
+          - $ref: '#/definitions/File'
           - type: string
-        type: array
+        type:
+        - array
+        - 'null'
       instrument_settings:
-        $ref: '#/definitions/instrument_settings'
+        anyOf:
+        - $ref: '#/definitions/InstrumentSettings'
       scheme:
         enum:
         - angle- and energy-dispersive
         - angle-dispersive
         - energy-dispersive
-        type: string
+        - null
+        type:
+        - string
+        - 'null'
     required:
-    - scheme
     - instrument_settings
     - data_files
     title: Measurement
@@ -90,242 +298,377 @@ definitions:
   Person:
     properties:
       affiliation:
-        anyOf:
-        - type: string
-        - items:
-            type: string
-          type: array
+        type:
+        - string
+        - 'null'
+      comment:
+        type:
+        - string
+        - 'null'
       contact:
         description: Contact (email) address
-        type: string
+        type:
+        - string
+        - 'null'
       name:
-        type: string
+        type:
+        - string
+        - 'null'
     required:
     - name
     - affiliation
     title: Person
     type: object
   Polarization:
-    description: 'The first symbol indicates the magnetisation direction of the incident
-      beam.
+    description: 'Polarization of the beam used for the reflectivity.
 
-      An optional second symbol indicates the direction of the scattered beam, if
-      a spin analyser is present.'
+
+      Neutrons:
+
+      The first symbol indicates the magnetisation direction of the incident
+
+      beam, the second symbol indicates the direction of the scattered
+
+      beam. If either polarization or analysis are not employed the
+
+      symbol is replaced by "o".
+
+
+      X-rays:
+
+      Uses the conventional names pi, sigma, left and right. In experiments
+
+      with polarization analysis the incident and outgoing polarizations
+
+      are separated with an underscore "_".'
     enum:
     - unpolarized
-    - +
-    - '-'
-    - --
-    - -+
-    - +-
-    - ++
+    - po
+    - mo
+    - op
+    - om
+    - mm
+    - mp
+    - pm
+    - pp
+    - pi
+    - sigma
+    - left
+    - right
+    - pi_pi
+    - sigma_sigma
+    - pi_sigma
+    - sigma_pi
     title: Polarization
     type: string
-  R_column:
+  Qz_column:
     properties:
-      dimension:
-        default: ''
-        type: string
+      comment:
+        anyOf:
+        - type: string
+        - type: 'null'
       name:
         enum:
-        - R
-        type: string
+        - Qz
+      physical_quantity:
+        anyOf:
+        - type: string
+        - type: 'null'
+        physical_quantity: physical quantity the column describes
       unit:
-        description: SI unit string
         enum:
         - 1/angstrom
         - 1/nm
-        type: string
+        - '1'
+        - 1/s
+        - null
     required:
     - name
-    title: R_column
+    title: Qz
+    type: object
+  R_column:
+    properties:
+      comment:
+        anyOf:
+        - type: string
+        - type: 'null'
+      name:
+        enum:
+        - R
+      physical_quantity:
+        anyOf:
+        - type: string
+        - type: 'null'
+        physical_quantity: physical quantity the column describes
+      unit:
+        enum:
+        - 1/angstrom
+        - 1/nm
+        - '1'
+        - 1/s
+        - null
+    required:
+    - name
+    title: R
     type: object
   Reduction:
     properties:
+      binary:
+        description: Path to full information file
+        type:
+        - string
+        - 'null'
       call:
-        default: ''
-        type: string
+        description: The command line call used
+        type:
+        - string
+        - 'null'
+      comment:
+        type:
+        - string
+        - 'null'
+      computer:
+        description: Computer used for reduction
+        type:
+        - string
+        - 'null'
+      corrections:
+        items:
+          type: string
+        type:
+        - array
+        - 'null'
+      creator:
+        anyOf:
+        - $ref: '#/definitions/Person'
+      script:
+        description: Path to reduction script or notebook
+        type:
+        - string
+        - 'null'
       software:
         anyOf:
         - $ref: '#/definitions/Software'
-        - type: string
+      timestamp:
+        description: Timestamp string, formatted as ISO 8601 datetime
+        format: date-time
+        type:
+        - string
+        - 'null'
     required:
     - software
     title: Reduction
     type: object
   Sample:
     properties:
+      category:
+        type:
+        - string
+        - 'null'
+      comment:
+        type:
+        - string
+        - 'null'
+      composition:
+        type:
+        - string
+        - 'null'
+      description:
+        type:
+        - string
+        - 'null'
+      environment:
+        items:
+          type: string
+        type:
+        - array
+        - 'null'
       name:
-        type: string
+        type:
+        - string
+        - 'null'
+      sample_parameters:
+        additionalProperties:
+          anyOf:
+          - $ref: '#/definitions/Value'
+          - $ref: '#/definitions/ValueRange'
+          - $ref: '#/definitions/ValueVector'
+          - $ref: '#/definitions/ComplexValue'
+        description: Using keys for parameters and Value* objects for values.
+        type:
+        - object
+        - 'null'
+      size:
+        anyOf:
+        - $ref: '#/definitions/ValueVector'
     required:
     - name
     title: Sample
     type: object
   Software:
     properties:
+      comment:
+        type:
+        - string
+        - 'null'
       name:
-        type: string
+        type:
+        - string
+        - 'null'
       platform:
-        type: string
+        type:
+        - string
+        - 'null'
       version:
-        type: string
+        type:
+        - string
+        - 'null'
     required:
     - name
     title: Software
     type: object
   Value:
     properties:
-      magnitude:
+      comment:
+        type:
+        - string
+        - 'null'
+      error:
         anyOf:
-        - type: number
-        - items:
-            type: number
-          type: array
+        - $ref: '#/definitions/ErrorValue'
+      magnitude:
+        type:
+        - number
+        - 'null'
       unit:
         description: SI unit string
-        type: string
+        type:
+        - string
+        - 'null'
     required:
     - magnitude
-    - unit
     title: Value
     type: object
   ValueRange:
     properties:
+      comment:
+        type:
+        - string
+        - 'null'
       max:
-        type: number
+        type:
+        - number
+        - 'null'
       min:
-        type: number
-      steps:
-        type: integer
+        type:
+        - number
+        - 'null'
       unit:
         description: SI unit string
-        type: string
+        type:
+        - string
+        - 'null'
     required:
     - min
     - max
-    - unit
     title: ValueRange
     type: object
-  data_file:
+  ValueVector:
     properties:
-      created:
-        format: date-time
-        type: string
-      file:
-        type: string
-    required:
-    - file
-    - created
-    title: data_file
-    type: object
-  instrument_settings:
-    properties:
-      incident_angle:
+      comment:
+        type:
+        - string
+        - 'null'
+      error:
         anyOf:
-        - $ref: '#/definitions/Value'
-        - $ref: '#/definitions/ValueRange'
-      polarization:
-        allOf:
-        - $ref: '#/definitions/Polarization'
-        default: !!python/object/apply:__main__.Polarization
-        - unpolarized
-      wavelength:
-        anyOf:
-        - $ref: '#/definitions/Value'
-        - $ref: '#/definitions/ValueRange'
-    required:
-    - incident_angle
-    - wavelength
-    title: instrument_settings
-    type: object
-  qz_column:
-    properties:
-      dimension:
-        default: ''
-        type: string
-      name:
-        enum:
-        - Qz
-        type: string
+        - $ref: '#/definitions/ErrorValue'
       unit:
         description: SI unit string
-        enum:
-        - 1/angstrom
-        - 1/nm
-        type: string
+        type:
+        - string
+        - 'null'
+      x:
+        type:
+        - number
+        - 'null'
+      y:
+        type:
+        - number
+        - 'null'
+      z:
+        type:
+        - number
+        - 'null'
     required:
-    - name
-    title: qz_column
+    - x
+    - y
+    - z
+    title: ValueVector
     type: object
   sQz_column:
     properties:
-      dimension:
-        default: ''
-        type: string
-      name:
+      error_of:
         enum:
-        - sQz
-        type: string
-      unit:
-        description: SI unit string
+        - Qz
+      error_type:
+        anyOf:
+        - type: string
+        - type: 'null'
         enum:
-        - 1/angstrom
-        - 1/nm
-        type: string
+        - uncertainty
+        - resolution
+        - 'null'
     required:
-    - name
-    title: sQz_column
+    - error_of
+    title: sQz
     type: object
   sR_column:
     properties:
-      dimension:
-        default: ''
-        type: string
-      name:
+      error_of:
         enum:
-        - sR
-        type: string
-      unit:
-        description: SI unit string
+        - R
+      error_type:
+        anyOf:
+        - type: string
+        - type: 'null'
         enum:
-        - 1/angstrom
-        - 1/nm
-        type: string
+        - uncertainty
+        - resolution
+        - 'null'
     required:
-    - name
-    title: sR_column
+    - error_of
+    title: sR
     type: object
 properties:
   columns:
-    anyOf:
-    - items:
-      - $ref: '#/definitions/qz_column'
-      - $ref: '#/definitions/R_column'
-      type: array
-    - items:
-      - $ref: '#/definitions/qz_column'
-      - $ref: '#/definitions/R_column'
-      - $ref: '#/definitions/sR_column'
-      type: array
-    - items:
-      - $ref: '#/definitions/qz_column'
-      - $ref: '#/definitions/R_column'
-      - $ref: '#/definitions/sR_column'
-      - $ref: '#/definitions/sQz_column'
-      type: array
-  creator:
-    $ref: '#/definitions/Creator'
+    additionalItems:
+      $ref: '#/definitions/Column'
+    items:
+    - $ref: '#/definitions/Qz_column'
+    - $ref: '#/definitions/R_column'
+    - $ref: '#/definitions/sR_column'
+    - $ref: '#/definitions/sQz_column'
+    type:
+    - array
+    - 'null'
+  comment:
+    type:
+    - string
+    - 'null'
   data_set:
     anyOf:
-    - type: string
     - type: integer
+    - type: string
+    - type: 'null'
   data_source:
-    $ref: '#/definitions/DataSource'
+    anyOf:
+    - $ref: '#/definitions/DataSource'
   reduction:
-    $ref: '#/definitions/Reduction'
+    anyOf:
+    - $ref: '#/definitions/Reduction'
 required:
-- creator
 - data_source
+- reduction
 - columns
-title: ORSOHeader
+title: Orso
 type: object

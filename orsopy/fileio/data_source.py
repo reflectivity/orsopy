@@ -1,11 +1,14 @@
 """
 Implementation of the data_source for the ORSO header.
 """
-
 from dataclasses import field
+from datetime import datetime
+from enum import Enum
 from typing import Dict, List, Optional, Union
 
-from .base import File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
+import yaml
+
+from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
 
 # typing stuff introduced in python 3.8
 try:
@@ -22,8 +25,8 @@ class Experiment(Header):
     :param title: Proposal or project title.
     :param instrument: Reflectometer identifier.
     :param start_date: Start date for the experiment.
-    :param probe: Radiation probe, either :code:`'neutrons'` or
-        :code:`'x-rays'`.
+    :param probe: Radiation probe, either :code:`'neutron'` or
+        :code:`'x-ray'`.
     :param facility: Facility where the experiment was performed.
     :param proposalID: Identifier for experiment at a facility.
     :param doi: Digital object identifier for the experiment, possibly
@@ -32,8 +35,8 @@ class Experiment(Header):
 
     title: str
     instrument: str
-    start_date: str
-    probe: Union[Literal["neutrons", "x-rays"]]
+    start_date: datetime
+    probe: Literal["neutron", "x-ray"]
     facility: Optional[str] = None
     proposalID: Optional[str] = None
     doi: Optional[str] = None
@@ -54,6 +57,8 @@ class Sample(Header):
         :code:`Si | SiO2 (20 angstrom) | Fe (200 angstrom) |
         air (beam side)`.
     :param description: Further details of the sample, e.g. size.
+    :param size: Sample size in x, y, z direction, where z is parallel to the surface normal
+        and x is along the beam direction (important for footprint correction).
     :param environment: Name of the sample environment device(s).
     :param sample_parameters: Dictionary of sample parameters.
     """
@@ -61,30 +66,54 @@ class Sample(Header):
     name: str
     category: Optional[str] = None
     composition: Optional[str] = None
-    description: Optional[Union[str, List[str]]] = None
-    environment: Optional[Union[str, List[str]]] = None
-    sample_parameters: Optional[Dict] = field(
+    description: Optional[str] = None
+    size: Optional[ValueVector] = None
+    environment: Optional[List[str]] = None
+    sample_parameters: Optional[Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue]]] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
     )
 
 
-# Enum does not work with yaml, if we really want this it has to be handle
-# as special case.
-#
-# class Polarization(str, enum.Enum):
-#     """
-#     The first symbol indicates the magnetisation direction of the incident
-#     beam. An optional second symbol indicates the direction of the scattered
-#     beam, if a spin analyser is present.
-#     """
-#
-#     unpolarized = "unpolarized"
-#     p = "+"
-#     m = "-"
-#     mm = "--"
-#     mp = "-+"
-#     pm = "+-"
-#     pp = "++"
+class Polarization(str, Enum):
+    """
+    Polarization of the beam used for the reflectivity.
+
+    Neutrons:
+    The first symbol indicates the magnetisation direction of the incident
+    beam, the second symbol indicates the direction of the scattered
+    beam. If either polarization or analysis are not employed the
+    symbol is replaced by "o".
+
+    X-rays:
+    Uses the conventional names pi, sigma, left and right. In experiments
+    with polarization analysis the incident and outgoing polarizations
+    are separated with an underscore "_".
+    """
+
+    unpolarized = "unpolarized"
+    # half polairzed states
+    po = "po"
+    mo = "mo"
+    op = "op"
+    om = "om"
+    # full polarization analysis
+    mm = "mm"
+    mp = "mp"
+    pm = "pm"
+    pp = "pp"
+    # x-ray polarizations
+    pi = "pi"  # in scattering plane
+    sigma = "sigma"  # perpendicular to scattering plane
+    left = "left"  # circular left
+    right = "right"  # circular right
+    pi_pi = "pi_pi"
+    sigma_sigma = "sigma_sigma"
+    pi_sigma = "pi_sigma"
+    sigma_pi = "sigma_pi"
+
+    def yaml_representer(self, dumper: yaml.Dumper):
+        output = self.value
+        return dumper.represent_str(output)
 
 
 @orsodataclass
@@ -104,9 +133,11 @@ class InstrumentSettings(Header):
 
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Literal["unpolarized", "p", "m", "mm", "mp", "pm", "pp"], ValueVector]] = field(
-        default="unpolarized",
-        metadata={"description": "Polarization described as unpolarized/ p " "/ m / pp / pm / mp / mm / vector"},
+    polarization: Optional[Union[Polarization, ValueVector]] = field(
+        default=None,
+        metadata={
+            "description": "Polarization described as unpolarized/ po/ mo / op / om / pp / pm / mp / mm / vector"
+        },
     )
     configuration: Optional[str] = field(
         default=None, metadata={"description": "half / full polarized | liquid_surface | etc"}
@@ -129,8 +160,8 @@ class Measurement(Header):
 
     instrument_settings: InstrumentSettings
     data_files: List[Union[File, str]]
-    references: Optional[List[Union[File, str]]] = None
-    scheme: Optional[Union[Literal["angle- and energy-dispersive", "angle-dispersive", "energy-dispersive"]]] = None
+    additional_files: Optional[List[Union[File, str]]] = None
+    scheme: Optional[Literal["angle- and energy-dispersive", "angle-dispersive", "energy-dispersive"]] = None
 
     __repr__ = Header._staggered_repr
 

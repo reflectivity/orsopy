@@ -8,11 +8,12 @@ from typing import Any, List, Optional, TextIO, Union
 import numpy as np
 import yaml
 
-from .base import Column, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data, orsodataclass
+from .base import (Column, ErrorColumn, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data,
+                   orsodataclass)
 from .data_source import DataSource
 from .reduction import Reduction
 
-ORSO_VERSION = "0.1"
+ORSO_VERSION = "1.0"
 ORSO_DESIGNATE = (
     f"# ORSO reflectivity data file | {ORSO_VERSION} standard " "| YAML encoding | https://www.reflectometry.org/"
 )
@@ -36,7 +37,7 @@ class Orso(Header):
 
     data_source: DataSource
     reduction: Reduction
-    columns: List[Column]
+    columns: List[Union[Column, ErrorColumn]]
     data_set: Optional[Union[int, str]] = None
 
     __repr__ = Header._staggered_repr
@@ -45,7 +46,7 @@ class Orso(Header):
         self,
         data_source: DataSource,
         reduction: Reduction,
-        columns: List[Column],
+        columns: List[Union[Column, ErrorColumn]],
         data_set: Optional[Union[int, str]] = None,
         **user_data,
     ):
@@ -57,6 +58,18 @@ class Orso(Header):
         # additional keywords used to add fields to the file header
         # some recreation does not work when using the attribute directly so it's wrapped in a property
         self._user_data = user_data
+
+    @classmethod
+    def empty(cls) -> "Orso":
+        """
+        Create an empty instance of the ORSO header with
+        all non-optional attributes as :code:`None`.
+
+        :return: Empty Orso class, within minimum required columns
+        """
+        res = super(Orso, cls).empty()
+        res.columns = [Column("Qz", "1/angstrom"), Column("R")]
+        return res
 
     @property
     def user_data(self):
@@ -77,10 +90,13 @@ class Orso(Header):
         """
         out = "# "
         for ci in self.columns:
-            if ci.unit is None:
-                out += f"{ci.name:<23}"
+            if isinstance(ci, Column):
+                if ci.unit is None:
+                    out += f"{ci.name:<23}"
+                else:
+                    out += f"{f'{ci.name} ({ci.unit})':<23}"
             else:
-                out += f"{f'{ci.name} ({ci.unit})':<23}"
+                out += f"s{ci.error_of:<22}"
             if ci is self.columns[0]:
                 # strip two characters from first column to align
                 out = out[:-4]
@@ -121,6 +137,14 @@ class Orso(Header):
         Adds the user data to the returned dictionary.
         """
         out = super().to_dict()
+        out.update(self._user_data)
+        # put columns at the end of the dictionary
+        cols = out.pop("columns")
+        out["columns"] = cols
+        return out
+
+    def _to_object_dict(self):
+        out = super()._to_object_dict()
         out.update(self._user_data)
         # put columns at the end of the dictionary
         cols = out.pop("columns")

@@ -27,7 +27,7 @@ class TestOrso(unittest.TestCase):
         """
         Creation of Orso object.
         """
-        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutrons")
+        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutron")
         s = Sample("The sample")
         inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"))
         df = [File("README.rst", None)]
@@ -67,7 +67,7 @@ class TestOrso(unittest.TestCase):
         """
         Creation of Orso object with a non-zero data_set.
         """
-        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutrons")
+        e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutron")
         s = Sample("The sample")
         inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"))
         df = [File("README.rst", None)]
@@ -110,11 +110,11 @@ class TestOrso(unittest.TestCase):
         info.columns = [
             fileio.Column("Qz", "1/angstrom"),
             fileio.Column("R"),
-            fileio.Column("sR"),
+            fileio.ErrorColumn("R"),
         ]
         info2.columns = info.columns
-        info.data_source.measurement.instrument_settings.polarization = "p"
-        info2.data_source.measurement.instrument_settings.polarization = "m"
+        info.data_source.measurement.instrument_settings.polarization = fileio.Polarization.po
+        info2.data_source.measurement.instrument_settings.polarization = fileio.Polarization.mo
         info.data_set = "up polarization"
         info2.data_set = "down polarization"
         info2.data_source.sample.comment = "this is a comment"
@@ -129,7 +129,7 @@ class TestOrso(unittest.TestCase):
                     title="Main experiment",
                     instrument="Reflectometer",
                     start_date=datetime.now().strftime("%Y-%m-%d"),
-                    probe="x-rays",
+                    probe="x-ray",
                 ),
                 owner=fileio.Person("someone", "important"),
                 measurement=fileio.Measurement(
@@ -141,7 +141,7 @@ class TestOrso(unittest.TestCase):
                     scheme="angle-dispersive",
                 ),
             ),
-            reduction=fileio.Reduction(software="awesome orso"),
+            reduction=fileio.Reduction(software=fileio.Software("awesome orso")),
             data_set="Filled header",
             columns=info.columns,
         )
@@ -192,7 +192,7 @@ class TestOrso(unittest.TestCase):
         info.columns = [
             fileio.Column("Qz", "1/angstrom"),
             fileio.Column("R"),
-            fileio.Column("sR"),
+            fileio.ErrorColumn("R"),
         ]
 
         data = np.zeros((100, 3))
@@ -251,7 +251,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert ds.measurement.instrument_settings.incident_angle.magnitude is None
         assert ds.measurement.instrument_settings.wavelength.magnitude is None
-        assert ds.measurement.data_files is None
+        assert ds.measurement.data_files == []
         assert empty.reduction.software.name is None
         assert empty.reduction.software.version is None
         assert empty.reduction.software.platform is None
@@ -261,7 +261,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert empty.reduction.corrections is None
         assert empty.reduction.creator is None
-        assert empty.columns == [Column.empty()]
+        assert empty.columns == [Column("Qz", "1/angstrom"), Column(name="R")]
         assert empty.data_set is None
         dct = empty.to_dict()
         _validate_header_data([dct])
@@ -278,9 +278,9 @@ class TestFunctions(unittest.TestCase):
             "    affiliation: null\n  experiment:\n    title: null\n"
             "    instrument: null\n    start_date: null\n    probe: null\n"
             "  sample:\n    name: null\n  measurement:\n"
-            "    instrument_settings:\n      incident_angle:\n        magnitude: null\n"
-            "      wavelength:\n        magnitude: null\n      polarization: unpolarized\n"
-            "    data_files: null\nreduction:\n  software:\n    name: null\n"
-            "columns:\n- name: null\n"
+            "    instrument_settings:\n      incident_angle: {magnitude: null}\n"
+            "      wavelength: {magnitude: null}\n"
+            "    data_files: []\nreduction:\n  software: {name: null}\n"
+            "columns:\n- {name: Qz, unit: 1/angstrom}\n- {name: R}\n"
         )
         assert empty.to_yaml() == req

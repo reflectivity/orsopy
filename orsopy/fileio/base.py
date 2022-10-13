@@ -7,15 +7,15 @@ import json
 import os.path
 import pathlib
 import re
+import sys
 import warnings
 
 from collections.abc import Mapping
 from contextlib import contextmanager
 from copy import deepcopy
-from dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
-                         _field_init, _init_param, _set_new_attribute, dataclass, field, fields)
+from enum import Enum
 from inspect import isclass
-from typing import Any, Generator, List, Optional, TextIO, Tuple, Union
+from typing import Any, Dict, Generator, List, Optional, TextIO, Tuple, Union
 
 import numpy as np
 import yaml
@@ -27,23 +27,15 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
+from ..dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
+                           _field_init, _init_param, _set_new_attribute, dataclass, field, fields)
+
 
 def _noop(self, *args, **kw):
     pass
 
 
 yaml.emitter.Emitter.process_tag = _noop
-
-
-def __datetime_representer(dumper, data):
-    """
-    Ensures that datetime objects are represented correctly.
-    """
-    value = data.isoformat("T")
-    return dumper.represent_scalar("tag:yaml.org,2002:timestamp", value)
-
-
-yaml.add_representer(datetime.datetime, __datetime_representer)
 
 # make sure that datetime strings get loaded as str not datetime instances
 yaml.constructor.SafeConstructor.yaml_constructors[
@@ -123,6 +115,10 @@ def orsodataclass(cls: type):
         return cls
 
 
+class ORSOResolveError(ValueError):
+    pass
+
+
 class Header:
     """
     The super class for all of the items in the orso module.
@@ -138,7 +134,14 @@ class Header:
             if attr is None or type_attr is fld.type:
                 continue
             else:
-                updt = self._resolve_type(fld.type, attr)
+                try:
+                    updt = self._resolve_type(fld.type, attr)
+                except Exception as e:
+                    message = (
+                        f"An exception occurred when trying to resolve value '{attr}' in {self.__class__.__name__}:"
+                    )
+                    message += f" {e.__class__.__name__}: {e}"
+                    raise ORSOResolveError(message) from e
                 if updt is not None:
                     # convert to dataclass instance
                     setattr(self, fld.name, updt)
@@ -180,7 +183,9 @@ class Header:
         :return: Correctly resolved object with required type for orso
             compatibility.
         """
-        if isclass(hint) and not getattr(hint, "__origin__", None) in [List, Tuple, Union, Literal]:
+        if hint is Any:
+            return item
+        elif isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
             # simple type that we can work with, no Union or List/Dict
             if isinstance(item, hint):
                 return item
@@ -201,7 +206,7 @@ class Header:
                 except ValueError:
                     # string wasn't ISO8601 format
                     return None
-            if issubclass(hint, Header):
+            if issubclass(hint, Header) and isinstance(item, dict):
                 # convert to dataclass instance
                 attribs = hint.__annotations__.keys()
                 realised_items = {k: item[k] for k in item.keys() if k in attribs}
@@ -227,14 +232,33 @@ class Header:
                 except (ValueError, TypeError):
                     return None
         else:
-            # the hint is a combined type (Union/List etc.)
+            # the hint is a combined type (Union/List/Dict etc.)
             hbase = get_origin(hint)
             if hbase in (list, tuple):
                 t0 = get_args(hint)[0]
                 if isinstance(item, (list, tuple)):
-                    return type(item)([Header._resolve_type(t0, i) for i in item])
+                    if hbase is list:
+                        return list([Header._resolve_type(t0, i) for i in item])
+                    else:
+                        return tuple([Header._resolve_type(ti, i) for ti, i in zip(get_args(hint), item)])
                 else:
-                    return [Header._resolve_type(t0, item)]
+                    return hbase([Header._resolve_type(t0, item)])
+            elif hbase is dict:
+                try:
+                    value_type = get_args(hint)[1]
+                except IndexError:
+                    warnings.warn(
+                        "The evaluation of type hints requires key/value definition for Dict, "
+                        "if you want to use unspecified dictionaries use dict instead of Dict."
+                    )
+                    raise
+                try:
+                    for key, value in item.items():
+                        # resolve the type of any value in the dictionary
+                        item[key] = Header._resolve_type(value_type, value)
+                    return item
+                except AttributeError:
+                    return None
             elif hbase in [Union, Optional]:
                 subtypes = get_args(hint)
                 if type(item) in subtypes:
@@ -249,6 +273,11 @@ class Header:
             elif hbase is Literal:
                 if item in get_args(hint):
                     return item
+                else:
+                    warnings.warn(
+                        f"Has to be one of {get_args(hint)} got {item}", RuntimeWarning,
+                    )
+                    return str(item)
         return None
 
     @classmethod
@@ -266,7 +295,11 @@ class Header:
                 continue
             elif isclass(fld.type) and issubclass(fld.type, Header):
                 attr_items[fld.name] = fld.type.empty()
-            elif get_origin(fld.type) is Union and issubclass(get_args(fld.type)[0], Header):
+            elif (
+                get_origin(fld.type) is Union
+                and isclass(get_args(fld.type)[0])
+                and issubclass(get_args(fld.type)[0], Header)
+            ):
                 attr_items[fld.name] = get_args(fld.type)[0].empty()
             elif (
                 get_origin(fld.type) is list
@@ -274,6 +307,8 @@ class Header:
                 and issubclass(get_args(fld.type)[0], Header)
             ):
                 attr_items[fld.name] = [get_args(fld.type)[0].empty()]
+            elif get_origin(fld.type) is list:
+                attr_items[fld.name] = []
             else:
                 attr_items[fld.name] = None
         return cls(**attr_items)
@@ -323,7 +358,23 @@ class Header:
 
         :return: Yaml string
         """
-        return yaml.dump(self.to_dict(), sort_keys=False)
+        return yaml.dump(self, Dumper=OrsoDumper, sort_keys=False)
+
+    def _to_object_dict(self):
+        output = {}
+        for i, value in self.__dict__.items():
+            if i.startswith("_") or (value is None and i in self._orso_optionals):
+                continue
+            output[i] = value
+        return output
+
+    def yaml_representer(self, dumper: yaml.Dumper):
+        output = self._to_object_dict()
+        return dumper.represent_mapping(dumper.DEFAULT_MAPPING_TAG, output, flow_style=False)
+
+    def yaml_representer_compact(self, dumper: yaml.Dumper):
+        output = self._to_object_dict()
+        return dumper.represent_mapping(dumper.DEFAULT_MAPPING_TAG, output, flow_style=True)
 
     @staticmethod
     def _check_unit(unit: str):
@@ -373,14 +424,150 @@ class Header:
         return out
 
 
+class OrsoDumper(yaml.SafeDumper):
+    def represent_data(self, data):
+        if hasattr(data, "yaml_representer"):
+            return data.yaml_representer(self)
+        elif isinstance(data, datetime.datetime):
+            value = data.isoformat("T")
+            return super().represent_scalar("tag:yaml.org,2002:timestamp", value)
+        else:
+            return super().represent_data(data)
+
+
+unit_registry = None
+
+
+@orsodataclass
+class ErrorValue(Header):
+    """
+    Information about errors on a value.
+    """
+
+    error_value: float
+    error_type: Optional[Literal["uncertainty", "resolution"]] = None
+    value_is: Optional[Literal["sigma", "FWHM"]] = None
+    distribution: Optional[Literal["gaussian", "triangular", "uniform", "lorentzian"]] = None
+
+    yaml_representer = Header.yaml_representer_compact
+
+    @property
+    def sigma(self):
+        """
+        Return value converted to standard deviation.
+
+        The conversion factors can be found in common statistics and experimental physics text books or derived
+        manually solving the variance definition integral.
+        (e.g. Dekking, Michel (2005).
+        A modern introduction to probability and statistics : understanding why and how.
+        Springer, London, UK:)
+        Values and some references available on Wikipedia, too.
+        """
+        if self.value_is == "FWHM":
+            from math import log, sqrt
+
+            value = self.error_value
+
+            if self.distribution in ["gaussian", None]:
+                # Solving for the gaussian function = 0.5 yields:
+                return value / (2.0 * sqrt(2.0 * log(2.0)))
+            elif self.distribution == "triangular":
+                # See solution of integral e.g. https://math.stackexchange.com/questions/4271314/
+                # what-is-the-proof-for-variance-of-triangular-distribution/4273147#4273147
+                # setting c=0 and a=b=FWHM for the symmetric triangle around 0.
+                return value / sqrt(6.0)
+            elif self.distribution == "uniform":
+                # Variance is just the integral of x² from -0.5*FWHM to 0.5*FWHM => 1/12.
+                return value / sqrt(12.0)
+            elif self.distribution == "lorentzian":
+                raise ValueError("Lorentzian distribution does not have a sigma value")
+            else:
+                raise NotImplementedError(f"Unknown distribution {self.distribution}")
+        else:
+            # Value is already sigma
+            return self.error_value
+
+
 @orsodataclass
 class Value(Header):
     """
     A value or list of values with an optional unit.
     """
 
-    magnitude: Union[float, List[float]]
+    magnitude: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
+
+    yaml_representer = Header.yaml_representer_compact
+
+    def __repr__(self):
+        """
+        Make representation more readability by removing names of default arguments.
+        """
+        output = super().__repr__()
+        output = output.replace("magnitude=", "")
+        output = output.replace("unit=", "")
+        return output
+
+    def as_unit(self, output_unit):
+        """
+        Returns the value as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return self.magnitude
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        val = self.magnitude * unit_registry(self.unit)
+        return val.to(output_unit).magnitude
+
+
+@orsodataclass
+class ComplexValue(Header):
+    """
+    A value or list of values with an optional unit.
+    """
+
+    real: float
+    imag: Optional[float] = None
+    unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
+
+    yaml_representer = Header.yaml_representer_compact
+
+    def __repr__(self):
+        """
+        Make representation more readability by removing names of default arguments.
+        """
+        output = super().__repr__()
+        output = output.replace("real=", "")
+        output = output.replace("imag=", "")
+        output = output.replace("unit=", "")
+        return output
+
+    def as_unit(self, output_unit):
+        """
+        Returns the complex value as converted to the given unit.
+        """
+        if self.imag is None:
+            value = self.real + 0j
+        else:
+            value = self.real + 1j * self.imag
+        if output_unit == self.unit:
+            return value
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        val = value * unit_registry(self.unit)
+        return val.to(output_unit).magnitude
 
 
 @orsodataclass
@@ -389,9 +576,28 @@ class ValueRange(Header):
     A range or list of ranges with mins, maxs, and an optional unit.
     """
 
-    min: Union[float, List[float]]
-    max: Union[float, List[float]]
+    min: float
+    max: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+
+    yaml_representer = Header.yaml_representer_compact
+
+    def as_unit(self, output_unit):
+        """
+        Returns a (min, max) tuple of values as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return (self.min, self.max)
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        vmin = self.min * unit_registry(self.unit)
+        vmax = self.max * unit_registry(self.unit)
+        return (vmin.to(output_unit).magnitude, vmax.to(output_unit).magnitude)
 
 
 @orsodataclass
@@ -409,10 +615,31 @@ class ValueVector(Header):
     :param unit: SI unit string.
     """
 
-    x: Union[float, List[float]]
-    y: Union[float, List[float]]
-    z: Union[float, List[float]]
+    x: float
+    y: float
+    z: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
+
+    yaml_representer = Header.yaml_representer_compact
+
+    def as_unit(self, output_unit):
+        """
+        Returns a (x, y, z) tuple of values as converted to the given unit.
+        """
+        if output_unit == self.unit:
+            return (self.x, self.y, self.z)
+
+        global unit_registry
+        if unit_registry is None:
+            import pint
+
+            unit_registry = pint.UnitRegistry()
+
+        vx = self.x * unit_registry(self.unit)
+        vy = self.y * unit_registry(self.unit)
+        vz = self.z * unit_registry(self.unit)
+        return (vx.to(output_unit).magnitude, vy.to(output_unit).magnitude, vz.to(output_unit).magnitude)
 
 
 @orsodataclass
@@ -423,7 +650,7 @@ class Person(Header):
     """
 
     name: str
-    affiliation: Union[str, List[str]]
+    affiliation: str
     contact: Optional[str] = field(default=None, metadata={"description": "Contact (email) address"})
 
 
@@ -435,7 +662,66 @@ class Column(Header):
 
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
-    dimension: Optional[str] = field(default=None, metadata={"dimension": "A description of the column"})
+    physical_quantity: Optional[str] = field(
+        default=None, metadata={"physical_quantity": "A description of the column"}
+    )
+
+    yaml_representer = Header.yaml_representer_compact
+
+
+@orsodataclass
+class ErrorColumn(Header):
+    """
+    Information about a data column.
+    """
+
+    error_of: str
+    error_type: Optional[Literal["uncertainty", "resolution"]] = None
+    value_is: Optional[Literal["sigma", "FWHM"]] = None
+    distribution: Optional[Literal["gaussian", "triangular", "uniform", "lorentzian"]] = None
+
+    yaml_representer = Header.yaml_representer_compact
+
+    @property
+    def name(self):
+        """
+        A convenience property to allow programs to get a valid name attribute for any column.
+        """
+        return f"s{self.error_of}"
+
+    @property
+    def to_sigma(self):
+        """
+        The multiplicative factor needed to convert a FWHM to sigma.
+
+        The conversion factors can be found in common statistics and experimental physics text books or derived
+        manually solving the variance definition integral.
+        (e.g. Dekking, Michel (2005).
+        A modern introduction to probability and statistics : understanding why and how.
+        Springer, London, UK:)
+        Values and some references available on Wikipedia, too.
+        """
+        if self.value_is == "FWHM":
+            from math import log, sqrt
+
+            if self.distribution in ["gaussian", None]:
+                # Solving for the gaussian function = 0.5 yields:
+                return 1.0 / (2.0 * sqrt(2.0 * log(2.0)))
+            elif self.distribution == "triangular":
+                # See solution of integral e.g. https://math.stackexchange.com/questions/4271314/
+                # what-is-the-proof-for-variance-of-triangular-distribution/4273147#4273147
+                # setting c=0 and a=b=FWHM for the symmetric triangle around 0.
+                return 1.0 / sqrt(6.0)
+            elif self.distribution == "uniform":
+                # Variance is just the integral of x² from -0.5*FWHM to 0.5*FWHM => 1/12.
+                return 1.0 / sqrt(12.0)
+            elif self.distribution == "lorentzian":
+                raise ValueError("Lorentzian distribution does not have a sigma value")
+            else:
+                raise NotImplementedError(f"Unknown distribution {self.distribution}")
+        else:
+            # Value is already sigma
+            return 1.0
 
 
 @orsodataclass
@@ -463,6 +749,10 @@ class File(Header):
             fname = pathlib.Path(self.file)
             if fname.exists():
                 self.timestamp = datetime.datetime.fromtimestamp(fname.stat().st_mtime)
+
+
+class NotOrsoCompatibleFileError(ValueError):
+    pass
 
 
 def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple[List[dict], list, str]:
@@ -531,8 +821,8 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
             r" standard \| YAML encoding \| https://www\.reflectometry\.org/)$"
         )
 
-        if not pattern.match(header[0].lstrip(" ")):
-            raise ValueError("First line does not appear to match that of an ORSO file")
+        if len(header) < 1 or not pattern.match(header[0].lstrip(" ")):
+            raise NotOrsoCompatibleFileError("First line does not appear to match that of an ORSO file")
         version = re.findall(r"([0-9]+\.?[0-9]*|\.[0-9]+)+?", header[0])[0]
 
         dcts = yaml.safe_load_all(yml)
@@ -586,23 +876,14 @@ def _validate_header_data(dct_list: List[dict]):
         cols = dct["columns"]
 
         ncols = min(4, len(cols))
-        col_names = [col["name"] for col in cols]
+        col_names = [col["name"] if "name" in col else "s" + col["error_of"] for col in cols]
         units = [col.get("unit") for col in cols]
-
-        # If dct was created with Orso.empty() the Orso.columns attribute
-        # will be [{"name": None}]. In which case don't both validating column
-        # names and units.
-        if len(col_names) == 1 and col_names[0] is None:
-            continue
 
         if col_names[:ncols] != req_cols[:ncols]:
             raise ValueError("The first four columns should be named" " 'Qz', 'R', ['sR', ['sQz']]")
 
         if units[0] not in acceptable_Qz_units:
             raise ValueError("The Qz column must have units of '1/angstrom'" " or '1/nm'")
-
-        if len(units) >= 4 and units[0] != units[3]:
-            raise ValueError("Columns Qz and sQz must have the same units'")
 
 
 @contextmanager
@@ -646,6 +927,8 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
         for (k, v) in obj.items():
             data[k] = _todict(v, classkey)
         return data
+    elif isinstance(obj, Enum):
+        return obj.value
     elif hasattr(obj, "_ast"):
         return _todict(obj._ast())
     elif hasattr(obj, "__iter__") and not isinstance(obj, str):
@@ -712,4 +995,6 @@ def _dict_diff(old: dict, new: dict) -> dict:
                 out[key] = value
         else:
             out[key] = value
+    for key in [ki for ki in old.keys() if ki not in new]:
+        out[key] = None
     return out
