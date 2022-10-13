@@ -13,6 +13,7 @@ Early in the workflow, the :py:mod:`orsopy.fileio` should be imported and an emp
     header = fileio.orso.Orso.empty()
 
 Having created the empty header object we can start to populate the appropriate components of it. 
+It is generally a good idea to populate the components as particular steps occur in the reduction process. 
 For example, if we want to identify the probing radiation as neutrons, we include this as follows. 
 
 .. code-block:: python 
