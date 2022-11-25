@@ -168,6 +168,111 @@
         "probe"
       ]
     },
+    "ErrorValue": {
+      "title": "ErrorValue",
+      "type": "object",
+      "properties": {
+        "error_value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "error_type": {
+          "enum": [
+            "uncertainty",
+            "resolution",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "value_is": {
+          "enum": [
+            "sigma",
+            "FWHM",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "distribution": {
+          "enum": [
+            "gaussian",
+            "triangular",
+            "uniform",
+            "lorentzian",
+            null
+          ],
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "error_value"
+      ]
+    },
+    "ValueVector": {
+      "title": "ValueVector",
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "y": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "z": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unit": {
+          "description": "SI unit string",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ErrorValue"
+            }
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ]
+    },
     "Value": {
       "title": "Value",
       "type": "object",
@@ -183,6 +288,13 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ErrorValue"
+            }
           ]
         },
         "comment": {
@@ -231,82 +343,20 @@
         "max"
       ]
     },
-    "ValueVector": {
-      "title": "ValueVector",
-      "type": "object",
-      "properties": {
-        "x": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "y": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "z": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "x",
-        "y",
-        "z"
-      ]
-    },
     "ComplexValue": {
       "title": "ComplexValue",
       "type": "object",
       "properties": {
         "real": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "imag": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            },
-            {
-              "type": "null"
-            }
+          "type": [
+            "number",
+            "null"
           ]
         },
         "unit": {
@@ -314,6 +364,13 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ErrorValue"
+            }
           ]
         },
         "comment": {
@@ -353,6 +410,13 @@
           "type": [
             "string",
             "null"
+          ]
+        },
+        "size": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ValueVector"
+            }
           ]
         },
         "environment": {
@@ -400,7 +464,7 @@
     },
     "Polarization": {
       "title": "Polarization",
-      "description": "The first symbol indicates the magnetisation direction of the incident\nbeam. An optional second symbol indicates the direction of the scattered\nbeam, if a spin analyser is present.",
+      "description": "Polarization of the beam used for the reflectivity.\n\nNeutrons:\nThe first symbol indicates the magnetisation direction of the incident\nbeam, the second symbol indicates the direction of the scattered\nbeam. If either polarization or analysis are not employed the\nsymbol is replaced by \"o\".\n\nX-rays:\nUses the conventional names pi, sigma, left and right. In experiments\nwith polarization analysis the incident and outgoing polarizations\nare separated with an underscore \"_\".",
       "enum": [
         "unpolarized",
         "po",
@@ -410,7 +474,15 @@
         "mm",
         "mp",
         "pm",
-        "pp"
+        "pp",
+        "pi",
+        "sigma",
+        "left",
+        "right",
+        "pi_pi",
+        "sigma_sigma",
+        "pi_sigma",
+        "sigma_pi"
       ],
       "type": "string"
     },
@@ -743,8 +815,8 @@
             "null"
           ]
         },
-        "dimension": {
-          "dimension": "A description of the column",
+        "physical_quantity": {
+          "physical_quantity": "A description of the column",
           "type": [
             "string",
             "null"
@@ -835,8 +907,8 @@
             null
           ]
         },
-        "dimension": {
-          "dimension": "dimension of column",
+        "physical_quantity": {
+          "physical_quantity": "physical quantity the column describes",
           "anyOf": [
             {
               "type": "string"
@@ -879,8 +951,8 @@
             null
           ]
         },
-        "dimension": {
-          "dimension": "dimension of column",
+        "physical_quantity": {
+          "physical_quantity": "physical quantity the column describes",
           "anyOf": [
             {
               "type": "string"

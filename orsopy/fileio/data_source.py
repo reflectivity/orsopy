@@ -58,6 +58,8 @@ class Sample(Header):
         :code:`Si | SiO2 (20 angstrom) | Fe (200 angstrom) |
         air (beam side)`.
     :param description: Further details of the sample, e.g. size.
+    :param size: Sample size in x, y, z direction, where z is parallel to the surface normal
+        and x is along the beam direction (important for footprint correction).
     :param environment: Name of the sample environment device(s).
     :param sample_parameters: Dictionary of sample parameters.
     """
@@ -66,6 +68,7 @@ class Sample(Header):
     category: Optional[str] = None
     composition: Optional[str] = None
     description: Optional[str] = None
+    size: Optional[ValueVector] = None
     environment: Optional[List[str]] = None
     sample_parameters: Optional[Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue]]] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
@@ -75,9 +78,18 @@ class Sample(Header):
 
 class Polarization(str, Enum):
     """
+    Polarization of the beam used for the reflectivity.
+
+    Neutrons:
     The first symbol indicates the magnetisation direction of the incident
-    beam. An optional second symbol indicates the direction of the scattered
-    beam, if a spin analyser is present.
+    beam, the second symbol indicates the direction of the scattered
+    beam. If either polarization or analysis are not employed the
+    symbol is replaced by "o".
+
+    X-rays:
+    Uses the conventional names pi, sigma, left and right. In experiments
+    with polarization analysis the incident and outgoing polarizations
+    are separated with an underscore "_".
     """
 
     unpolarized = "unpolarized"
@@ -91,6 +103,15 @@ class Polarization(str, Enum):
     mp = "mp"
     pm = "pm"
     pp = "pp"
+    # x-ray polarizations
+    pi = "pi"  # in scattering plane
+    sigma = "sigma"  # perpendicular to scattering plane
+    left = "left"  # circular left
+    right = "right"  # circular right
+    pi_pi = "pi_pi"
+    sigma_sigma = "sigma_sigma"
+    pi_sigma = "pi_sigma"
+    sigma_pi = "sigma_pi"
 
     def yaml_representer(self, dumper: yaml.Dumper):
         output = self.value

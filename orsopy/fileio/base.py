@@ -439,6 +439,56 @@ unit_registry = None
 
 
 @orsodataclass
+class ErrorValue(Header):
+    """
+    Information about errors on a value.
+    """
+
+    error_value: float
+    error_type: Optional[Literal["uncertainty", "resolution"]] = None
+    value_is: Optional[Literal["sigma", "FWHM"]] = None
+    distribution: Optional[Literal["gaussian", "triangular", "uniform", "lorentzian"]] = None
+
+    yaml_representer = Header.yaml_representer_compact
+
+    @property
+    def sigma(self):
+        """
+        Return value converted to standard deviation.
+
+        The conversion factors can be found in common statistics and experimental physics text books or derived
+        manually solving the variance definition integral.
+        (e.g. Dekking, Michel (2005).
+        A modern introduction to probability and statistics : understanding why and how.
+        Springer, London, UK:)
+        Values and some references available on Wikipedia, too.
+        """
+        if self.value_is == "FWHM":
+            from math import log, sqrt
+
+            value = self.error_value
+
+            if self.distribution in ["gaussian", None]:
+                # Solving for the gaussian function = 0.5 yields:
+                return value / (2.0 * sqrt(2.0 * log(2.0)))
+            elif self.distribution == "triangular":
+                # See solution of integral e.g. https://math.stackexchange.com/questions/4271314/
+                # what-is-the-proof-for-variance-of-triangular-distribution/4273147#4273147
+                # setting c=0 and a=b=FWHM for the symmetric triangle around 0.
+                return value / sqrt(6.0)
+            elif self.distribution == "uniform":
+                # Variance is just the integral of x² from -0.5*FWHM to 0.5*FWHM => 1/12.
+                return value / sqrt(12.0)
+            elif self.distribution == "lorentzian":
+                raise ValueError("Lorentzian distribution does not have a sigma value")
+            else:
+                raise NotImplementedError(f"Unknown distribution {self.distribution}")
+        else:
+            # Value is already sigma
+            return self.error_value
+
+
+@orsodataclass
 class Value(Header):
     """
     A value or list of values with an optional unit.
@@ -446,6 +496,7 @@ class Value(Header):
 
     magnitude: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -481,9 +532,10 @@ class ComplexValue(Header):
     A value or list of values with an optional unit.
     """
 
-    real: Union[float, List[float]]
-    imag: Optional[Union[float, List[float]]] = None
+    real: float
+    imag: Optional[float] = None
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -567,6 +619,9 @@ class ValueVector(Header):
     y: float
     z: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    error: Optional[ErrorValue] = None
+
+    yaml_representer = Header.yaml_representer_compact
 
     def as_unit(self, output_unit):
         """
@@ -607,7 +662,9 @@ class Column(Header):
 
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
-    dimension: Optional[str] = field(default=None, metadata={"dimension": "A description of the column"})
+    physical_quantity: Optional[str] = field(
+        default=None, metadata={"physical_quantity": "A description of the column"}
+    )
 
     yaml_representer = Header.yaml_representer_compact
 

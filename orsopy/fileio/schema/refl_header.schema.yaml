@@ -7,12 +7,12 @@ definitions:
         type:
         - string
         - 'null'
-      dimension:
-        dimension: A description of the column
+      name:
         type:
         - string
         - 'null'
-      name:
+      physical_quantity:
+        physical_quantity: A description of the column
         type:
         - string
         - 'null'
@@ -31,20 +31,17 @@ definitions:
         type:
         - string
         - 'null'
+      error:
+        anyOf:
+        - $ref: '#/definitions/ErrorValue'
       imag:
-        anyOf:
-        - type: number
-        - items:
-            type: number
-          type: array
-        - type: 'null'
+        type:
+        - number
+        - 'null'
       real:
-        anyOf:
-        - type: number
-        - items:
-            type: number
-          type: array
-        - type: 'null'
+        type:
+        - number
+        - 'null'
       unit:
         description: SI unit string
         type:
@@ -118,6 +115,46 @@ definitions:
     required:
     - error_of
     title: ErrorColumn
+    type: object
+  ErrorValue:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      distribution:
+        enum:
+        - gaussian
+        - triangular
+        - uniform
+        - lorentzian
+        - null
+        type:
+        - string
+        - 'null'
+      error_type:
+        enum:
+        - uncertainty
+        - resolution
+        - null
+        type:
+        - string
+        - 'null'
+      error_value:
+        type:
+        - number
+        - 'null'
+      value_is:
+        enum:
+        - sigma
+        - FWHM
+        - null
+        type:
+        - string
+        - 'null'
+    required:
+    - error_value
+    title: ErrorValue
     type: object
   Experiment:
     properties:
@@ -283,11 +320,27 @@ definitions:
     title: Person
     type: object
   Polarization:
-    description: 'The first symbol indicates the magnetisation direction of the incident
+    description: 'Polarization of the beam used for the reflectivity.
 
-      beam. An optional second symbol indicates the direction of the scattered
 
-      beam, if a spin analyser is present.'
+      Neutrons:
+
+      The first symbol indicates the magnetisation direction of the incident
+
+      beam, the second symbol indicates the direction of the scattered
+
+      beam. If either polarization or analysis are not employed the
+
+      symbol is replaced by "o".
+
+
+      X-rays:
+
+      Uses the conventional names pi, sigma, left and right. In experiments
+
+      with polarization analysis the incident and outgoing polarizations
+
+      are separated with an underscore "_".'
     enum:
     - unpolarized
     - po
@@ -298,6 +351,14 @@ definitions:
     - mp
     - pm
     - pp
+    - pi
+    - sigma
+    - left
+    - right
+    - pi_pi
+    - sigma_sigma
+    - pi_sigma
+    - sigma_pi
     title: Polarization
     type: string
   Qz_column:
@@ -306,14 +367,14 @@ definitions:
         anyOf:
         - type: string
         - type: 'null'
-      dimension:
-        anyOf:
-        - type: string
-        - type: 'null'
-        dimension: dimension of column
       name:
         enum:
         - Qz
+      physical_quantity:
+        anyOf:
+        - type: string
+        - type: 'null'
+        physical_quantity: physical quantity the column describes
       unit:
         enum:
         - 1/angstrom
@@ -331,14 +392,14 @@ definitions:
         anyOf:
         - type: string
         - type: 'null'
-      dimension:
-        anyOf:
-        - type: string
-        - type: 'null'
-        dimension: dimension of column
       name:
         enum:
         - R
+      physical_quantity:
+        anyOf:
+        - type: string
+        - type: 'null'
+        physical_quantity: physical quantity the column describes
       unit:
         enum:
         - 1/angstrom
@@ -437,6 +498,9 @@ definitions:
         type:
         - object
         - 'null'
+      size:
+        anyOf:
+        - $ref: '#/definitions/ValueVector'
     required:
     - name
     title: Sample
@@ -469,6 +533,9 @@ definitions:
         type:
         - string
         - 'null'
+      error:
+        anyOf:
+        - $ref: '#/definitions/ErrorValue'
       magnitude:
         type:
         - number
@@ -512,6 +579,9 @@ definitions:
         type:
         - string
         - 'null'
+      error:
+        anyOf:
+        - $ref: '#/definitions/ErrorValue'
       unit:
         description: SI unit string
         type:

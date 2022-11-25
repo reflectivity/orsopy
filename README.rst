@@ -30,9 +30,9 @@ Features
 * `Reading and writing of ORSO specification reduced reflectivity files`_. 
 
 .. _`reduced data file format`: https://www.reflectometry.org/file_formats/
-.. _`ORSO defined specification`: https://www.reflectometry.org/file_formats/spec
+.. _`ORSO defined specification`: https://www.reflectometry.org/file_format/specification
 .. _`ORSO`: https://www.reflectometry.org
 .. _`Documents`: https://orsopy.readthedocs.io/en/latest/documents.html
 .. _`contribute`: https://orsopy.readthedocs.io/en/latest/contributing.html
 .. _`ORSO Slack`: https://join.slack.com/t/orso-co/shared_invite/zt-z7p3v89g-~JgCbzcxurQP6ufqdfTCfw
-.. _`Reading and writing of ORSO specification reduced reflectivity files`: ./modules.html#fileio
+.. _`Reading and writing of ORSO specification reduced reflectivity files`: https://orsopy.rtfd.io/en/latest/modules.html#fileio
