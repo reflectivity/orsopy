@@ -18,7 +18,8 @@ from orsopy.fileio import model_language as ml
 class TestMaterial(unittest.TestCase):
     def test_empty(self):
         with self.assertRaises(ValueError):
-            ml.Material()
+            mat = ml.Material()
+            mat.resolve_defaults({})
 
     def test_values(self):
         m = ml.Material(formula="Fe2O3", mass_density={"magnitude": 7.0, "unit": "g/cm^3"})
@@ -153,7 +154,8 @@ class TestLayer(unittest.TestCase):
 
     def test_empty(self):
         with self.assertRaises(ValueError):
-            ml.Layer()
+            lay = ml.Layer()
+            lay.resolve_names({})
 
     def test_resolution(self):
         materials = {"Si": ml.Material(formula="Si")}
