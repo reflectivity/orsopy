@@ -41,13 +41,19 @@ class Material(Header):
     number_density: Optional[Union[float, Value]] = None
     sld: Optional[Union[float, ComplexValue, Value]] = None
     magnetic_moment: Optional[Union[float, Value]] = None
+    relative_density: Optional[float] = None
+
+    original_name = None
 
     def __post_init__(self):
         super().__post_init__()
-        if self.formula is None and self.sld is None:
-            raise ValueError("Material has to either define sld or formula")
 
     def resolve_defaults(self, defaults: ModelParameters):
+        if self.formula is None and self.sld is None:
+            if self.original_name is None:
+                raise ValueError("Material has to either define sld or formula")
+            else:
+                self.formula = self.original_name
         if self.mass_density is not None:
             if isinstance(self.mass_density, Value) and self.mass_density.unit is None:
                 self.mass_density.unit = defaults.mass_density_unit
@@ -110,8 +116,12 @@ class Material(Header):
         self.comment = "could not locate density information for material"
 
     def get_sld(self, xray_energy=None) -> complex:
+        if self.relative_density is None:
+            rel = 1.0
+        else:
+            rel = self.relative_density
         if self.sld is not None:
-            return self.sld.as_unit("1/angstrom^2") + 0j
+            return rel * self.sld.as_unit("1/angstrom^2") + 0j
 
         from orsopy.slddb.material import Material, get_element
 
@@ -122,18 +132,18 @@ class Material(Header):
                 dens=self.mass_density.as_unit("g/cm^3"),
             )
             if xray_energy is None:
-                return material.rho_n
+                return rel * material.rho_n
             else:
-                return material.rho_of_E(xray_energy)
+                return rel * material.rho_of_E(xray_energy)
         elif self.number_density is not None:
             material = Material(
                 [(get_element(element), amount) for element, amount in formula],
                 fu_dens=self.number_density.as_unit("1/angstrom^3"),
             )
             if xray_energy is None:
-                return material.rho_n
+                return rel * material.rho_n
             else:
-                return material.rho_of_E(xray_energy)
+                return rel * material.rho_of_E(xray_energy)
         else:
             return 0.0j
 
@@ -193,24 +203,32 @@ class Layer(Header):
     material: Optional[Union[Material, Composit, str]] = None
     composition: Optional[Dict[str, float]] = None
 
+    original_name = None
+
     def __post_init__(self):
         super().__post_init__()
-        if self.material is None and self.composition is None:
-            raise ValueError("Layer has to either define material or composition")
 
     def resolve_names(self, resolvable_items):
+        if self.material is None and self.composition is None and self.original_name is None:
+            raise ValueError("Layer has to either define material or composition")
         if self.material is not None:
             if isinstance(self.material, Material):
                 pass
             elif isinstance(self.material, Composit):
                 self.material.resolve_names(resolvable_items)
             elif self.material in resolvable_items:
-                self.material = resolvable_items[self.material]
+                possible_material = resolvable_items[self.material]
+                if isinstance(possible_material, Layer):
+                    # There was another layer that used a formula as name
+                    # fall back to formula from material name.
+                    self.material = Material(formula=self.material)
+                else:
+                    self.material = possible_material
             elif self.material in SPECIAL_MATERIALS:
                 self.material = SPECIAL_MATERIALS[self.material]
             else:
                 self.material = Material(formula=self.material)
-        else:
+        elif self.composition:
             self._composition_materials = {}
             for key, value in self.composition.items():
                 if key in resolvable_items:
@@ -220,6 +238,8 @@ class Layer(Header):
                 else:
                     material = Material(formula=key)
                 self._composition_materials[key] = material
+        else:
+            self.material = Material(formula=self.original_name)
 
     def resolve_defaults(self, defaults: ModelParameters):
         if self.roughness is None:
@@ -295,6 +315,8 @@ class SubStack(Header):
                         obj = resolvable_items[item]
                         if isinstance(obj, Material) or isinstance(obj, Composit):
                             obj = Layer(material=obj, thickness=thickness)
+                        elif getattr(obj, "thickness", "ignore") is None:
+                            obj.thickness = thickness
                     else:
                         obj = Layer(material=item, thickness=thickness)
                 if hasattr(obj, "resolve_names"):
@@ -355,8 +377,12 @@ class SampleModel(Header):
         if self.sub_stacks:
             output.update(self.sub_stacks)
         if self.layers:
+            for key, li in self.layers.items():
+                li.original_name = key
             output.update(self.layers)
         if self.materials:
+            for key, mi in self.materials.items():
+                mi.original_name = key
             output.update(self.materials)
         if self.composits:
             output.update(self.composits)
@@ -391,6 +417,8 @@ class SampleModel(Header):
                     obj = ri[item]
                     if isinstance(obj, Material) or isinstance(obj, Composit):
                         obj = Layer(material=obj, thickness=thickness)
+                    elif getattr(obj, "thickness", "ignore") is None:
+                        obj.thickness = thickness
                 else:
                     obj = Layer(material=item, thickness=thickness)
             if hasattr(obj, "resolve_names"):
