@@ -870,7 +870,7 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
                 # numerical array  and start collecting the numbers for this
                 # dataset
                 _d = np.array([np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines])
-                data.append(_d)
+                data.append(_d.T)
                 _ds_lines = []
 
                 # append '---' to signify the start of a new yaml document
@@ -883,7 +883,7 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
 
         # append the last numerical array
         _d = np.array([np.fromstring(v, dtype=float, sep=" ") for v in _ds_lines])
-        data.append(_d)
+        data.append(_d.T)
 
         yml = "".join(header)
 
