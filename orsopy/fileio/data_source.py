@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Union
 import yaml
 
 from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
+from .model_language import SampleModel
 
 # typing stuff introduced in python 3.8
 try:
@@ -72,6 +73,7 @@ class Sample(Header):
     sample_parameters: Optional[Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue]]] = field(
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
     )
+    model: Optional[SampleModel] = None
 
 
 class Polarization(str, Enum):
