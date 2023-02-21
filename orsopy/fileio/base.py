@@ -84,6 +84,7 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
     )
 
 
+#register all ORSO classes here:
 ORSO_DATACLASSES = dict()
 
 
@@ -383,7 +384,7 @@ class Header:
         output = self._to_object_dict()
         return dumper.represent_mapping(dumper.DEFAULT_MAPPING_TAG, output, flow_style=True)
 
-    def to_nexus(self, root=None, name=None, data=None):
+    def to_nexus(self, root=None, name=None):
         """
         Produces an HDF5 representation of the Header object, removing
         any optional attributes with the value :code:`None`.
@@ -421,6 +422,11 @@ class Header:
                         elif isinstance(t_value, dict):
                             item_out = child_group.create_dataset(sub_name, data=json.dumps(t_value))
                             item_out.attrs["mimetype"] = JSON_MIMETYPE
+                        else:
+                            import warnings
+                            # raise ValueError(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
+                            warnings.warn(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
+                            continue
                     item_out.attrs["sequence_index"] = index
             else:
                 # here _todict converts objects that aren't derived from Header
@@ -433,6 +439,10 @@ class Header:
                 elif isinstance(t_value, dict):
                     dset = group.create_dataset(child_name, data=json.dumps(t_value))
                     dset.attrs["mimetype"] = JSON_MIMETYPE
+                else:
+                    import warnings
+                    warnings.warn(f"unserializable attribute found: {child_name} = {t_value}")
+                    # raise ValueError(f"unserializable attribute found: {child_name} = {t_value}")
         return group
 
     @staticmethod
