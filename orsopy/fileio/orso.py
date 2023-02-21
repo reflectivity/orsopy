@@ -288,13 +288,14 @@ def _from_nexus_group(group):
     else:
         dct = dict()
         for name, value in group.items():
+            if value.attrs.get('NX_class', None) == 'NXdata':
+                # remove NXdata folder, which exists only for NeXus plotting
+                continue
             dct[name] = _get_nexus_item(value)
 
         if "ORSO_class" in group.attrs:
             cls = ORSO_DATACLASSES[group.attrs["ORSO_class"]]
-            cls_fields = set(field.name for field in fields(cls))
-            init_params = {name: value for name, value in dct.items() if name in cls_fields}
-            return cls(**init_params)
+            return cls(**dct)
         else:
             return dct
 
