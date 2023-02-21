@@ -415,10 +415,11 @@ class Header:
                         t_value = nexus_value_converter(item)
                         if any(isinstance(t_value, t) for t in (str, float, int, bool, np.ndarray)):
                             item_out = child_group.create_dataset(sub_name, data=t_value)
-                        else:
-                            item_out = child_group.create_dataset(
-                                sub_name, data=json.dumps(_todict(value), default=nexus_value_converter)
-                            )
+                        elif t_value is None:
+                            # special handling for null datasets: no data
+                            item_out = child_group.create_dataset(sub_name, dtype="f")
+                        elif isinstance(t_value, dict):
+                            item_out = child_group.create_dataset(sub_name, data=json.dumps(t_value))
                             item_out.attrs["mimetype"] = JSON_MIMETYPE
                     item_out.attrs["sequence_index"] = index
             else:
@@ -427,10 +428,10 @@ class Header:
                 t_value = nexus_value_converter(value)
                 if any(isinstance(t_value, t) for t in (str, float, int, bool, np.ndarray)):
                     group.create_dataset(child_name, data=t_value)
-                else:
-                    dset = group.create_dataset(
-                        child_name, data=json.dumps(_todict(value), default=nexus_value_converter)
-                    )
+                elif t_value is None:
+                    group.create_dataset(child_name, dtype="f")
+                elif isinstance(t_value, dict):
+                    dset = group.create_dataset(child_name, data=json.dumps(t_value))
                     dset.attrs["mimetype"] = JSON_MIMETYPE
         return group
 

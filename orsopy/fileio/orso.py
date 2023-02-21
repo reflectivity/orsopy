@@ -308,7 +308,9 @@ def _get_nexus_item(value):
         return _from_nexus_group(value)
     elif isinstance(value, h5py.Dataset):
         v = value[()]
-        if value.attrs.get("mimetype", None) == JSON_MIMETYPE:
+        if isinstance(value, h5py.Empty):
+            return None
+        elif value.attrs.get("mimetype", None) == JSON_MIMETYPE:
             return json.loads(v)
         elif hasattr(v, "decode"):
             # it is a bytes object, should be string
