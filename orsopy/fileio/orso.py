@@ -374,4 +374,4 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
                     if column.unit is not None:
                         col_data.attrs["units"] = column.unit
 
-                plottable_data_group[nexus_colname] = h5py.SoftLink(col_data.name)
+                plottable_data_group[nexus_colname] = col_data
