@@ -282,7 +282,7 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
 
 
 def _from_nexus_group(group):
-    if group.attrs.get("list", None) is not None:
+    if group.attrs.get("sequence", None) is not None:
         sort_list = [[v.attrs["sequence_index"], v] for v in group.values()]
         return [_get_nexus_item(v) for _, v in sorted(sort_list)]
     else:
@@ -353,10 +353,10 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
             entry.attrs["default"] = "plottable_data"
             info.to_nexus(root=entry, name="info")
             data_group = entry.create_group("data")
-            data_group.attrs["list"] = 1
-            plottable_data_group = entry.create_group("plottable_data")
+            data_group.attrs["sequence"] = 1
+            plottable_data_group = entry.create_group("plottable_data", track_order=True)
             plottable_data_group.attrs["NX_class"] = "NXdata"
-            plottable_data_group.attrs["list"] = 1
+            plottable_data_group.attrs["sequence"] = 1
             plottable_data_group.attrs["axes"] = [info.columns[0].name]
             plottable_data_group.attrs["signal"] = info.columns[1].name
             plottable_data_group.attrs[f"{info.columns[0].name}_indices"] = [0]

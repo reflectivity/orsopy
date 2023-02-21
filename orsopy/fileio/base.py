@@ -405,7 +405,7 @@ class Header:
                 value.to_nexus(root=group, name=child_name)
             elif isinstance(value, (list, tuple)):
                 child_group = group.create_group(child_name)
-                child_group.attrs["list"] = 1
+                child_group.attrs["sequence"] = 1
                 for index, item in enumerate(value):
                     # use the 'name' attribute of children if it exists, else index:
                     sub_name = getattr(item, "name", str(index))
