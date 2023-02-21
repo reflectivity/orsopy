@@ -84,7 +84,7 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
     )
 
 
-#register all ORSO classes here:
+# register all ORSO classes here:
 ORSO_DATACLASSES = dict()
 
 
