@@ -6,10 +6,10 @@ sample:
           substrate:
             sequence:
             - material: Si
-              sigma: 2
+              roughness: 2
             - material: SiO2
               thickness: 5
-              sigma: 3
+              roughness: 3
           film:
             repetitions: 5
             stack: head_group 4 | tail | tail | head_group 4
@@ -35,7 +35,7 @@ sample:
               H2O: 0.3
               D2O: 0.7
         globals:
-          sigma: {magnitude: 5, unit: angstrom}
+          roughness: {magnitude: 5, unit: angstrom}
           length_unit: angstrom
           mass_density_unit: g/cm^3
           sld_unit: 1/angstrom^2
