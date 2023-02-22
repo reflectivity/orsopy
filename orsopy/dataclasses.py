@@ -11,7 +11,7 @@ if sys.version_info >= (3, 10, 1):
         return _field_init_real(f, frozen, locals, self_name, False)
 
 
-elif sys.version_info <= (3, 7, 0):
+elif sys.version_info < (3, 7, 0):
     # fix bug in python 3.6 when using default_factory for dataclass objects
     _orig_field = field
 
