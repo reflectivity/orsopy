@@ -872,7 +872,17 @@ class ErrorColumn(Header):
             return 1.0
 
 
-@dataclass
+@orsodataclass
+class ContentHash(Header):
+    """
+    A hash of some content, using standard algorithms
+    """
+
+    digest: str
+    algorithm: Literal["sha1", "sha256", "sha384", "sha512", "sha3_256", "sha3_512"]
+
+
+@orsodataclass
 class File(Header):
     """
     A file with file path and a last modified timestamp.
@@ -887,6 +897,7 @@ class File(Header):
             " itself"
         },
     )
+    hash: Optional[ContentHash] = None
 
     def __post_init__(self):
         """
