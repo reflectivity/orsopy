@@ -27,12 +27,12 @@ def find_idx(string, start, value):
 
 @orsodataclass
 class ModelParameters(Header):
-    roughness: Optional[Value] = field(default_factory=lambda: Value(0.3, "nm"))
-    length_unit: Optional[str] = "nm"
-    mass_density_unit: Optional[str] = "g/cm^3"
-    number_density_unit: Optional[str] = "1/nm^3"
-    sld_unit: Optional[str] = "1/angstrom^2"
-    magnetic_moment_unit: Optional[str] = "muB"
+    roughness: Value = field(default_factory=lambda: Value(0.3, "nm"))
+    length_unit: str = "nm"
+    mass_density_unit: str = "g/cm^3"
+    number_density_unit: str = "1/nm^3"
+    sld_unit: str = "1/angstrom^2"
+    magnetic_moment_unit: str = "muB"
 
 
 @orsodataclass
