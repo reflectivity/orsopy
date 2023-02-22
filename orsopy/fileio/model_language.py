@@ -152,6 +152,8 @@ class Material(Header):
 class Composit(Header):
     composition: Dict[str, float]
 
+    original_name = None
+
     def resolve_names(self, resolvable_items):
         self._composition_materials = {}
         for key, value in self.composition.items():
@@ -288,6 +290,8 @@ class SubStack(Header):
     arguments: Optional[List[Any]] = None
     keywords: Optional[Dict[str, Any]] = None
 
+    original_name = None
+
     def resolve_names(self, resolvable_items):
         if self.stack is None and self.sequence is None:
             raise ValueError("SubStack has to either define stack or sequence")
@@ -319,6 +323,7 @@ class SubStack(Header):
                             obj.thickness = thickness
                     else:
                         obj = Layer(material=item, thickness=thickness)
+                        obj.original_name = item
                 if hasattr(obj, "resolve_names"):
                     obj.resolve_names(resolvable_items)
                 output.append(obj)
@@ -375,6 +380,8 @@ class SampleModel(Header):
     def resolvable_items(self):
         output = {}
         if self.sub_stacks:
+            for key, ssi in self.sub_stacks.items():
+                ssi.original_name = key
             output.update(self.sub_stacks)
         if self.layers:
             for key, li in self.layers.items():
@@ -385,6 +392,8 @@ class SampleModel(Header):
                 mi.original_name = key
             output.update(self.materials)
         if self.composits:
+            for key, ci in self.composits.items():
+                ci.original_name = key
             output.update(self.composits)
         return output
 
@@ -421,6 +430,7 @@ class SampleModel(Header):
                         obj.thickness = thickness
                 else:
                     obj = Layer(material=item, thickness=thickness)
+                    obj.original_name = item
             if hasattr(obj, "resolve_names"):
                 obj.resolve_names(ri)
             if hasattr(obj, "resolve_defaults"):
