@@ -6,6 +6,7 @@ resolving the model to a simple list of slabs.
 """
 import warnings
 
+from dataclasses import field
 from typing import Any, Dict, List, Optional, Union
 
 from ..utils.chemical_formula import Formula
@@ -26,7 +27,7 @@ def find_idx(string, start, value):
 
 @orsodataclass
 class ModelParameters(Header):
-    roughness: Optional[Value] = Value(0.3, "nm")
+    roughness: Optional[Value] = field(default_factory=lambda: Value(0.3, "nm"))
     length_unit: Optional[str] = "nm"
     mass_density_unit: Optional[str] = "g/cm^3"
     number_density_unit: Optional[str] = "1/nm^3"

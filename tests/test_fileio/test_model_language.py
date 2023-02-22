@@ -358,7 +358,7 @@ class TestSampleModel(unittest.TestCase):
         stack = sm.resolve_stack()
         assert len(stack) == 1
         assert stack[0] == ml.Layer(
-            ml.Value(0.0, "nm"), roughness=ml.ModelParameters.roughness, material=ml.Material(formula="Si")
+            ml.Value(0.0, "nm"), roughness=defaults.roughness, material=ml.Material(formula="Si")
         )
 
     def test_resolve_to_layers(self):
