@@ -51,6 +51,22 @@ definitions:
     - real
     title: ComplexValue
     type: object
+  Composit:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      composition:
+        additionalProperties:
+          type: number
+        type:
+        - object
+        - 'null'
+    required:
+    - composition
+    title: Composit
+    type: object
   DataSource:
     properties:
       comment:
@@ -256,6 +272,73 @@ definitions:
     - wavelength
     title: InstrumentSettings
     type: object
+  Layer:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      composition:
+        additionalProperties:
+          type: number
+        type:
+        - object
+        - 'null'
+      material:
+        anyOf:
+        - $ref: '#/definitions/Material'
+        - $ref: '#/definitions/Composit'
+        - type: string
+        - type: 'null'
+      roughness:
+        anyOf:
+        - type: number
+        - $ref: '#/definitions/Value'
+        - type: 'null'
+      thickness:
+        anyOf:
+        - type: number
+        - $ref: '#/definitions/Value'
+        - type: 'null'
+    title: Layer
+    type: object
+  Material:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      formula:
+        type:
+        - string
+        - 'null'
+      magnetic_moment:
+        anyOf:
+        - type: number
+        - $ref: '#/definitions/Value'
+        - type: 'null'
+      mass_density:
+        anyOf:
+        - type: number
+        - $ref: '#/definitions/Value'
+        - type: 'null'
+      number_density:
+        anyOf:
+        - type: number
+        - $ref: '#/definitions/Value'
+        - type: 'null'
+      relative_density:
+        type:
+        - number
+        - 'null'
+      sld:
+        anyOf:
+        - type: number
+        - $ref: '#/definitions/ComplexValue'
+        - $ref: '#/definitions/Value'
+        - type: 'null'
+    title: Material
+    type: object
   Measurement:
     properties:
       additional_files:
@@ -294,6 +377,47 @@ definitions:
     - instrument_settings
     - data_files
     title: Measurement
+    type: object
+  ModelParameters:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      length_unit:
+        default: nm
+        type:
+        - string
+        - 'null'
+      magnetic_moment_unit:
+        default: muB
+        type:
+        - string
+        - 'null'
+      mass_density_unit:
+        default: g/cm^3
+        type:
+        - string
+        - 'null'
+      number_density_unit:
+        default: 1/nm^3
+        type:
+        - string
+        - 'null'
+      roughness:
+        allOf:
+        - $ref: '#/definitions/Value'
+        default:
+          comment: null
+          error: null
+          magnitude: 0.3
+          unit: nm
+      sld_unit:
+        default: 1/angstrom^2
+        type:
+        - string
+        - 'null'
+    title: ModelParameters
     type: object
   Person:
     properties:
@@ -483,6 +607,9 @@ definitions:
         type:
         - array
         - 'null'
+      model:
+        anyOf:
+        - $ref: '#/definitions/SampleModel'
       name:
         type:
         - string
@@ -505,6 +632,55 @@ definitions:
     - name
     title: Sample
     type: object
+  SampleModel:
+    properties:
+      comment:
+        type:
+        - string
+        - 'null'
+      composits:
+        additionalProperties:
+          $ref: '#/definitions/Composit'
+        type:
+        - object
+        - 'null'
+      globals:
+        anyOf:
+        - $ref: '#/definitions/ModelParameters'
+      layers:
+        additionalProperties:
+          $ref: '#/definitions/Layer'
+        type:
+        - object
+        - 'null'
+      materials:
+        additionalProperties:
+          $ref: '#/definitions/Material'
+        type:
+        - object
+        - 'null'
+      origin:
+        type:
+        - string
+        - 'null'
+      reference:
+        type:
+        - string
+        - 'null'
+      stack:
+        type:
+        - string
+        - 'null'
+      sub_stacks:
+        additionalProperties:
+          $ref: '#/definitions/SubStack'
+        type:
+        - object
+        - 'null'
+    required:
+    - stack
+    title: SampleModel
+    type: object
   Software:
     properties:
       comment:
@@ -526,6 +702,42 @@ definitions:
     required:
     - name
     title: Software
+    type: object
+  SubStack:
+    properties:
+      arguments:
+        items: {}
+        type:
+        - array
+        - 'null'
+      comment:
+        type:
+        - string
+        - 'null'
+      keywords:
+        type:
+        - object
+        - 'null'
+      repetitions:
+        default: 1
+        type:
+        - integer
+        - 'null'
+      represents:
+        type:
+        - string
+        - 'null'
+      sequence:
+        items:
+          $ref: '#/definitions/Layer'
+        type:
+        - array
+        - 'null'
+      stack:
+        type:
+        - string
+        - 'null'
+    title: SubStack
     type: object
   Value:
     properties:

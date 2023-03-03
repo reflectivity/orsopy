@@ -2,6 +2,21 @@
 History
 =======
 
+1.1.0 (2023-02-20)
+------------------
+
+* Introduction of simple model language that can be used to describe
+  sample structures. The module *orsopy.fileio.model_language* is used to implement
+  and parse the model language.
+  See https://www.reflectometry.org/projects/simple_model for specifications.
+  Sample model examples can be found in the examples folder together
+  with scripts using the orsopy module to parse and plot the data.
+* Add polarization channels for x-ray experiments
+* Implement ErrorValue class for optional description of errors
+  on values within the file header.
+* Update of .ort standard according to discussions with community.
+  (E.g. rename of column attribute "dimension" to "physical_quantity")
+
 1.0.1 (2022-06-28)
 ------------------
 
@@ -9,6 +24,8 @@ History
 * Update the schema files for released .ort standard.
 * Sample.sample_parameters keys to be strings and values restricted to
   Value, ValueRange, ValueVector or ComplexValue.
+* Add *as_unit* method to value classes that uses the *pint* library to convert
+  values to supplied unit automatically.
 
 1.0.0 (2022-06-10)
 ------------------

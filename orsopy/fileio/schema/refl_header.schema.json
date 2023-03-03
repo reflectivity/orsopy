@@ -384,6 +384,361 @@
         "real"
       ]
     },
+    "Material": {
+      "title": "Material",
+      "type": "object",
+      "properties": {
+        "formula": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mass_density": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "number_density": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sld": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/ComplexValue"
+            },
+            {
+              "$ref": "#/definitions/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "magnetic_moment": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relative_density": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Composit": {
+      "title": "Composit",
+      "type": "object",
+      "properties": {
+        "composition": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "composition"
+      ]
+    },
+    "Layer": {
+      "title": "Layer",
+      "type": "object",
+      "properties": {
+        "thickness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "roughness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "material": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Material"
+            },
+            {
+              "$ref": "#/definitions/Composit"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "composition": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "SubStack": {
+      "title": "SubStack",
+      "type": "object",
+      "properties": {
+        "repetitions": {
+          "default": 1,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "stack": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sequence": {
+          "items": {
+            "$ref": "#/definitions/Layer"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "represents": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "arguments": {
+          "items": {},
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "keywords": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "ModelParameters": {
+      "title": "ModelParameters",
+      "type": "object",
+      "properties": {
+        "roughness": {
+          "default": {
+            "magnitude": 0.3,
+            "unit": "nm",
+            "error": null,
+            "comment": null
+          },
+          "allOf": [
+            {
+              "$ref": "#/definitions/Value"
+            }
+          ]
+        },
+        "length_unit": {
+          "default": "nm",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "mass_density_unit": {
+          "default": "g/cm^3",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "number_density_unit": {
+          "default": "1/nm^3",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sld_unit": {
+          "default": "1/angstrom^2",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "magnetic_moment_unit": {
+          "default": "muB",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "SampleModel": {
+      "title": "SampleModel",
+      "type": "object",
+      "properties": {
+        "stack": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "origin": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sub_stacks": {
+          "additionalProperties": {
+            "$ref": "#/definitions/SubStack"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "layers": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Layer"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "materials": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Material"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "composits": {
+          "additionalProperties": {
+            "$ref": "#/definitions/Composit"
+          },
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "globals": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ModelParameters"
+            }
+          ]
+        },
+        "reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "comment": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "stack"
+      ]
+    },
     "Sample": {
       "title": "Sample",
       "type": "object",
@@ -449,6 +804,13 @@
           "type": [
             "object",
             "null"
+          ]
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/SampleModel"
+            }
           ]
         },
         "comment": {
