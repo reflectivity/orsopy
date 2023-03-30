@@ -8,7 +8,7 @@ Early in the workflow, the :py:mod:`orsopy.fileio` should be imported and an emp
 .. code-block:: python 
 
     import numpy as np
-    from orsopy.fileio.orso import Orso
+    from orsopy import fileio
 
     header = fileio.orso.Orso.empty()
 
@@ -26,33 +26,35 @@ It is not possible to write a .ort file without defining the columns present in 
 Columns are defined as follows, using the :code:`orsopy.fileio.base.Column` and :code:`orsopy.fileio.base.ErrorColumn` class objects (note that there are other `base classes`_ that can be used for a variety of objects).
 
 .. code-block:: python 
-
-    from orsopy.fileio.base import Column, ErrorColumn
     
-    q_column = Column(name='Qz', unit='1/angstrom', physical_quantity='wavevector transfer')
-    r_column = Column(name='R', unit=None, physical_quantity='reflectivity')
-    dr_column = ErrorColumn(error_of='R', error_type='uncertainty', value_is='sigma')
-    dq_column = ErrorColumn(error_of='Qz', error_type='resolution', value_is='sigma')
+    q_column = fileio.base.Column(name='Qz', unit='1/angstrom', physical_quantity='wavevector transfer')
+    r_column = fileio.base.Column(name='R', unit=None, physical_quantity='reflectivity')
+    dr_column = fileio.base.ErrorColumn(error_of='R', error_type='uncertainty', value_is='sigma')
+    dq_column = fileio.base.ErrorColumn(error_of='Qz', error_type='resolution', value_is='sigma')
 
     header.columns = [q_column, r_column, dr_column, dq_column]
 
 Any **required** metadata that is not included in the head will be written in the file as containing :code:`null`. 
-Having populated the metadata for the header, we then want to assign the data that we want to write (this will be after your data reduction has been performed).
+Having populated the metadata, we can now ensure that the metadata is correct with the following, 
+
+.. code-block:: python 
+
+    correct_header = fileio.orso.Orso(**header.to_dict())
+
+This will produce a new object, if the metadata is correct. 
+
+Now, we then want to assign the data that we want to write (this will be after your data reduction has been performed).
 This is achieved by producing a :code:`fileio.orso.OrsoDataset` object, which takes the header and the relevant data columns (below these are :code:`q`, :code:`R`, :code:`dR`, and :code:`dq`) as inputs. 
 
 .. code-block:: python 
 
-    from orsopy.fileio.orso import OrsoDataset
-
-    dataset = OrsoDataset(info=header, data=np.array([q, R, dR, dq]).T)
+    dataset = fileio.orso.OrsoDataset(info=header, data=np.array([q, R, dR, dq]).T)
 
 The dataset can then be saved with the following function, where :code:`'my_file.ort'` is the name for the file to be saved under. 
 
 .. code-block:: python
 
-    from orsopy.fileio.orso import save_orso
-
-    save_orso(datasets=[dataset], fname='my_file.ort') 
+    fileio.orso.save_orso(datasets=[dataset], fname='my_file.ort') 
 
 Note that if you want to save more than one dataset in a single file, this can be achieved by including these in the list that is passed to this function. 
 
