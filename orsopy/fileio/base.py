@@ -431,6 +431,9 @@ class OrsoDumper(yaml.SafeDumper):
         elif isinstance(data, datetime.datetime):
             value = data.isoformat("T")
             return super().represent_scalar("tag:yaml.org,2002:timestamp", value)
+        elif (not np.shape(data)) and hasattr(data, "item"):
+            # If data is a numpy scalar, convert to a python object
+            return super().represent_data(data.item())
         else:
             return super().represent_data(data)
 
