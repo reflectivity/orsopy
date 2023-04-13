@@ -238,8 +238,8 @@ class TestOrso(unittest.TestCase):
         fileio.save_orso([ds], "test_numpy.ort")
         ls = fileio.load_orso("test_numpy.ort")
         i_s = ls[0].info.data_source.measurement.instrument_settings
-        assert i_s.wavelength == 10.0
-        assert i_s.incident_angle == 2
+        assert i_s.wavelength.magnitude == 10.0
+        assert i_s.incident_angle.magnitude == 2
 
 
 class TestFunctions(unittest.TestCase):
