@@ -2,14 +2,14 @@
 Implementation of the top level class for the ORSO header.
 """
 
-from dataclasses import dataclass
-from typing import Any, List, Optional, TextIO, Union
+from dataclasses import dataclass, fields
+from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 
 import numpy as np
 import yaml
 
-from .base import (Column, ErrorColumn, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data,
-                   orsodataclass)
+from .base import (JSON_MIMETYPE, ORSO_DATACLASSES, Column, ErrorColumn, Header, _dict_diff, _nested_update,
+                   _possibly_open_file, _read_header_data, orsodataclass)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -163,11 +163,14 @@ class OrsoDataset:
     """
 
     info: Orso
-    data: Any
+    data: Union[np.ndarray, Sequence[np.ndarray], Sequence[Sequence]]
 
     def __post_init__(self):
-        if self.data.shape[1] != len(self.info.columns):
+        if len(self.data) != len(self.info.columns):
             raise ValueError("Data has to have the same number of columns as header")
+        column_lengths = set(len(c) for c in self.data)
+        if len(column_lengths) > 1:
+            raise ValueError("Columns must all have the same length in first dimension")
 
     def header(self) -> str:
         """
@@ -210,6 +213,9 @@ class OrsoDataset:
         return self.info == other.info and (self.data == other.data).all()
 
 
+ORSO_DATACLASSES["OrsoDataset"] = OrsoDataset
+
+
 def save_orso(
     datasets: List[OrsoDataset], fname: Union[TextIO, str], comment: Optional[str] = None, data_separator: str = ""
 ) -> None:
@@ -249,13 +255,13 @@ def save_orso(
 
         ds1 = datasets[0]
         header += ds1.header()
-        np.savetxt(f, ds1.data, header=header, fmt="%-22.16e")
+        np.savetxt(f, np.asarray(ds1.data).T, header=header, fmt="%-22.16e")
 
         for dsi in datasets[1:]:
             # write an optional spacer string between dataset e.g. \n
             f.write(data_separator)
             hi = ds1.diff_header(dsi)
-            np.savetxt(f, dsi.data, header=hi, fmt="%-22.16e")
+            np.savetxt(f, np.asarray(dsi.data).T, header=hi, fmt="%-22.16e")
 
 
 def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
@@ -273,3 +279,99 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
         od = OrsoDataset(o, data)
         ods.append(od)
     return ods
+
+
+def _from_nexus_group(group):
+    if group.attrs.get("sequence", None) is not None:
+        sort_list = [[v.attrs["sequence_index"], v] for v in group.values()]
+        return [_get_nexus_item(v) for _, v in sorted(sort_list)]
+    else:
+        dct = dict()
+        for name, value in group.items():
+            if value.attrs.get('NX_class', None) == 'NXdata':
+                # remove NXdata folder, which exists only for NeXus plotting
+                continue
+            dct[name] = _get_nexus_item(value)
+
+        if "ORSO_class" in group.attrs:
+            cls = ORSO_DATACLASSES[group.attrs["ORSO_class"]]
+            return cls(**dct)
+        else:
+            return dct
+
+
+def _get_nexus_item(value):
+    import json
+
+    import h5py
+
+    if isinstance(value, h5py.Group):
+        return _from_nexus_group(value)
+    elif isinstance(value, h5py.Dataset):
+        v = value[()]
+        if isinstance(value, h5py.Empty):
+            return None
+        elif value.attrs.get("mimetype", None) == JSON_MIMETYPE:
+            return json.loads(v)
+        elif hasattr(v, "decode"):
+            # it is a bytes object, should be string
+            return v.decode()
+        else:
+            return v
+
+
+def load_nexus(fname: Union[str, BinaryIO]) -> List[OrsoDataset]:
+    import h5py
+
+    f = h5py.File(fname, "r")
+    return [_from_nexus_group(g) for g in f.values() if g.attrs.get("ORSO_class", None) == "OrsoDataset"]
+
+
+def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment: Optional[str] = None) -> BinaryIO:
+    import h5py
+
+    for idx, dataset in enumerate(datasets):
+        info = dataset.info
+        data_set = info.data_set
+        if data_set is None or (isinstance(data_set, str) and len(data_set) == 0):
+            # it's not set, or is zero length string
+            info.data_set = idx
+
+    dsets = [dataset.info.data_set for dataset in datasets]
+    if len(set(dsets)) != len(dsets):
+        raise ValueError("All `OrsoDataset.info.data_set` values must be unique")
+
+    with h5py.File(fname, mode="w") as f:
+        f.attrs["NX_class"] = "NXroot"
+        if comment is not None:
+            f.attrs["comment"] = comment
+
+        for dsi in datasets:
+            info = dsi.info
+            entry = f.create_group(info.data_set)
+            entry.attrs["ORSO_class"] = "OrsoDataset"
+            entry.attrs["NX_class"] = "NXentry"
+            entry.attrs["default"] = "plottable_data"
+            info.to_nexus(root=entry, name="info")
+            data_group = entry.create_group("data")
+            data_group.attrs["sequence"] = 1
+            plottable_data_group = entry.create_group("plottable_data", track_order=True)
+            plottable_data_group.attrs["NX_class"] = "NXdata"
+            plottable_data_group.attrs["sequence"] = 1
+            plottable_data_group.attrs["axes"] = [info.columns[0].name]
+            plottable_data_group.attrs["signal"] = info.columns[1].name
+            plottable_data_group.attrs[f"{info.columns[0].name}_indices"] = [0]
+            for column_index, column in enumerate(info.columns):
+                # assume that dataset.data has dimension == ncolumns along first dimension
+                # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
+                col_data = data_group.create_dataset(column.name, data=dsi.data[column_index])
+                col_data.attrs["sequence_index"] = column_index
+                col_data.attrs["target"] = col_data.name
+                if isinstance(column, ErrorColumn):
+                    nexus_colname = column.error_of + "_errors"
+                else:
+                    nexus_colname = column.name
+                    if column.unit is not None:
+                        col_data.attrs["units"] = column.unit
+
+                plottable_data_group[nexus_colname] = col_data
