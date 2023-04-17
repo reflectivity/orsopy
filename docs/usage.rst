@@ -2,6 +2,11 @@
 Usage
 =====
 
-To use orsopy in a project::
+Usage examples
+--------------
 
-    import orsopy
+- `Producing metadata rich reduced datasets`_
+
+
+.. _`Producing metadata rich reduced datasets`: ./fileio_usage.html
+
