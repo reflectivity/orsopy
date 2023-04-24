@@ -230,6 +230,17 @@ class TestOrso(unittest.TestCase):
         info = datasets[0].info
         assert hasattr(info.data_source.measurement.instrument_settings.incident_angle, "resolution")
 
+    def test_save_numpy_scalar_dtypes(self):
+        info = fileio.Orso.empty()
+        info.data_source.measurement.instrument_settings.wavelength = Value(np.float64(10.0))
+        info.data_source.measurement.instrument_settings.incident_angle = Value(np.int32(2))
+        ds = fileio.orso.OrsoDataset(info, np.arange(20.).reshape(10, 2))
+        fileio.save_orso([ds], "test_numpy.ort")
+        ls = fileio.load_orso("test_numpy.ort")
+        i_s = ls[0].info.data_source.measurement.instrument_settings
+        assert i_s.wavelength.magnitude == 10.0
+        assert i_s.incident_angle.magnitude == 2
+
 
 class TestFunctions(unittest.TestCase):
     """
