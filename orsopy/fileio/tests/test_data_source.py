@@ -2,12 +2,15 @@
 Tests for fileio.data_source module
 """
 
-import pathlib
+from pathlib import Path
 import unittest
 
 from datetime import datetime
 
 from orsopy.fileio import base, data_source
+
+
+pth = Path(__file__).absolute().parent
 
 
 class TestExperiment(unittest.TestCase):
@@ -260,27 +263,29 @@ class TestMeasurement(unittest.TestCase):
         """
         Creation with minimal set.
         """
+        fname = pth / "not_orso.ort"
         value = data_source.Measurement(
             data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
-            [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
+            [base.File(str(fname), None)],
         )
         assert value.instrument_settings.incident_angle.magnitude == 4.0
         assert value.instrument_settings.incident_angle.unit == "deg"
         assert value.instrument_settings.wavelength.min == 2.0
         assert value.instrument_settings.wavelength.max == 12.0
         assert value.instrument_settings.wavelength.unit == "angstrom"
-        assert value.data_files[0].file == str(pathlib.Path().resolve().joinpath("README.rst"))
-        assert value.data_files[0].timestamp == datetime.fromtimestamp(pathlib.Path("README.rst").stat().st_mtime)
+        assert value.data_files[0].file == str(pth / "not_orso.ort")
+        assert value.data_files[0].timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml(self):
         """
         Transform to yaml with minimal set.
         """
+        fname = pth / "not_orso.ort"
+
         value = data_source.Measurement(
             data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
-            [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
+            [base.File(str(fname), None)],
         )
-        fname = pathlib.Path("README.rst")
         assert (
             value.to_yaml()
             == "instrument_settings:\n  incident_angle:"
@@ -294,44 +299,48 @@ class TestMeasurement(unittest.TestCase):
         """
         Creation with optionals.
         """
+        fname0 = pth / "not_orso.ort"
+        fname1 = pth / "test_base.py"
+
         value = data_source.Measurement(
             data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
-            [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
-            [base.File(str(pathlib.Path().resolve().joinpath("AUTHORS.rst")), None)],
+            [base.File(str(fname0), None)],
+            [base.File(str(fname1), None)],
         )
         assert value.instrument_settings.incident_angle.magnitude == 4.0
         assert value.instrument_settings.incident_angle.unit == "deg"
         assert value.instrument_settings.wavelength.min == 2.0
         assert value.instrument_settings.wavelength.max == 12.0
         assert value.instrument_settings.wavelength.unit == "angstrom"
-        assert value.data_files[0].file == str(pathlib.Path().resolve().joinpath("README.rst"))
-        assert value.data_files[0].timestamp == datetime.fromtimestamp(pathlib.Path("README.rst").stat().st_mtime)
-        assert value.additional_files[0].file == str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))
+        assert value.data_files[0].file == str(fname0)
+        assert value.data_files[0].timestamp == datetime.fromtimestamp(fname0.stat().st_mtime)
+        assert value.additional_files[0].file == str(fname1)
         assert value.additional_files[0].timestamp == datetime.fromtimestamp(
-            pathlib.Path("AUTHORS.rst").stat().st_mtime
+            fname1.stat().st_mtime
         )
 
     def test_to_yaml_optionals(self):
         """
         Transform to yaml with optionals.
         """
+        fname0 = pth / "not_orso.ort"
+        fname1 = pth / "test_base.py"
+
         value = data_source.Measurement(
             data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
-            [base.File(str(pathlib.Path().resolve().joinpath("README.rst")), None)],
-            [base.File(str(pathlib.Path().resolve().joinpath("AUTHORS.rst")), None)],
+            [base.File(str(fname0), None)],
+            [base.File(str(fname1), None)],
             "energy-dispersive",
         )
-        fname = pathlib.Path("README.rst")
-        gname = pathlib.Path("AUTHORS.rst")
         assert (
             value.to_yaml()
             == "instrument_settings:\n  incident_angle:"
             + " {magnitude: 4.0, unit: deg}\n  wavelength: {min: "
             + "2.0, max: 12.0, unit: angstrom}\ndata_files:\n- file: "
-            + f"{str(fname.absolute())}\n  timestamp: "
-            + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
+            + f"{str(fname0.absolute())}\n  timestamp: "
+            + f"{datetime.fromtimestamp(fname0.stat().st_mtime).isoformat()}\n"
             + "additional_files:\n- file: "
-            + f"{str(gname.absolute())}\n  timestamp: "
-            + f"{datetime.fromtimestamp(gname.stat().st_mtime).isoformat()}\n"
+            + f"{str(fname1.absolute())}\n  timestamp: "
+            + f"{datetime.fromtimestamp(fname1.stat().st_mtime).isoformat()}\n"
             + "scheme: energy-dispersive\n"
         )

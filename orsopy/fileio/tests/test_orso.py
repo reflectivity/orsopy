@@ -2,7 +2,7 @@
 Tests for fileio module
 """
 
-import os.path
+from pathlib import Path
 import unittest
 
 from datetime import datetime
@@ -16,6 +16,9 @@ from orsopy.fileio.base import Column, File, Person, Value, ValueRange, _read_he
 from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Sample
 from orsopy.fileio.orso import Orso, OrsoDataset
 from orsopy.fileio.reduction import Reduction, Software
+
+
+pth = Path(__file__).absolute().parent
 
 
 class TestOrso(unittest.TestCase):
@@ -226,7 +229,7 @@ class TestOrso(unittest.TestCase):
         # if there are extra elements present in the ORT file they should still
         # be loadable. They won't be there as dataclass fields, but they'll be
         # visible as attributes.
-        datasets = fileio.load_orso(os.path.join("tests", "test_example.ort"))
+        datasets = fileio.load_orso(pth / "test_example.ort")
         info = datasets[0].info
         assert hasattr(info.data_source.measurement.instrument_settings.incident_angle, "resolution")
 

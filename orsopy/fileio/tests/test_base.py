@@ -3,12 +3,11 @@ Tests for fileio.base module
 """
 # pylint: disable=R0201
 
-import pathlib
+from pathlib import Path
 import unittest
 
 from datetime import datetime
 from math import log, sqrt
-from os.path import join as pjoin
 
 import pint
 import pytest
@@ -16,6 +15,9 @@ import pytest
 from numpy.testing import assert_equal
 
 from orsopy.fileio import base, orso
+
+
+pth = Path(__file__).absolute().parent
 
 
 class TestErrorValue(unittest.TestCase):
@@ -501,9 +503,9 @@ class TestFile(unittest.TestCase):
         """
         Creation for a file that does exist with a given modified date.
         """
-        fname = pathlib.Path("README.rst")
+        fname = Path(pth / "not_orso.ort")
         value = base.File(str(fname.absolute()), datetime.fromtimestamp(fname.stat().st_mtime))
-        assert value.file == str(pathlib.Path().resolve().joinpath("README.rst"))
+        assert value.file == str(fname)
         assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file(self):
@@ -511,11 +513,11 @@ class TestFile(unittest.TestCase):
         Transformation to yaml a file that does exist with a given modified
         date.
         """
-        fname = pathlib.Path("README.rst")
+        fname = Path(pth / "not_orso.ort")
         value = base.File(str(fname.absolute()), datetime.fromtimestamp(fname.stat().st_mtime))
         assert (
             value.to_yaml()
-            == f'file: {str(pathlib.Path().resolve().joinpath("README.rst"))}\n'
+            == f'file: {str(fname)}\n'
             + "timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )
@@ -525,9 +527,9 @@ class TestFile(unittest.TestCase):
         Transformation to yaml a file that does exist without a given
         modified date.
         """
-        fname = pathlib.Path("AUTHORS.rst")
+        fname = Path(pth / "not_orso.ort")
         value = base.File(str(fname.absolute()), None)
-        assert value.file == str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))
+        assert value.file == str(fname)
         assert value.timestamp == datetime.fromtimestamp(fname.stat().st_mtime)
 
     def test_to_yaml_for_existing_file_no_mod_time(self):
@@ -535,12 +537,12 @@ class TestFile(unittest.TestCase):
         Transformation to yaml a file that does exist without a given
         modified date.
         """
-        fname = pathlib.Path("AUTHORS.rst")
+        fname = Path(pth / "not_orso.ort")
         value = base.File(str(fname.absolute()), None)
         assert (
             value.to_yaml()
             == "file: "
-            + f'{str(pathlib.Path().resolve().joinpath("AUTHORS.rst"))}\n'
+            + f'{str(fname)}\n'
             + "timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )
@@ -548,4 +550,4 @@ class TestFile(unittest.TestCase):
 
 def test_not_orso():
     with pytest.raises(base.NotOrsoCompatibleFileError, match="First line does not appea"):
-        orso.load_orso(pjoin("tests", "not_orso.ort"))
+        orso.load_orso(pth / "not_orso.ort")
