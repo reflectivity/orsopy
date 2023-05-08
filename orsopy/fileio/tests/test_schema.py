@@ -1,5 +1,5 @@
 import json
-import os.path
+from pathlib import Path
 
 import jsonschema
 import numpy as np
@@ -8,15 +8,16 @@ import yaml
 from orsopy import fileio
 from orsopy.fileio.base import _read_header_data, _validate_header_data
 
+pth = Path(__file__).absolute().parent
+
 
 class TestSchema:
     def test_example_ort(self):
-        pth = os.path.dirname(fileio.__file__)
-        schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
+        schema_pth = pth / ".." / "schema" / "refl_header.schema.json"
         with open(schema_pth, "r") as f:
             schema = json.load(f)
 
-        dct_list, data, version = _read_header_data(os.path.join("tests", "test_example.ort"), validate=True)
+        dct_list, data, version = _read_header_data(pth / "test_example.ort", validate=True)
         assert data[0].shape == (2, 4)
         assert version == "0.1"
 
@@ -29,7 +30,7 @@ class TestSchema:
         _validate_header_data(dct_list)
 
         # try a 2 dataset file
-        dct_list, data, version = _read_header_data(os.path.join("tests", "test_example2.ort"), validate=True)
+        dct_list, data, version = _read_header_data(pth / "test_example2.ort", validate=True)
         assert len(dct_list) == 2
         assert dct_list[1]["data_set"] == "spin_down"
         assert data[1].shape == (4, 4)

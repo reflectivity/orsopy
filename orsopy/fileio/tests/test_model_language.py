@@ -3,7 +3,6 @@ Tests for fileio.model_language module
 """
 # pylint: disable=R0201
 
-import pathlib
 import unittest
 
 from datetime import datetime
