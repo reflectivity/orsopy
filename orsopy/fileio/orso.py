@@ -3,7 +3,7 @@ Implementation of the top level class for the ORSO header.
 """
 
 from dataclasses import dataclass
-from typing import Any, List, Optional, TextIO, Union
+from typing import Any, List, Optional, Sequence, TextIO, Union
 
 import numpy as np
 import yaml
