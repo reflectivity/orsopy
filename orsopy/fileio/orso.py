@@ -373,6 +373,9 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
                 col_data = data_group.create_dataset(column.name, data=dsi.data[:, column_index])
                 col_data.attrs["sequence_index"] = column_index
                 col_data.attrs["target"] = col_data.name
+                physical_quantity = getattr(column, 'physical_quantity', None)
+                if physical_quantity is not None:
+                    col_data.attrs["physical_quantity"] = physical_quantity
                 if isinstance(column, ErrorColumn):
                     nexus_colname = column.error_of + "_errors"
                 else:
