@@ -355,6 +355,7 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
             info = dsi.info
             entry = f.create_group(str(info.data_set))
             entry.attrs["ORSO_class"] = "OrsoDataset"
+            entry.attrs["ORSO_VERSION"] = ORSO_VERSION
             entry.attrs["NX_class"] = "NXentry"
             entry.attrs["default"] = "plottable_data"
             info.to_nexus(root=entry, name="info")
