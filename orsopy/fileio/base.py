@@ -656,6 +656,13 @@ class ValueRange(Header):
     min: float
     max: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    individual_magnitudes: Optional[List[float]] = field(
+        default=None,
+        metadata={
+            "description": "Can list each individual value "
+            "that was present during the experiment, only for information."
+        },
+    )
     offset: Optional[float] = field(
         default=None,
         metadata={
