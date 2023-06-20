@@ -2,6 +2,14 @@
 History
 =======
 
+1.1.1 (2023-06-20)
+------------------
+
+* Add some extra attributes from updated ORSO specification.
+* Move tests to orsopy sub-folders to prevent interference with other packages.
+* Some updates to the package documentation.
+* Fix some cases where numpy based scalars where not properly converted to YAML.
+
 1.1.0 (2023-02-20)
 ------------------
 
