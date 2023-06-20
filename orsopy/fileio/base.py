@@ -568,6 +568,12 @@ class Value(Header):
     magnitude: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     error: Optional[ErrorValue] = None
+    offset: Optional[float] = field(
+        default=None,
+        metadata={
+            "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) magnitude"
+        },
+    )
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -650,6 +656,12 @@ class ValueRange(Header):
     min: float
     max: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    offset: Optional[float] = field(
+        default=None,
+        metadata={
+            "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) min/max"
+        },
+    )
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -714,6 +726,17 @@ class ValueVector(Header):
 
 
 @dataclass
+class AlternatingField(Header):
+    """
+    A physical field with regular variations as AC magnetic field.
+    """
+
+    amplitude: Value
+    frequency: Value
+    phase: Optional[Value] = None
+
+
+@dataclass
 class Person(Header):
     """
     Information about a person, including name, affiliation(s), and contact
@@ -734,9 +757,12 @@ class Column(Header):
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     physical_quantity: Optional[str] = field(
-        default=None, metadata={"physical_quantity": "A description of the column"}
+        default=None, metadata={"description": "A description of the column"}
     )
 
+    flag_is: Optional[List[str]] = field(
+        default=None, metadata={"description": "A list of items that a flag-value in this column stands for"}
+    )
     yaml_representer = Header.yaml_representer_compact
 
 

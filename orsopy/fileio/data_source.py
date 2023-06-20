@@ -9,7 +9,7 @@ from typing import Dict, List, Optional, Union
 import yaml
 
 from .. import dataclass
-from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector
+from .base import AlternatingField, ComplexValue, File, Header, Person, Value, ValueRange, ValueVector
 from .model_language import SampleModel
 
 # typing stuff introduced in python 3.8
@@ -62,7 +62,9 @@ class Sample(Header):
     :param size: Sample size in x, y, z direction, where z is parallel to the surface normal
         and x is along the beam direction (important for footprint correction).
     :param environment: Name of the sample environment device(s).
-    :param sample_parameters: Dictionary of sample parameters.
+    :param sample_parameters: Dictionary of sample parameters. See Sample.PARAMETER_DEFAULT_KEYS
+        for some common names defined in the specification.
+    :param model: A model using the simple model description  (https://www.reflectometry.org/projects/simple_model)
     """
 
     name: str
@@ -71,10 +73,18 @@ class Sample(Header):
     description: Optional[str] = None
     size: Optional[ValueVector] = None
     environment: Optional[List[str]] = None
-    sample_parameters: Optional[Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue]]] = field(
-        default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
-    )
+    sample_parameters: Optional[
+        Dict[str, Union[Value, ValueRange, ValueVector, ComplexValue, AlternatingField]]
+    ] = field(default=None, metadata={"description": "Using keys for parameters and Value* objects for values."})
     model: Optional[SampleModel] = None
+
+    PARAMETER_DEFAULT_KEYS = [
+        "temperature",
+        "magnetic_field",
+        "electric_potential",
+        "electric_current",
+        "electric_ac_field",
+    ]
 
 
 class Polarization(str, Enum):
