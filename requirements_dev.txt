@@ -14,4 +14,4 @@ typing_extensions
 coverage
 coveralls
 pint
-h5py>=3.7.0
+h5py>=3.1.0
