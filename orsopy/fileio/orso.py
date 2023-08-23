@@ -27,11 +27,11 @@ class Orso(Header):
     :param data_source: Information about the origin and ownership of
         the raw data.
     :param reduction: Details of the data reduction that has been
-        performed the content of this section should contain enough
+        performed. The content of this section should contain enough
         information to rerun the reduction.
     :param columns: Information about the columns of data that will
         be contained in the file.
-    :param data_set: An identified for the data set, i.e. if there is
+    :param data_set: An identifier for the data set, i.e. if there is
         more than one data set in the object.
     """
 
