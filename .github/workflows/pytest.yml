@@ -38,7 +38,7 @@ jobs:
           coverage run -m pytest
 
       - name: Coveralls
-        if: ${{ secrets.GITHUB_TOKEN }}
+        if: github.repository == 'reflectivity/orsopy'
         run: |
           coveralls --service=github
         env:
