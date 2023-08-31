@@ -157,7 +157,7 @@ class Element:
         return 'Element(symbol="%s")' % symb
 
     def __eq__(self, other):
-        if type(self) == type(other):
+        if isinstance(other, Element):
             return self.N == other.N and self.Z == other.Z and self.symbol == other.symbol
         else:
             return object.__eq__(self, other)

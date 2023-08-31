@@ -398,7 +398,7 @@ class Material:
 
     def __add__(self, other):
         # add two materials by adding the chemical formula and FU_volume of each element.
-        if type(other) != type(self):
+        if not isinstance(other, Material):
             raise ValueError("Can only combine two Material instances.")
         fout = dict(self.elements)
         for ele, number in other.elements:
