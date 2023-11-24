@@ -149,9 +149,19 @@ class TestOrso(unittest.TestCase):
             columns=info.columns,
         )
         ds3 = fileio.OrsoDataset(info3, data)
+
+        # .ort read/write
         fileio.save_orso([ds, ds2, ds3], "test.ort", comment="Interdiffusion")
 
         ls1, ls2, ls3 = fileio.load_orso("test.ort")
+        assert ls1 == ds
+        assert ls2 == ds2
+        assert ls3 == ds3
+
+        # .orb read/write
+        fileio.save_nexus([ds, ds2, ds3], "test.orb", comment="Interdiffusion")
+
+        ls1, ls2, ls3 = fileio.load_nexus("test.orb")
         assert ls1 == ds
         assert ls2 == ds2
         assert ls3 == ds3
@@ -238,11 +248,18 @@ class TestOrso(unittest.TestCase):
         info.data_source.measurement.instrument_settings.wavelength = Value(np.float64(10.0))
         info.data_source.measurement.instrument_settings.incident_angle = Value(np.int32(2))
         ds = fileio.orso.OrsoDataset(info, np.arange(20.).reshape(10, 2))
+        # .ort test:
         fileio.save_orso([ds], "test_numpy.ort")
         ls = fileio.load_orso("test_numpy.ort")
         i_s = ls[0].info.data_source.measurement.instrument_settings
         assert i_s.wavelength.magnitude == 10.0
         assert i_s.incident_angle.magnitude == 2
+        # .orb test:
+        fileio.save_nexus([ds], "test_numpy.orb")
+        ln = fileio.load_nexus("test_numpy.orb")
+        i_n = ln[0].info.data_source.measurement.instrument_settings
+        assert i_n.wavelength.magnitude == 10.0
+        assert i_n.incident_angle.magnitude == 2
 
 
 class TestFunctions(unittest.TestCase):
