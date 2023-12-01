@@ -2,14 +2,14 @@
 Implementation of the top level class for the ORSO header.
 """
 
-from dataclasses import dataclass
-from typing import Any, List, Optional, Sequence, TextIO, Union
+from dataclasses import dataclass, fields
+from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 
 import numpy as np
 import yaml
 
-from .base import (Column, ErrorColumn, Header, _dict_diff, _nested_update, _possibly_open_file, _read_header_data,
-                   orsodataclass)
+from .base import (JSON_MIMETYPE, ORSO_DATACLASSES, Column, ErrorColumn, Header, _dict_diff, _nested_update,
+                   _possibly_open_file, _read_header_data, orsodataclass)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -27,11 +27,11 @@ class Orso(Header):
     :param data_source: Information about the origin and ownership of
         the raw data.
     :param reduction: Details of the data reduction that has been
-        performed the content of this section should contain enough
+        performed. The content of this section should contain enough
         information to rerun the reduction.
     :param columns: Information about the columns of data that will
         be contained in the file.
-    :param data_set: An identified for the data set, i.e. if there is
+    :param data_set: An identifier for the data set, i.e. if there is
         more than one data set in the object.
     """
 
@@ -213,6 +213,9 @@ class OrsoDataset:
         return self.info == other.info and (self.data == other.data).all()
 
 
+ORSO_DATACLASSES["OrsoDataset"] = OrsoDataset
+
+
 def save_orso(
     datasets: List[OrsoDataset], fname: Union[TextIO, str], comment: Optional[str] = None, data_separator: str = ""
 ) -> None:
@@ -276,3 +279,111 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
         od = OrsoDataset(o, data)
         ods.append(od)
     return ods
+
+
+def _from_nexus_group(group):
+    if group.attrs.get("sequence", None) is not None:
+        sort_list = [[v.attrs["sequence_index"], v] for v in group.values()]
+        return [_get_nexus_item(v) for _, v in sorted(sort_list)]
+    else:
+        dct = dict()
+        for name, value in group.items():
+            if value.attrs.get("NX_class", None) == "NXdata":
+                # remove NXdata folder, which exists only for NeXus plotting
+                continue
+            dct[name] = _get_nexus_item(value)
+
+        ORSO_class = group.attrs.get("ORSO_class", None)
+        if ORSO_class is not None:
+            if ORSO_class == "OrsoDataset":
+                # TODO: remove swapaxes if order of data is changed (PR #107)
+                # reorder columns so column index is second:
+                dct["data"] = np.asarray(dct["data"]).swapaxes(0, 1)
+            cls = ORSO_DATACLASSES[ORSO_class]
+            return cls(**dct)
+        else:
+            return dct
+
+
+def _get_nexus_item(value):
+    import json
+
+    import h5py
+
+    if isinstance(value, h5py.Group):
+        return _from_nexus_group(value)
+    elif isinstance(value, h5py.Dataset):
+        v = value[()]
+        if isinstance(v, h5py.Empty):
+            return None
+        elif value.attrs.get("mimetype", None) == JSON_MIMETYPE:
+            return json.loads(v)
+        elif hasattr(v, "decode"):
+            # it is a bytes object, should be string
+            return v.decode()
+        else:
+            return v
+
+
+def load_nexus(fname: Union[str, BinaryIO]) -> List[OrsoDataset]:
+    import h5py
+
+    f = h5py.File(fname, "r")
+    # Use '/' because order is not tracked on the File object, but is on the '/' group!
+    root = f['/']
+    return [_from_nexus_group(g) for g in root.values() if g.attrs.get("ORSO_class", None) == "OrsoDataset"]
+
+
+def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment: Optional[str] = None) -> BinaryIO:
+    import h5py
+    h5py.get_config().track_order = True
+
+    for idx, dataset in enumerate(datasets):
+        info = dataset.info
+        data_set = info.data_set
+        if data_set is None or (isinstance(data_set, str) and len(data_set) == 0):
+            # it's not set, or is zero length string
+            info.data_set = idx
+
+    dsets = [dataset.info.data_set for dataset in datasets]
+    if len(set(dsets)) != len(dsets):
+        raise ValueError("All `OrsoDataset.info.data_set` values must be unique")
+
+    with h5py.File(fname, mode="w") as f:
+        f.attrs["NX_class"] = "NXroot"
+        if comment is not None:
+            f.attrs["comment"] = comment
+
+        for dsi in datasets:
+            info = dsi.info
+            entry = f.create_group(str(info.data_set))
+            entry.attrs["ORSO_class"] = "OrsoDataset"
+            entry.attrs["ORSO_VERSION"] = ORSO_VERSION
+            entry.attrs["NX_class"] = "NXentry"
+            entry.attrs["default"] = "plottable_data"
+            info.to_nexus(root=entry, name="info")
+            data_group = entry.create_group("data")
+            data_group.attrs["sequence"] = 1
+            plottable_data_group = entry.create_group("plottable_data", track_order=True)
+            plottable_data_group.attrs["NX_class"] = "NXdata"
+            plottable_data_group.attrs["sequence"] = 1
+            plottable_data_group.attrs["axes"] = [info.columns[0].name]
+            plottable_data_group.attrs["signal"] = info.columns[1].name
+            plottable_data_group.attrs[f"{info.columns[0].name}_indices"] = [0]
+            for column_index, column in enumerate(info.columns):
+                # assume that dataset.data has dimension == ncolumns along first dimension
+                # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
+                col_data = data_group.create_dataset(column.name, data=dsi.data[:, column_index])
+                col_data.attrs["sequence_index"] = column_index
+                col_data.attrs["target"] = col_data.name
+                physical_quantity = getattr(column, 'physical_quantity', None)
+                if physical_quantity is not None:
+                    col_data.attrs["physical_quantity"] = physical_quantity
+                if isinstance(column, ErrorColumn):
+                    nexus_colname = column.error_of + "_errors"
+                else:
+                    nexus_colname = column.name
+                    if column.unit is not None:
+                        col_data.attrs["units"] = column.unit
+
+                plottable_data_group[nexus_colname] = col_data

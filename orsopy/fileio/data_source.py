@@ -93,7 +93,7 @@ class Polarization(str, Enum):
     """
 
     unpolarized = "unpolarized"
-    # half polairzed states
+    # half polarized states
     po = "po"
     mo = "mo"
     op = "op"
