@@ -16,6 +16,7 @@ from copy import deepcopy
 from enum import Enum
 from inspect import isclass
 from typing import Any, Dict, Generator, List, Optional, TextIO, Tuple, Union
+from dataclasses import dataclass, field, fields
 
 import numpy as np
 import yaml
@@ -26,9 +27,6 @@ try:
     from typing import Literal, get_args, get_origin
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
-
-from ..dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
-                           _field_init, _init_param, _set_new_attribute, dataclass, field, fields)
 
 
 def _noop(self, *args, **kw):
@@ -43,45 +41,6 @@ yaml.emitter.Emitter.process_tag = _noop
 yaml.constructor.SafeConstructor.yaml_constructors[
     "tag:yaml.org,2002:timestamp"
 ] = yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
-
-
-def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
-    """
-    _init_fn from dataclasses adapted to accept additional keywords.
-    See dataclasses source for comments on code.
-    """
-    seen_default = False
-    for f in fieldsarg:
-        if f.init:
-            if not (f.default is MISSING and f.default_factory is MISSING):
-                seen_default = True
-            elif seen_default:
-                raise TypeError(f"non-default argument {f.name!r} " "follows default argument")
-
-    locals = {f"_type_{f.name}": f.type for f in fieldsarg}
-    locals.update({"MISSING": MISSING, "_HAS_DEFAULT_FACTORY": _HAS_DEFAULT_FACTORY})
-
-    body_lines = []
-    for f in fieldsarg:
-        line = _field_init(f, frozen, locals, self_name)
-        if line:
-            body_lines.append(line)
-
-    if has_post_init:
-        params_str = ",".join(f.name for f in fieldsarg if f._field_type is _FIELD_INITVAR)
-        body_lines.append(f"{self_name}.{_POST_INIT_NAME}({params_str})")
-
-    # processing of additional user keyword arguments
-    body_lines += ["for k,v in user_kwds.items():", "    setattr(self, k, v)"]
-
-    return _create_fn(
-        "__init__",
-        [self_name] + [_init_param(f) for f in fieldsarg if f.init] + ["**user_kwds"],
-        body_lines,
-        locals=locals,
-        globals=globals,
-        return_type=None,
-    )
 
 
 # register all ORSO classes here:

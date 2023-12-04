@@ -2,6 +2,13 @@
 Generates the schema for an ORSO file,
 based on the Orso class (from orsopy.fileio.orso)
 """
+
+"""
+** NOTE **
+This script is extremely sensitive to the version of pydantic that is installed.
+It works with pydantic-1.10.13 and lower, but not with pydantic >= 2.0
+"""
+
 import functools
 import os
 
@@ -9,31 +16,32 @@ from copy import deepcopy
 from typing import Any, Dict, List
 
 from pydantic.dataclasses import dataclass as _dataclass
+from pydantic import ConfigDict
 
 
-class PydanticConfig:
-    """ for schema generation, otherwise unused """
+def schema_extra(schema: Dict[str, Any]) -> None:
+    for prop, value in schema.get("properties", {}).items():
+        value.pop("title", None)
 
-    @staticmethod
-    def schema_extra(schema: Dict[str, Any]) -> None:
-        for prop, value in schema.get("properties", {}).items():
-            value.pop("title", None)
+        # make the schema accept None as a value for any of the
+        # Header class attributes.
+        if "enum" in value:
+            value["enum"].append(None)
 
-            # make the schema accept None as a value for any of the
-            # Header class attributes.
-            if "enum" in value:
-                value["enum"].append(None)
-
-            if "type" in value:
-                value["type"] = [value.pop("type"), "null"]
-            elif "anyOf" in value:
-                value["anyOf"].append({"type": "null"})
-            # only one $ref e.g. from other model
-            elif "$ref" in value:
-                value["anyOf"] = [{"$ref": value.pop("$ref")}]
+        if "type" in value:
+            value["type"] = [value.pop("type"), "null"]
+        elif "anyOf" in value:
+            value["anyOf"].append({"type": "null"})
+        # only one $ref e.g. from other model
+        elif "$ref" in value:
+            value["anyOf"] = [{"$ref": value.pop("$ref")}]
 
 
-pydantic_dataclass = functools.partial(_dataclass, config=PydanticConfig)
+# pydantic doesn't like dealing with np.ndarrays
+config = ConfigDict(arbitrary_types_allowed=True, schema_extra=schema_extra)
+
+
+pydantic_dataclass = functools.partial(_dataclass, config=config)
 
 
 ADD_COLUMN_ORDER = True
@@ -98,9 +106,8 @@ def add_column_ordering(schema: Dict, column_order: List[str] = COLUMN_ORDER):
 
 def main():
     # replace the dataclass function in the local import:
-    from orsopy import dataclasses
-
-    dataclasses.dataclass = pydantic_dataclass
+    from orsopy import _dataclasses
+    _dataclasses.dataclass = pydantic_dataclass
 
     import orsopy
 

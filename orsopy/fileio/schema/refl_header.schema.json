@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v1.0/orsopy/fileio/schema/refl_header.schema.json",
   "title": "Orso",
+  "description": "The Orso object collects the necessary metadata.\n\n:param data_source: Information about the origin and ownership of\n    the raw data.\n:param reduction: Details of the data reduction that has been\n    performed. The content of this section should contain enough\n    information to rerun the reduction.\n:param columns: Information about the columns of data that will\n    be contained in the file.\n:param data_set: An identifier for the data set, i.e. if there is\n    more than one data set in the object.",
   "type": "object",
   "properties": {
     "data_source": {
@@ -52,12 +53,6 @@
         {
           "type": "null"
         }
-      ]
-    },
-    "comment": {
-      "type": [
-        "string",
-        "null"
       ]
     }
   },
@@ -455,6 +450,7 @@
             "null"
           ]
         },
+        "original_name": {},
         "comment": {
           "type": [
             "string",
@@ -476,6 +472,7 @@
             "null"
           ]
         },
+        "original_name": {},
         "comment": {
           "type": [
             "string",
@@ -595,6 +592,7 @@
             "null"
           ]
         },
+        "original_name": {},
         "comment": {
           "type": [
             "string",
@@ -608,13 +606,7 @@
       "type": "object",
       "properties": {
         "roughness": {
-          "default": {
-            "magnitude": 0.3,
-            "unit": "nm",
-            "error": null,
-            "comment": null
-          },
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/definitions/Value"
             }

@@ -63,6 +63,7 @@ definitions:
         type:
         - object
         - 'null'
+      original_name: {}
     required:
     - composition
     title: Composit
@@ -327,6 +328,7 @@ definitions:
         - type: number
         - $ref: '#/definitions/Value'
         - type: 'null'
+      original_name: {}
       relative_density:
         type:
         - number
@@ -405,13 +407,8 @@ definitions:
         - string
         - 'null'
       roughness:
-        allOf:
+        anyOf:
         - $ref: '#/definitions/Value'
-        default:
-          comment: null
-          error: null
-          magnitude: 0.3
-          unit: nm
       sld_unit:
         default: 1/angstrom^2
         type:
@@ -718,6 +715,7 @@ definitions:
         type:
         - object
         - 'null'
+      original_name: {}
       repetitions:
         default: 1
         type:
@@ -851,6 +849,13 @@ definitions:
     - error_of
     title: sR
     type: object
+description: "The Orso object collects the necessary metadata.\n\n:param data_source:\
+  \ Information about the origin and ownership of\n    the raw data.\n:param reduction:\
+  \ Details of the data reduction that has been\n    performed. The content of this\
+  \ section should contain enough\n    information to rerun the reduction.\n:param\
+  \ columns: Information about the columns of data that will\n    be contained in\
+  \ the file.\n:param data_set: An identifier for the data set, i.e. if there is\n\
+  \    more than one data set in the object."
 properties:
   columns:
     additionalItems:
@@ -862,10 +867,6 @@ properties:
     - $ref: '#/definitions/sQz_column'
     type:
     - array
-    - 'null'
-  comment:
-    type:
-    - string
     - 'null'
   data_set:
     anyOf:
