@@ -8,10 +8,10 @@ import warnings
 
 from typing import Any, Dict, List, Optional, Union
 
-from ..dataclasses import field
+from ..dataclasses import field, dataclass
 from ..utils.chemical_formula import Formula
 from ..utils.density_resolver import DensityResolver
-from .base import ComplexValue, Header, Value, orsodataclass
+from .base import ComplexValue, Header, Value
 
 DENSITY_RESOLVERS: List[DensityResolver] = []
 
@@ -25,7 +25,7 @@ def find_idx(string, start, value):
     return next_idx
 
 
-@orsodataclass
+@dataclass
 class ModelParameters(Header):
     roughness: Value = field(default_factory=lambda: Value(0.3, "nm"))
     length_unit: str = "nm"
@@ -34,8 +34,34 @@ class ModelParameters(Header):
     sld_unit: str = "1/angstrom^2"
     magnetic_moment_unit: str = "muB"
 
+    comment: Optional[str] = None
 
-@orsodataclass
+    def __init__(
+            self,
+            roughness=Value(0.3, unit="nm"),
+            length_unit="nm",
+            mass_density_unit="g/cm^3",
+            number_density_unit="1/nm^3",
+            sld_unit="1/angstrom^2",
+            magnetic_moment_unit="muB",
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(ModelParameters, self).__init__()
+        self.roughness = roughness
+        self.length_unit = length_unit
+        self.mass_density_unit = mass_density_unit
+        self.number_density_unit = number_density_unit
+        self.sld_unit = sld_unit
+        self.magnetic_moment_unit = magnetic_moment_unit
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
+
+
+@dataclass
 class Material(Header):
     formula: Optional[str] = None
     mass_density: Optional[Union[float, Value]] = None
@@ -43,11 +69,35 @@ class Material(Header):
     sld: Optional[Union[float, ComplexValue, Value]] = None
     magnetic_moment: Optional[Union[float, Value]] = None
     relative_density: Optional[float] = None
+    original_name: Optional[Any] = None
 
-    original_name = None
+    comment: Optional[str] = None
 
-    def __post_init__(self):
-        super().__post_init__()
+    def __init__(
+            self,
+            formula=None,
+            mass_density=None,
+            number_density=None,
+            sld=None,
+            magnetic_moment=None,
+            relative_density=None,
+            original_name=None,
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(Material, self).__init__()
+        self.formula = formula
+        self.mass_density = mass_density
+        self.number_density = number_density
+        self.sld = sld
+        self.magnetic_moment = magnetic_moment
+        self.relative_density = relative_density
+        self.original_name = original_name
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def resolve_defaults(self, defaults: ModelParameters):
         if self.formula is None and self.sld is None:
@@ -149,11 +199,22 @@ class Material(Header):
             return 0.0j
 
 
-@orsodataclass
+@dataclass
 class Composit(Header):
     composition: Dict[str, float]
 
-    original_name = None
+    original_name: Optional[Any] = None
+
+    comment: Optional[str] = None
+
+    def __init__(self, composition, original_name=None, *, comment=None, **kwds):
+        super(Composit, self).__init__()
+        self.composition = composition
+        self.original_name = original_name
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def resolve_names(self, resolvable_items):
         self._composition_materials = {}
@@ -199,7 +260,7 @@ SPECIAL_MATERIALS = {
 CACHED_MATERIALS = {}
 
 
-@orsodataclass
+@dataclass
 class Layer(Header):
     thickness: Optional[Union[float, Value]] = None
     roughness: Optional[Union[float, Value]] = None
@@ -208,8 +269,29 @@ class Layer(Header):
 
     original_name = None
 
-    def __post_init__(self):
-        super().__post_init__()
+    comment: Optional[str] = None
+
+    def __init__(
+            self,
+            thickness=None,
+            roughness=None,
+            material=None,
+            composition=None,
+            original_name=None,
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(Layer, self).__init__()
+        self.thickness = thickness
+        self.roughness = roughness
+        self.material = material
+        self.composition = composition
+        self.original_name = original_name
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def resolve_names(self, resolvable_items):
         if self.material is None and self.composition is None and self.original_name is None:
@@ -282,7 +364,7 @@ class Layer(Header):
         )
 
 
-@orsodataclass
+@dataclass
 class SubStack(Header):
     repetitions: int = 1
     stack: Optional[str] = None
@@ -291,7 +373,35 @@ class SubStack(Header):
     arguments: Optional[List[Any]] = None
     keywords: Optional[Dict[str, Any]] = None
 
-    original_name = None
+    original_name: Optional[Any] = None
+
+    comment: Optional[str] = None
+
+    def __init__(
+            self,
+            repetitions=1,
+            stack=None,
+            sequence=None,
+            represents=None,
+            arguments=None,
+            keywords=None,
+            original_name=None,
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(SubStack, self).__init__()
+        self.repetitions = repetitions
+        self.stack = stack
+        self.sequence = sequence
+        self.represents = represents
+        self.arguments = arguments
+        self.keywords = keywords
+        self.original_name = original_name
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def resolve_names(self, resolvable_items):
         if self.stack is None and self.sequence is None:
@@ -355,7 +465,7 @@ class SubStack(Header):
         return layers * self.repetitions
 
 
-@orsodataclass
+@dataclass
 class SampleModel(Header):
     stack: str
     origin: Optional[str] = None
@@ -365,6 +475,36 @@ class SampleModel(Header):
     composits: Optional[Dict[str, Composit]] = None
     globals: Optional[ModelParameters] = None
     reference: Optional[str] = None
+
+    comment: Optional[str] = None
+
+    def __init__(
+            self,
+            stack,
+            origin=None,
+            sub_stacks=None,
+            layers=None,
+            materials=None,
+            composits=None,
+            globals=None,
+            reference=None,
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(SampleModel, self).__init__()
+        self.stack = stack
+        self.origin = origin
+        self.sub_stacks = sub_stacks
+        self.layers = layers
+        self.materials = materials
+        self.composits = composits
+        self.globals = globals
+        self.reference = reference
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def __post_init__(self):
         super().__post_init__()

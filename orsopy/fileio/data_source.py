@@ -1,14 +1,14 @@
 """
 Implementation of the data_source for the ORSO header.
 """
-from dataclasses import field
+from dataclasses import field, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
 import yaml
 
-from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
+from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector
 from .model_language import SampleModel
 
 # typing stuff introduced in python 3.8
@@ -18,7 +18,7 @@ except ImportError:
     from .typing_backport import Literal
 
 
-@orsodataclass
+@dataclass
 class Experiment(Header):
     """
     A definition of the experiment performed.
@@ -42,8 +42,36 @@ class Experiment(Header):
     proposalID: Optional[str] = None
     doi: Optional[str] = None
 
+    comment: Optional[str] = None
 
-@orsodataclass
+    def __init__(
+            self,
+            title,
+            instrument,
+            start_date,
+            probe,
+            facility=None,
+            proposalID=None,
+            doi=None,
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(Experiment, self).__init__()
+        self.title = title
+        self.instrument = instrument
+        self.start_date = start_date
+        self.probe = probe
+        self.facility = facility
+        self.proposalID = proposalID
+        self.doi = doi
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
+
+
+@dataclass
 class Sample(Header):
     """
     A description of the sample measured.
@@ -74,6 +102,35 @@ class Sample(Header):
         default=None, metadata={"description": "Using keys for parameters and Value* objects for values."}
     )
     model: Optional[SampleModel] = None
+
+    comment: Optional[str] = None
+
+    def __init__(
+            self,
+            name,
+            category=None,
+            composition=None,
+            description=None,
+            size=None, environment=None,
+            sample_parameters=None,
+            model=None,
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(Sample, self).__init__()
+        self.name = name
+        self.category = category
+        self.composition = composition
+        self.description = description
+        self.size = size
+        self.environment = environment
+        self.sample_parameters = sample_parameters
+        self.model = model
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
 
 class Polarization(str, Enum):
@@ -118,7 +175,7 @@ class Polarization(str, Enum):
         return dumper.represent_str(output)
 
 
-@orsodataclass
+@dataclass
 class InstrumentSettings(Header):
     """
     Settings associated with the instrumentation.
@@ -147,8 +204,21 @@ class InstrumentSettings(Header):
 
     __repr__ = Header._staggered_repr
 
+    comment: Optional[str] = None
 
-@orsodataclass
+    def __init__(self, incident_angle, wavelength, polarization=None, configuration=None, *, comment=None, **kwds):
+        super(InstrumentSettings, self).__init__()
+        self.incident_angle = incident_angle
+        self.wavelength = wavelength
+        self.polarization = polarization
+        self.configuration = configuration
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
+
+
+@dataclass
 class Measurement(Header):
     """
     The measurement elements for the header.
@@ -167,8 +237,21 @@ class Measurement(Header):
 
     __repr__ = Header._staggered_repr
 
+    comment: Optional[str] = None
 
-@orsodataclass
+    def __init__(self, instrument_settings, data_files, additional_files=None, scheme=None, *, comment=None, **kwds):
+        super(Measurement, self).__init__()
+        self.instrument_settings = instrument_settings
+        self.data_files = data_files
+        self.additional_files = additional_files
+        self.scheme = scheme
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
+
+
+@dataclass
 class DataSource(Header):
     """
     The data_source object definition.
@@ -188,3 +271,16 @@ class DataSource(Header):
     _orso_optionals = []
 
     __repr__ = Header._staggered_repr
+
+    comment: Optional[str] = None
+
+    def __init__(self, owner, experiment, sample, measurement, *, comment=None, **kwds):
+        super(DataSource, self).__init__()
+        self.owner = owner
+        self.experiment = experiment
+        self.sample = sample
+        self.measurement = measurement
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()

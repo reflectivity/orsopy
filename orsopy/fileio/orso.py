@@ -8,8 +8,8 @@ from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 import numpy as np
 import yaml
 
-from .base import (JSON_MIMETYPE, ORSO_DATACLASSES, Column, ErrorColumn, Header, _dict_diff, _nested_update,
-                   _possibly_open_file, _read_header_data, orsodataclass)
+from .base import (ORSO_DATACLASSES, JSON_MIMETYPE, Column, ErrorColumn, Header, _dict_diff, _nested_update,
+                   _possibly_open_file, _read_header_data)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -19,7 +19,7 @@ ORSO_DESIGNATE = (
 )
 
 
-@orsodataclass
+@dataclass
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.
@@ -50,6 +50,7 @@ class Orso(Header):
         data_set: Optional[Union[int, str]] = None,
         **user_data,
     ):
+        super(Orso, self).__init__()
         self.data_source = data_source
         self.reduction = reduction
         self.columns = columns

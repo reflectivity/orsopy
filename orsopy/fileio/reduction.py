@@ -4,13 +4,13 @@ The reduction elements for the ORSO header
 
 import datetime
 
-from dataclasses import field
+from dataclasses import field, dataclass
 from typing import List, Optional, Union
 
-from .base import Header, Person, orsodataclass
+from .base import Header, Person
 
 
-@orsodataclass
+@dataclass
 class Software(Header):
     """
     Software description.
@@ -24,10 +24,22 @@ class Software(Header):
     version: Optional[str] = None
     platform: Optional[str] = None
 
+    comment: Optional[str] = None
+
     yaml_representer = Header.yaml_representer_compact
 
+    def __init__(self, name, version=None, platform=None, *, comment=None, **kwds):
+        super(Software, self).__init__()
+        self.name = name
+        self.version = version
+        self.platform = platform
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
-@orsodataclass
+
+@dataclass
 class Reduction(Header):
     """
     A description of the reduction that has been performed.
@@ -54,3 +66,33 @@ class Reduction(Header):
     binary: Optional[str] = field(default=None, metadata={"description": "Path to full information file"})
 
     __repr__ = Header._staggered_repr
+
+    comment: Optional[str] = None
+
+    def __init__(
+            self,
+            software,
+            timestamp=None,
+            creator=None,
+            corrections=None,
+            computer=None,
+            call=None,
+            script=None,
+            binary=None,
+            *,
+            comment=None,
+            **kwds
+    ):
+        super(Reduction, self).__init__()
+        self.software = software
+        self.timestamp = timestamp
+        self.creator = creator
+        self.corrections = corrections
+        self.computer = computer
+        self.call = call
+        self.script = script
+        self.binary = binary
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()

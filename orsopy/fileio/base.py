@@ -88,40 +88,6 @@ def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
 ORSO_DATACLASSES = dict()
 
 
-def orsodataclass(cls: type):
-    ORSO_DATACLASSES[cls.__name__] = cls
-    attrs = cls.__dict__
-    bases = cls.__bases__
-    if "__annotations__" in attrs and len([k for k in attrs["__annotations__"].keys() if not k.startswith("_")]) > 0:
-        # only applies to dataclass children of Header
-        # add optional comment attribute, needs to come last
-        attrs["__annotations__"]["comment"] = Optional[str]
-        setattr(cls, "comment", field(default=None))
-
-        # create the _orso_optional attribute
-        orso_optionals = []
-        for fname, ftype in attrs["__annotations__"].items():
-            if type(None) in get_args(ftype):
-                orso_optionals.append(fname)
-        for base in bases:
-            if hasattr(base, "_orso_optionals"):
-                orso_optionals += getattr(base, "_orso_optionals")
-        setattr(cls, "_orso_optionals", orso_optionals)
-        out = dataclass(cls, repr=False, init=False)
-        fieldsarg = getattr(out, _FIELDS)
-
-        # Generate custom __init__ method that allows arbitrary extra keyword arguments
-        has_post_init = hasattr(out, _POST_INIT_NAME)
-        # Include InitVars and regular fields (so, not ClassVars).
-        flds = [f for f in fieldsarg.values() if f._field_type in (_FIELD, _FIELD_INITVAR)]
-        init_fun = _custom_init_fn(flds, False, has_post_init, "self", globals())
-        _set_new_attribute(out, "__init__", init_fun)
-
-        return out
-    else:
-        return cls
-
-
 class ORSOResolveError(ValueError):
     pass
 
@@ -133,7 +99,14 @@ class Header:
 
     _orso_optionals: List[str] = []
 
+    def __init__(self):
+        self._orso_optionals = []
+
     def __post_init__(self):
+        for fname, ftype in self.__annotations__.items():
+            if type(None) in get_args(ftype):
+                self._orso_optionals.append(fname)
+
         """Make sure Header types are correct."""
         for fld in fields(self):
             attr = getattr(self, fld.name, None)
@@ -510,7 +483,7 @@ class OrsoDumper(yaml.SafeDumper):
 unit_registry = None
 
 
-@orsodataclass
+@dataclass
 class ErrorValue(Header):
     """
     Information about errors on a value.
@@ -520,8 +493,20 @@ class ErrorValue(Header):
     error_type: Optional[Literal["uncertainty", "resolution"]] = None
     value_is: Optional[Literal["sigma", "FWHM"]] = None
     distribution: Optional[Literal["gaussian", "triangular", "uniform", "lorentzian"]] = None
+    comment: Optional[str] = None
 
     yaml_representer = Header.yaml_representer_compact
+
+    def __init__(self, error_value, error_type=None, value_is=None, distribution=None, *, comment=None, **kwds):
+        super(ErrorValue, self).__init__()
+        self.error_value = error_value
+        self.error_type = error_type
+        self.value_is = value_is
+        self.distribution = distribution
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     @property
     def sigma(self):
@@ -560,7 +545,7 @@ class ErrorValue(Header):
             return self.error_value
 
 
-@orsodataclass
+@dataclass
 class Value(Header):
     """
     A value or list of values with an optional unit.
@@ -569,8 +554,19 @@ class Value(Header):
     magnitude: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     error: Optional[ErrorValue] = None
+    comment: Optional[str] = None
 
     yaml_representer = Header.yaml_representer_compact
+
+    def __init__(self, magnitude, unit=None, error=None, *, comment=None, **kwds):
+        super(Value, self).__init__()
+        self.magnitude = magnitude
+        self.unit = unit
+        self.error = error
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def __repr__(self):
         """
@@ -598,7 +594,7 @@ class Value(Header):
         return val.to(output_unit).magnitude
 
 
-@orsodataclass
+@dataclass
 class ComplexValue(Header):
     """
     A value or list of values with an optional unit.
@@ -608,8 +604,20 @@ class ComplexValue(Header):
     imag: Optional[float] = None
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     error: Optional[ErrorValue] = None
+    comment: Optional[str] = None
 
     yaml_representer = Header.yaml_representer_compact
+
+    def __init__(self, real, imag=None, unit=None, error=None, *, comment=None, **kwds):
+        super(ComplexValue, self).__init__()
+        self.real = real
+        self.imag = imag
+        self.unit = unit
+        self.error = error
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def __repr__(self):
         """
@@ -642,7 +650,7 @@ class ComplexValue(Header):
         return val.to(output_unit).magnitude
 
 
-@orsodataclass
+@dataclass
 class ValueRange(Header):
     """
     A range or list of ranges with mins, maxs, and an optional unit.
@@ -651,8 +659,19 @@ class ValueRange(Header):
     min: float
     max: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    comment: Optional[str] = None
 
     yaml_representer = Header.yaml_representer_compact
+
+    def __init__(self, min, max, unit=None, *, comment=None, **kwds):
+        super(ValueRange, self).__init__()
+        self.min = min
+        self.max = max
+        self.unit = unit
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def as_unit(self, output_unit):
         """
@@ -672,7 +691,7 @@ class ValueRange(Header):
         return (vmin.to(output_unit).magnitude, vmax.to(output_unit).magnitude)
 
 
-@orsodataclass
+@dataclass
 class ValueVector(Header):
     """
     A vector or list of vectors with an optional unit.
@@ -692,8 +711,21 @@ class ValueVector(Header):
     z: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     error: Optional[ErrorValue] = None
+    comment: Optional[str] = None
 
     yaml_representer = Header.yaml_representer_compact
+
+    def __init__(self, x, y, z, unit=None, error=None, *, comment=None, **kwds):
+        super(ValueVector, self).__init__()
+        self.x = x
+        self.y = y
+        self.z = z
+        self.unit = unit
+        self.error = error
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def as_unit(self, output_unit):
         """
@@ -714,7 +746,7 @@ class ValueVector(Header):
         return (vx.to(output_unit).magnitude, vy.to(output_unit).magnitude, vz.to(output_unit).magnitude)
 
 
-@orsodataclass
+@dataclass
 class Person(Header):
     """
     Information about a person, including name, affiliation(s), and contact
@@ -725,8 +757,20 @@ class Person(Header):
     affiliation: str
     contact: Optional[str] = field(default=None, metadata={"description": "Contact (email) address"})
 
+    comment: Optional[str] = None
 
-@orsodataclass
+    def __init__(self, name, affiliation, contact=None, *, comment=None, **kwds):
+        super(Person, self).__init__()
+        self.name = name
+        self.affiliation = affiliation
+        self.contact = contact
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
+
+
+@dataclass
 class Column(Header):
     """
     Information about a data column.
@@ -738,10 +782,22 @@ class Column(Header):
         default=None, metadata={"physical_quantity": "A description of the column"}
     )
 
+    comment: Optional[str] = None
+
     yaml_representer = Header.yaml_representer_compact
 
+    def __init__(self, name, unit=None, physical_quantity=None, *, comment=None, **kwds):
+        super(Column, self).__init__()
+        self.name = name
+        self.unit = unit
+        self.physical_quantity = physical_quantity
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
-@orsodataclass
+
+@dataclass
 class ErrorColumn(Header):
     """
     Information about a data column.
@@ -752,7 +808,20 @@ class ErrorColumn(Header):
     value_is: Optional[Literal["sigma", "FWHM"]] = None
     distribution: Optional[Literal["gaussian", "triangular", "uniform", "lorentzian"]] = None
 
+    comment: Optional[str] = None
+
     yaml_representer = Header.yaml_representer_compact
+
+    def __init__(self, error_of, error_type=error_type, value_is=None, distribution=None, *, comment=None, **kwds):
+        super(ErrorColumn, self).__init__()
+        self.error_of = error_of
+        self.error_type = error_type
+        self.value_is = value_is
+        self.distribution = distribution
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     @property
     def name(self):
@@ -796,7 +865,7 @@ class ErrorColumn(Header):
             return 1.0
 
 
-@orsodataclass
+@dataclass
 class File(Header):
     """
     A file with file path and a last modified timestamp.
@@ -811,6 +880,17 @@ class File(Header):
             " itself"
         },
     )
+
+    comment: Optional[str] = None
+
+    def __init__(self, file, timestamp=None, *, comment=None, **kwds):
+        super(File, self).__init__()
+        self.file = file
+        self.timestamp = timestamp
+        for k, v in kwds.items():
+            setattr(self, k, v)
+        self.comment = comment
+        self.__post_init__()
 
     def __post_init__(self):
         """
