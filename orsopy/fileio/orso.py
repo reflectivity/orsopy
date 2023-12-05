@@ -6,7 +6,6 @@ from .._dataclasses import dataclass, fields
 from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 
 import numpy as np
-from numpy.typing import NDArray
 import yaml
 
 from .base import (ORSO_DATACLASSES, JSON_MIMETYPE, Column, ErrorColumn, Header, _dict_diff, _nested_update,
@@ -165,7 +164,7 @@ class OrsoDataset:
     """
 
     info: Orso
-    data: Union[NDArray, Sequence[NDArray], Sequence[Sequence]]
+    data: Union[np.ndrray, Sequence[np.ndarray], Sequence[Sequence]]
 
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):
