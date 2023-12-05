@@ -164,7 +164,7 @@ class OrsoDataset:
     """
 
     info: Orso
-    data: Union[np.ndrray, Sequence[np.ndarray], Sequence[Sequence]]
+    data: Union[np.ndarray, Sequence[np.ndarray], Sequence[Sequence]]
 
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):
