@@ -124,7 +124,7 @@ class InstrumentSettings(Header):
     Settings associated with the instrumentation.
 
     :param incident_angle: Angle (range) of incidence.
-    :param wavelength: Neutron/x-ray wavelenght (range).
+    :param wavelength: Neutron/x-ray wavelength (range).
     :param polarization: Radiation polarization as one of
         :code:`'unpolarized'`, :code:`'p'`, :code:`'m'`, :code:`'pp'`,
         :code:`'pm'`, :code:`'mp'`, :code:`'mm'`, or a

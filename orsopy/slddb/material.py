@@ -188,7 +188,7 @@ class Material:
     def b_vs_L(self):
         # generate full energy range data for Lambda,SLD
         if not self.has_ndata:
-            # no energy dependant cross-sections
+            # no energy dependent cross-sections
             b0 = self.fu_b
             return array([0.05, 50.0]), array([b0, b0])
 
@@ -419,7 +419,7 @@ class Material:
         """
         if type(other) in [int, float]:
             if other <= 0:
-                raise ValueError("Can only mulitply material with positive number")
+                raise ValueError("Can only multiply material with positive number")
             fout = [(ele, number * other) for ele, number in self.elements]
             return Material(fout, fu_volume=self.fu_volume * other, mu=self.mu * other)
         else:

@@ -13,7 +13,7 @@ If no angles are given, a set of default angle - time pairs is used.
 Output are two graphs:
 - the q-dependent flux on the sample for a given angle
 - the calculated reflectivity with errorbars
-This might help to plan the experiement (angles and counting times).
+This might help to plan the experiment (angles and counting times).
 
 Not yet implemented is a variable resolution or a reduced divergence.
 
@@ -31,7 +31,7 @@ from refnx.reflect import SLD, ReflectModel, Structure
 from orsopy.fileio import model_language
 
 
-# Parametised intensity distribution on Amor at the sample position as
+# Parametrised intensity distribution on Amor at the sample position as
 # function of incoming angle and wavelength. No real parameters, yet!
 def Imap(mu):
     theta_t = np.array(np.arange(-0.7, 0.701, 0.01), ndmin=2)

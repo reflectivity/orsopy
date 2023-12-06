@@ -146,7 +146,7 @@ class TestWebAPI(unittest.TestCase):
     def test_c_query(self):
         if not self.server_available:
             return
-        res = api.search(fomula="Fe2O3")
+        res = api.search(formula="Fe2O3")
         self.assertGreater(len(res), 0)
         self.assertIn("density", res[0])
 

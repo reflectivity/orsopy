@@ -717,7 +717,7 @@ class ValueVector(Header):
 @orsodataclass
 class Person(Header):
     """
-    Information about a person, including name, affilation(s), and contact
+    Information about a person, including name, affiliation(s), and contact
     information.
     """
 

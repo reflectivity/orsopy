@@ -23,10 +23,10 @@ class SLD_API:
 
       Usage:
         from orsopy.slddb import api
-        res=api.search(fomula="Fe2O3")
+        res=api.search(formula="Fe2O3")
         res[0]['density'] => ....
 
-        m=api.material(res[0]['ID']) # retreive all data for the given material, see Material class.
+        m=api.material(res[0]['ID']) # retrieve all data for the given material, see Material class.
         sldn=m.rho_n # get nuclear neutron SLD (complex number)
         sldm=m.rho_m # get magnetic neutron SLD (real number)
         sldx=m.f_of_E(E=8.047823) # get x-ray SLD (complex number) for given energy, default is Cu-Kalpha
@@ -48,7 +48,7 @@ class SLD_API:
 
     def __init__(self):
         self.first_access = True
-        self.use_webquery = True  # only try webquery once, if error occures switch to local database
+        self.use_webquery = True  # only try webquery once, if error occurs switch to local database
 
     def check(self):
         # make sure the local database file is up to date, if not try to download newest version
@@ -68,7 +68,7 @@ class SLD_API:
                     try:
                         self.download_db()
                     except URLError as err:
-                        warnings.warn("Can't download new version of databse; " + str(err))
+                        warnings.warn("Can't download new version of database; " + str(err))
             self.db = SLDDB(DB_FILE)  # after potential update, make connection with local database
             self.first_access = False
         else:
@@ -123,7 +123,7 @@ class SLD_API:
 
     def material(self, ID):
         """
-        Returns the material object for a certain databse entry specified by its unique ID.
+        Returns the material object for a certain database entry specified by its unique ID.
 
         Example:
             res=api.search(formula='Fe')
