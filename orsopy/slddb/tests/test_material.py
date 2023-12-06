@@ -230,7 +230,7 @@ class TestMaterial(unittest.TestCase):
     def test_deuteration(self):
         m1 = Material("H2O", dens=1.0)
         m2 = Material("D2O", fu_dens=m1.fu_dens)
-        m3 = Material("HHxO", fu_dens=m1.fu_dens, name="exchangable")
+        m3 = Material("HHxO", fu_dens=m1.fu_dens, name="exchangeable")
         m4 = Material("HDO", fu_dens=m1.fu_dens)
         self.assertEqual(m1.deuterated.formula, m2.formula)
         self.assertAlmostEqual(m1.deuterated.fu_dens, m2.fu_dens)

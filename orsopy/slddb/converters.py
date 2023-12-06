@@ -47,7 +47,7 @@ class Converter(ABC):
         return db_data
 
     def revert_serializable(self, db_data):
-        # generage json serialisable value, default is the normal value
+        # generate json serialisable value, default is the normal value
         return self.revert(db_data)
 
     def html_input(self, field, value):
@@ -87,7 +87,7 @@ class CType(Converter):
             return None
         elif type(db_data) is not self._dbtype:
             raise ValueError(
-                "Wrong type of database data %s, expecte %s" % (type(db_data).__name__, self._dbtype.__name__)
+                "Wrong type of database data %s, expected %s" % (type(db_data).__name__, self._dbtype.__name__)
             )
         else:
             return self._fromtype(db_data)
@@ -148,7 +148,7 @@ class CFormula(Converter):
             "<br/>Repreating groups can be provided by a sub-formula in round brackets "
             "followed by a number of repetitions. "
             "<br/>For organic molecules that exchange hydrogen atoms with their environment, "
-            "such exchangable hydrogens are written separately as <i>Hx</i> element."
+            "such exchangeable hydrogens are written separately as <i>Hx</i> element."
             "<br/>In searches the match is exect (besides re-ordering the elements), "
             "a rough search can be indicated by "
             "adding a tilde (~) before the formula.<br/>Examples:<br/>"

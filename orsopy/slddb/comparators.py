@@ -89,7 +89,7 @@ class FormulaComparator(Comparator):
 
 class FuzzyFloat(Comparator):
     """
-    Compare a float value agains a range or +/-10% of given value.
+    Compare a float value against a range or +/-10% of given value.
     """
 
     def query_string(self):

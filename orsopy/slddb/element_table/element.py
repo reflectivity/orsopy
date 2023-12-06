@@ -126,7 +126,7 @@ class Element:
 
     @property
     def Lamda(self):
-        # return neutron wavelength values for energy dependant absorption
+        # return neutron wavelength values for energy dependent absorption
         if self.has_ndata:
             return self._ndata[0]
         else:

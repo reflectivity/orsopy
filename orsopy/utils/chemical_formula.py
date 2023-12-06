@@ -9,7 +9,7 @@ from collections import OrderedDict
 
 class Formula(list):
     """
-    Evaluate strings for element chemical fomula.
+    Evaluate strings for element chemical formula.
     """
 
     elements = (

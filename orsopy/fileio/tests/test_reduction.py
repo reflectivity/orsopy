@@ -77,7 +77,7 @@ class TestReduction(unittest.TestCase):
 
     def test_call_to_yaml(self):
         """
-        Tranform with call to yaml.
+        Transform with call to yaml.
         """
         value = reduction.Reduction(
             reduction.Software("Reducer", "1.2.3", "Ubuntu-20.04"),
@@ -96,7 +96,7 @@ class TestReduction(unittest.TestCase):
 
     def test_script_to_yaml(self):
         """
-        Tranform with script to yaml.
+        Transform with script to yaml.
         """
         value = reduction.Reduction(
             reduction.Software("Reducer", "1.2.3", "Ubuntu-20.04"),
@@ -116,7 +116,7 @@ class TestReduction(unittest.TestCase):
 
     def test_computer_to_yaml(self):
         """
-        Tranform with computer to yaml.
+        Transform with computer to yaml.
         """
         value = reduction.Reduction(
             reduction.Software("Reducer", "1.2.3", "Ubuntu-20.04"),
@@ -136,7 +136,7 @@ class TestReduction(unittest.TestCase):
 
     def test_binary_to_yaml(self):
         """
-        Tranform with computer to yaml.
+        Transform with computer to yaml.
         """
         value = reduction.Reduction(
             reduction.Software("Reducer", "1.2.3", "Ubuntu-20.04"),

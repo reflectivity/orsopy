@@ -279,7 +279,7 @@ class SLDDB:
         if len(fields) == len(DB_MATERIALS_FIELDS) and DB_MATERIALS_FIELDS == fields[: len(DB_MATERIALS_FIELDS)]:
             return
         if DB_MATERIALS_FIELDS[: len(fields)] != fields:
-            # need to reorder and/or add/remove colums of the databse, requires copy of table
+            # need to reorder and/or add/remove columns of the database, requires copy of table
             name_type = [
                 "%s %s %s" % (fi, ci.sql_type, (di is not None) and "DEFAULT %s" % di or "")
                 for fi, ci, di in zip(DB_MATERIALS_FIELDS, DB_MATERIALS_CONVERTERS, DB_MATERIALS_FIELD_DEFAULTS)
