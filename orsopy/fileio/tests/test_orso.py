@@ -13,7 +13,7 @@ import yaml
 
 from orsopy import fileio as fileio
 from orsopy.fileio.base import Column, File, Person, Value, ValueRange, _read_header_data, _validate_header_data
-from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Sample
+from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Sample, Polarization
 from orsopy.fileio.orso import Orso, OrsoDataset
 from orsopy.fileio.reduction import Reduction, Software
 
@@ -282,6 +282,7 @@ class TestFunctions(unittest.TestCase):
         assert ds.sample.name is None
         assert ds.measurement.instrument_settings.incident_angle.magnitude is None
         assert ds.measurement.instrument_settings.wavelength.magnitude is None
+        assert ds.measurement.instrument_settings.polarization is Polarization.unpolarized
         assert ds.measurement.data_files == []
         assert empty.reduction.software.name is None
         assert empty.reduction.software.version is None
@@ -305,13 +306,27 @@ class TestFunctions(unittest.TestCase):
         """
         empty = Orso.empty()
         req = (
-            "data_source:\n  owner:\n    name: null\n"
-            "    affiliation: null\n  experiment:\n    title: null\n"
-            "    instrument: null\n    start_date: null\n    probe: null\n"
-            "  sample:\n    name: null\n  measurement:\n"
-            "    instrument_settings:\n      incident_angle: {magnitude: null}\n"
+            "data_source:\n"
+            "  owner:\n"
+            "    name: null\n"
+            "    affiliation: null\n"
+            "  experiment:\n"
+            "    title: null\n"
+            "    instrument: null\n"
+            "    start_date: null\n"
+            "    probe: null\n"
+            "  sample:\n"
+            "    name: null\n"
+            "  measurement:\n"
+            "    instrument_settings:\n"
+            "      incident_angle: {magnitude: null}\n"
             "      wavelength: {magnitude: null}\n"
-            "    data_files: []\nreduction:\n  software: {name: null}\n"
-            "columns:\n- {name: Qz, unit: 1/angstrom}\n- {name: R}\n"
+            "      polarization: unpolarized\n"
+            "    data_files: []\n"
+            "reduction:\n"
+            "  software: {name: null}\n"
+            "columns:\n"
+            "- {name: Qz, unit: 1/angstrom}\n"
+            "- {name: R}\n"
         )
         assert empty.to_yaml() == req
