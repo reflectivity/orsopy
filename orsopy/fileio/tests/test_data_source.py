@@ -7,7 +7,7 @@ import unittest
 
 from datetime import datetime
 
-from orsopy.fileio import base, data_source
+from orsopy.fileio import base, data_source, Polarization
 
 
 pth = Path(__file__).absolute().parent
@@ -198,7 +198,7 @@ class TestInstrumentSettings(unittest.TestCase):
         assert value.wavelength.min == 2.0
         assert value.wavelength.max == 12.0
         assert value.wavelength.unit == "angstrom"
-        assert value.polarization is None
+        assert value.polarization is Polarization.unpolarized
         assert value.configuration is None
 
     def test_to_yaml(self):
@@ -208,7 +208,9 @@ class TestInstrumentSettings(unittest.TestCase):
         value = data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),)
         assert (
             value.to_yaml()
-            == "incident_angle: {magnitude: 4.0, unit: deg}\n" + "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+            == ("incident_angle: {magnitude: 4.0, unit: deg}\n"
+                "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+                "polarization: unpolarized\n")
         )
 
     def test_creation_config_and_polarization(self):
@@ -288,11 +290,14 @@ class TestMeasurement(unittest.TestCase):
         )
         assert (
             value.to_yaml()
-            == "instrument_settings:\n  incident_angle:"
-            + " {magnitude: 4.0, unit: deg}\n  wavelength: {min: "
-            + "2.0, max: 12.0, unit: angstrom}\ndata_files:\n- file: "
-            + f"{str(fname.absolute())}\n  timestamp: "
-            + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
+            == ("instrument_settings:\n"
+                "  incident_angle: {magnitude: 4.0, unit: deg}\n"
+                "  wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+                "  polarization: unpolarized\n"
+                "data_files:\n"
+                f"- file: {str(fname.absolute())}\n"
+                f"  timestamp: {datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
+                )
         )
 
     def test_creation_optionals(self):
@@ -332,15 +337,17 @@ class TestMeasurement(unittest.TestCase):
             [base.File(str(fname1), None)],
             "energy-dispersive",
         )
-        assert (
-            value.to_yaml()
-            == "instrument_settings:\n  incident_angle:"
-            + " {magnitude: 4.0, unit: deg}\n  wavelength: {min: "
-            + "2.0, max: 12.0, unit: angstrom}\ndata_files:\n- file: "
-            + f"{str(fname0.absolute())}\n  timestamp: "
-            + f"{datetime.fromtimestamp(fname0.stat().st_mtime).isoformat()}\n"
-            + "additional_files:\n- file: "
-            + f"{str(fname1.absolute())}\n  timestamp: "
-            + f"{datetime.fromtimestamp(fname1.stat().st_mtime).isoformat()}\n"
-            + "scheme: energy-dispersive\n"
+        cmpstr = (
+            "instrument_settings:\n"
+            "  incident_angle: {magnitude: 4.0, unit: deg}\n"
+            "  wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+            "  polarization: unpolarized\n"
+            "data_files:\n"
+            f"- file: {str(fname0.absolute())}\n"
+            f"  timestamp: {datetime.fromtimestamp(fname0.stat().st_mtime).isoformat()}\n"
+            "additional_files:\n"
+            f"- file: {str(fname1.absolute())}\n"
+            f"  timestamp: {datetime.fromtimestamp(fname1.stat().st_mtime).isoformat()}\n"
+            "scheme: energy-dispersive\n"
         )
+        assert cmpstr == value.to_yaml()
