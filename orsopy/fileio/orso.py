@@ -166,8 +166,11 @@ class OrsoDataset:
     data: Union[np.ndarray, Sequence[np.ndarray], Sequence[Sequence]]
 
     def __post_init__(self):
-        if self.data.shape[1] != len(self.info.columns):
+        if len(self.data) != len(self.info.columns):
             raise ValueError("Data has to have the same number of columns as header")
+        column_lengths = set(len(c) for c in self.data)
+        if len(column_lengths) > 1:
+            raise ValueError("Columns must all have the same length in first dimension")
 
     def header(self) -> str:
         """
@@ -252,13 +255,13 @@ def save_orso(
 
         ds1 = datasets[0]
         header += ds1.header()
-        np.savetxt(f, ds1.data, header=header, fmt="%-22.16e")
+        np.savetxt(f, np.asarray(ds1.data).T, header=header, fmt="%-22.16e")
 
         for dsi in datasets[1:]:
             # write an optional spacer string between dataset e.g. \n
             f.write(data_separator)
             hi = ds1.diff_header(dsi)
-            np.savetxt(f, dsi.data, header=hi, fmt="%-22.16e")
+            np.savetxt(f, np.asarray(dsi.data).T, header=hi, fmt="%-22.16e")
 
 
 def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
