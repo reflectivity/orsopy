@@ -179,7 +179,9 @@ class Header:
                 except AttributeError:  # python 3.6
                     try:
                         item = item.split("+", 1)[0]
-                        if "." in item:
+                        if "T" not in item:
+                            return datetime.datetime.strptime(item, "%Y-%m-%d")
+                        elif "." in item:
                             return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S.%f")
                         else:
                             return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S")
@@ -1000,7 +1002,7 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
 
 def json_datetime_trap(obj):
     if isinstance(obj, datetime.datetime):
-        return obj.isoformat()
+        return obj.isoformat("T")
     return obj
 
 

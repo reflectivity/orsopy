@@ -9,7 +9,7 @@ import numpy as np
 import yaml
 
 from .base import (JSON_MIMETYPE, Column, ErrorColumn, Header, _dict_diff, _nested_update, _possibly_open_file,
-                   _read_header_data)
+                   _read_header_data, OrsoDumper)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -182,7 +182,7 @@ class OrsoDataset:
         out_dict.update(_diff)
         out_dict["data_set"] = other.info.data_set
 
-        out = yaml.dump(out_dict, sort_keys=False)
+        out = yaml.dump(out_dict, Dumper=OrsoDumper, sort_keys=False)
         out += self.info.column_header()
         return out
 
