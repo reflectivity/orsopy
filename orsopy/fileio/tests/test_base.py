@@ -3,11 +3,11 @@ Tests for fileio.base module
 """
 # pylint: disable=R0201
 
-from pathlib import Path
 import unittest
 
 from datetime import datetime
 from math import log, sqrt
+from pathlib import Path
 
 import pint
 import pytest
@@ -15,7 +15,6 @@ import pytest
 from numpy.testing import assert_equal
 
 from orsopy.fileio import base, orso
-
 
 pth = Path(__file__).absolute().parent
 
@@ -62,7 +61,7 @@ class TestErrorValue(unittest.TestCase):
         with self.assertRaises(ValueError):
             error.sigma
 
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             error = base.ErrorValue(1.0, "resolution", "FWHM", "undefined")
         with self.assertRaises(NotImplementedError):
             error.sigma
@@ -89,7 +88,7 @@ class TestErrorValue(unittest.TestCase):
         assert error.to_yaml() == "{error_value: 1.0}\n"
 
     def test_user_data(self):
-        error = base.ErrorValue(13.4, my_attr="hallo ORSO")
+        error = base.ErrorValue.from_dict(dict(error_value=13.4, my_attr="hallo ORSO"))
         assert error.user_data == {"my_attr": "hallo ORSO"}
 
 
@@ -110,7 +109,7 @@ class TestValue(unittest.TestCase):
         """
         Creation of an object with a a list of values and a unit.
         """
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             base.Value([1, 2, 3], "m")
 
     def test_bad_unit(self):
@@ -135,7 +134,7 @@ class TestValue(unittest.TestCase):
         assert value.to_yaml() == "{magnitude: null}\n"
 
     def test_user_data(self):
-        value = base.Value(13.4, my_attr="hallo ORSO")
+        value = base.Value.from_dict(dict(magnitude=13.4, my_attr="hallo ORSO"))
         assert value.user_data == {"my_attr": "hallo ORSO"}
 
     def test_unit_conversion(self):
@@ -165,9 +164,9 @@ class TestComplexValue(unittest.TestCase):
 
     def test_list_warning(self):
         """
-        Creation of an object with a a list of values and a unit.
+        Creation of an object with a list of values and a unit.
         """
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             base.ComplexValue([1, 2, 3], [1, 2, 3], "m")
 
     def test_bad_unit(self):
@@ -221,7 +220,7 @@ class TestValueVector(unittest.TestCase):
         """
         Creation of an object with three dimensions of lists and unit.
         """
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             base.ValueVector([1, 2], [2, 3], [3, 4], "m")
 
     def test_bad_unit(self):
@@ -274,7 +273,7 @@ class TestValueRange(unittest.TestCase):
         """
         Creation of an object of a list of max and list of min and a unit.
         """
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             base.ValueRange([1, 2, 3], [2, 3, 4], "m")
 
     def test_bad_unit(self):
@@ -435,18 +434,18 @@ class TestErrorColumn(unittest.TestCase):
         """
         Rejection of non-ASCII unit.
         """
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             _ = base.ErrorColumn("q", "nm")
 
     def test_bad_distribution(self):
         """
         Rejection of non-ASCII unit.
         """
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             _ = base.ErrorColumn("q", "uncertainty", "FWHM", "undefined")
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             _ = base.ErrorColumn("q", "uncertainty", "HWHM", "triangular")
-        with self.assertWarns(RuntimeWarning):
+        with self.assertWarns(base.ORSOSchemaWarning):
             _ = base.ErrorColumn("q", "uncertainty", "wrong")
 
     def test_to_yaml(self):
@@ -517,7 +516,7 @@ class TestFile(unittest.TestCase):
         value = base.File(str(fname.absolute()), datetime.fromtimestamp(fname.stat().st_mtime))
         assert (
             value.to_yaml()
-            == f'file: {str(fname)}\n'
+            == f"file: {str(fname)}\n"
             + "timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )
@@ -542,7 +541,7 @@ class TestFile(unittest.TestCase):
         assert (
             value.to_yaml()
             == "file: "
-            + f'{str(fname)}\n'
+            + f"{str(fname)}\n"
             + "timestamp: "
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )

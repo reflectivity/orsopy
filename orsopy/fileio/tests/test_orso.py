@@ -2,10 +2,10 @@
 Tests for fileio module
 """
 
-from pathlib import Path
 import unittest
 
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -13,10 +13,9 @@ import yaml
 
 from orsopy import fileio as fileio
 from orsopy.fileio.base import Column, File, Person, Value, ValueRange, _read_header_data, _validate_header_data
-from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Sample, Polarization
+from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Polarization, Sample
 from orsopy.fileio.orso import Orso, OrsoDataset
 from orsopy.fileio.reduction import Reduction, Software
-
 
 pth = Path(__file__).absolute().parent
 
@@ -129,10 +128,7 @@ class TestOrso(unittest.TestCase):
             data_source=fileio.DataSource(
                 sample=fileio.Sample(name="My Sample", category="solid", description="Something descriptive",),
                 experiment=fileio.Experiment(
-                    title="Main experiment",
-                    instrument="Reflectometer",
-                    start_date=datetime.now().strftime("%Y-%m-%d"),
-                    probe="x-ray",
+                    title="Main experiment", instrument="Reflectometer", start_date=datetime.now(), probe="x-ray",
                 ),
                 owner=fileio.Person("someone", "important"),
                 measurement=fileio.Measurement(
@@ -140,7 +136,6 @@ class TestOrso(unittest.TestCase):
                         incident_angle=fileio.Value(13.4, "deg"), wavelength=fileio.Value(5.34, "A"),
                     ),
                     data_files=["abc", "def", "ghi"],
-                    references=["more", "files"],
                     scheme="angle-dispersive",
                 ),
             ),
@@ -148,6 +143,7 @@ class TestOrso(unittest.TestCase):
             data_set="Filled header",
             columns=info.columns,
         )
+        info3.data_source.measurement.references = ["more", "files"]
         ds3 = fileio.OrsoDataset(info3, data)
 
         # .ort read/write
@@ -210,8 +206,8 @@ class TestOrso(unittest.TestCase):
 
         data = np.zeros((100, 3))
         data[:] = np.arange(100.0)[:, None]
-        dct = {"ci": "1", "foo": ["bar", 1, 2, 3.5]}
-        info.user_data = dct
+        info.ci = 1
+        info.foo = ["bar", 1, 2, 3.4]
         ds = fileio.OrsoDataset(info, data)
 
         fileio.save_orso([ds], "test2.ort")
@@ -232,7 +228,7 @@ class TestOrso(unittest.TestCase):
         assert not hasattr(info2.data_source, "test_entry")
         ds_dict = info.data_source.to_dict()
         assert "test_entry" in ds_dict
-        info2.data_source = fileio.DataSource(**ds_dict)
+        info2.data_source = fileio.DataSource.from_dict(ds_dict)
         assert hasattr(info2.data_source, "test_entry")
 
     def test_extra_elements(self):
@@ -247,7 +243,7 @@ class TestOrso(unittest.TestCase):
         info = fileio.Orso.empty()
         info.data_source.measurement.instrument_settings.wavelength = Value(np.float64(10.0))
         info.data_source.measurement.instrument_settings.incident_angle = Value(np.int32(2))
-        ds = fileio.orso.OrsoDataset(info, np.arange(20.).reshape(10, 2))
+        ds = fileio.orso.OrsoDataset(info, np.arange(20.0).reshape(10, 2))
         # .ort test:
         fileio.save_orso([ds], "test_numpy.ort")
         ls = fileio.load_orso("test_numpy.ort")
