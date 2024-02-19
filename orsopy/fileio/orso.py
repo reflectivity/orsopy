@@ -8,8 +8,8 @@ from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 import numpy as np
 import yaml
 
-from .base import (JSON_MIMETYPE, Column, ErrorColumn, Header, _dict_diff, _nested_update, _possibly_open_file,
-                   _read_header_data, OrsoDumper)
+from .base import (JSON_MIMETYPE, Column, ErrorColumn, Header, OrsoDumper, _dict_diff, _nested_update,
+                   _possibly_open_file, _read_header_data)
 from .data_source import DataSource
 from .reduction import Reduction
 

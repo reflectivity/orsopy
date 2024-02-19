@@ -2,13 +2,12 @@
 Tests for fileio.data_source module
 """
 
-from pathlib import Path
 import unittest
 
 from datetime import datetime
+from pathlib import Path
 
-from orsopy.fileio import base, data_source, Polarization
-
+from orsopy.fileio import Polarization, base, data_source
 
 pth = Path(__file__).absolute().parent
 
@@ -206,11 +205,10 @@ class TestInstrumentSettings(unittest.TestCase):
         Transformation to yaml with minimal set.
         """
         value = data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),)
-        assert (
-            value.to_yaml()
-            == ("incident_angle: {magnitude: 4.0, unit: deg}\n"
-                "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
-                "polarization: unpolarized\n")
+        assert value.to_yaml() == (
+            "incident_angle: {magnitude: 4.0, unit: deg}\n"
+            "wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+            "polarization: unpolarized\n"
         )
 
     def test_creation_config_and_polarization(self):
@@ -288,16 +286,14 @@ class TestMeasurement(unittest.TestCase):
             data_source.InstrumentSettings(base.Value(4.0, "deg"), base.ValueRange(2.0, 12.0, "angstrom"),),
             [base.File(str(fname), None)],
         )
-        assert (
-            value.to_yaml()
-            == ("instrument_settings:\n"
-                "  incident_angle: {magnitude: 4.0, unit: deg}\n"
-                "  wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
-                "  polarization: unpolarized\n"
-                "data_files:\n"
-                f"- file: {str(fname.absolute())}\n"
-                f"  timestamp: {datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
-                )
+        assert value.to_yaml() == (
+            "instrument_settings:\n"
+            "  incident_angle: {magnitude: 4.0, unit: deg}\n"
+            "  wavelength: {min: 2.0, max: 12.0, unit: angstrom}\n"
+            "  polarization: unpolarized\n"
+            "data_files:\n"
+            f"- file: {str(fname.absolute())}\n"
+            f"  timestamp: {datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )
 
     def test_creation_optionals(self):
@@ -320,9 +316,7 @@ class TestMeasurement(unittest.TestCase):
         assert value.data_files[0].file == str(fname0)
         assert value.data_files[0].timestamp == datetime.fromtimestamp(fname0.stat().st_mtime)
         assert value.additional_files[0].file == str(fname1)
-        assert value.additional_files[0].timestamp == datetime.fromtimestamp(
-            fname1.stat().st_mtime
-        )
+        assert value.additional_files[0].timestamp == datetime.fromtimestamp(fname1.stat().st_mtime)
 
     def test_to_yaml_optionals(self):
         """
