@@ -75,6 +75,10 @@ class TestHeaderClass(unittest.TestCase):
             datetime_module.datetime = datetime
 
     def test_resolve_dictof(self):
+        if not hasattr(datetime, "fromisoformat"):
+            # ignore this test for backport
+            return
+
         @dataclass
         class TestDictof(base.Header):
             test: Dict[str, datetime]
