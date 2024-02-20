@@ -4,6 +4,7 @@ Tests for fileio.base module
 # pylint: disable=R0201
 
 import datetime as datetime_module
+import sys
 import unittest
 import warnings
 
@@ -75,8 +76,8 @@ class TestHeaderClass(unittest.TestCase):
             datetime_module.datetime = datetime
 
     def test_resolve_dictof(self):
-        if not hasattr(datetime, "fromisoformat"):
-            # ignore this test for backport
+        if sys.version_info < (3, 8):
+            # dict type annotation changed in 3.8
             return
 
         @dataclass
