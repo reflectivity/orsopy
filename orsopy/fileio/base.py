@@ -98,7 +98,8 @@ class Header:
         for key, value in data_dict.items():
             if key in field_keys:
                 ftype = construct_fields[field_keys.index(key)].type
-                if type(ftype) is type and type(value) is not type and issubclass(ftype, Header):
+                # convert dictionary to Header derived class if possible
+                if type(ftype) is type and type(value) is dict and issubclass(ftype, Header):
                     # the field requires a ORSO Header type
                     value = construct_fields[field_keys.index(key)].type.from_dict(value)
                 construct_dict[key] = value
@@ -387,7 +388,7 @@ class Header:
                 for index, item in enumerate(value):
                     # use the 'name' attribute of children if it exists, else index:
                     sub_name = getattr(item, "name", str(index))
-                    if isinstance(value, Header):
+                    if isinstance(item, Header):
                         item_out = item.to_nexus(root=child_group, name=sub_name)
                     else:
                         t_value = nexus_value_converter(item)

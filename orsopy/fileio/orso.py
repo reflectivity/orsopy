@@ -157,6 +157,11 @@ class OrsoDataset:
         if self.data.shape[1] != len(self.info.columns):
             raise ValueError("Data has to have the same number of columns as header")
 
+    @classmethod
+    def from_dict(self, data_dict):
+        # TODO: verify that no additional treatment of data_dict is needed
+        return OrsoDataset(**data_dict)
+
     def header(self) -> str:
         """
         The header string for the ORSO file.
@@ -281,8 +286,9 @@ def _from_nexus_group(group):
                 # TODO: remove swapaxes if order of data is changed (PR #107)
                 # reorder columns so column index is second:
                 dct["data"] = np.asarray(dct["data"]).swapaxes(0, 1)
-                ORSO_class = "Dataset"
-            cls = Header._subclass_dict_[ORSO_class]
+                cls = OrsoDataset
+            else:
+                cls = Header._subclass_dict_[ORSO_class]
             return cls.from_dict(dct)
         else:
             return dct
