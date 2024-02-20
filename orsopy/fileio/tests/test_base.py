@@ -3,20 +3,181 @@ Tests for fileio.base module
 """
 # pylint: disable=R0201
 
+import datetime as datetime_module
 import unittest
+import warnings
 
+from dataclasses import dataclass
 from datetime import datetime
 from math import log, sqrt
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pint
 import pytest
 
-from numpy.testing import assert_equal
-
 from orsopy.fileio import base, orso
 
 pth = Path(__file__).absolute().parent
+
+
+class TestHeaderClass(unittest.TestCase):
+    """
+    Testing general class functionalities of ORSO Header.
+    """
+
+    def test_resolve_any(self):
+        @dataclass
+        class TestAny(base.Header):
+            test: Any
+
+        test_object = [1, 2, "test"]
+        res = TestAny(test=test_object)
+        assert res.test is test_object
+
+    def test_reolve_datetime(self):
+        @dataclass
+        class TestDatetime(base.Header):
+            test: datetime
+
+        res = TestDatetime(test=datetime.now())
+        assert type(res.test) is datetime
+        res = TestDatetime(test=datetime.now().isoformat("T"))
+        assert type(res.test) is datetime
+        with self.assertWarns(base.ORSOSchemaWarning):
+            res = TestDatetime(test="no-ISO-string")
+        assert type(res.test) is str
+
+        # check python 3.6 implementation where fromisoformat did not exist
+        class MockDatetime:
+            @staticmethod
+            def strptime(item, format):
+                return datetime.strptime(item, format)
+
+        @dataclass
+        class TestDatetime(base.Header):
+            test: MockDatetime
+
+        try:
+            datetime_module.datetime = MockDatetime
+            res = TestDatetime(test=MockDatetime())
+            assert type(res.test) is MockDatetime
+            res = TestDatetime(test=datetime.now().isoformat("T"))
+            assert type(res.test) is datetime
+            res = TestDatetime(test=datetime.now().strftime("%Y-%m-%d"))
+            assert type(res.test) is datetime
+            res = TestDatetime(test=datetime.now().strftime("%Y-%m-%dT%H:%M:%S"))
+            assert type(res.test) is datetime
+            with self.assertWarns(base.ORSOSchemaWarning):
+                res = TestDatetime(test="no-ISO-string")
+            assert type(res.test) is str
+        finally:
+            datetime_module.datetime = datetime
+
+    def test_resolve_dictof(self):
+        @dataclass
+        class TestDictof(base.Header):
+            test: Dict[str, datetime]
+            test2: Dict[float, int]
+
+        now = datetime.now()
+        res = TestDictof(test={"ab": now, "def": now.isoformat("T")}, test2={13: 4.0, "23": 23})
+        assert res.test == {"ab": now, "def": now}
+        assert res.test2 == {13.0: 4, 23.0: 23}
+        assert [(type(ki), type(vi)) for ki, vi in res.test2.items()] == [(float, int), (float, int)]
+
+        # Dict should be used to define key/value types
+        @dataclass
+        class TestDictNodef(base.Header):
+            test: Dict
+
+        with self.assertWarns(base.ORSOSchemaWarning):
+            res = TestDictNodef(test={"ab": "cd"})
+        assert res.test == {"ab": "cd"}
+
+    def test_resolve_list(self):
+        @dataclass
+        class TestList(base.Header):
+            test: List[int]
+
+        res = TestList(test=[1, 2, 3])
+        assert res.test == [1, 2, 3]
+        res = TestList(test=["1", 2.4, 3.232])
+        assert res.test == [1, 2, 3]
+        res = TestList(test=("1", 2.4, 3.232))
+        assert res.test == [1, 2, 3]
+        res = TestList(test="134")
+        assert res.test == [134]
+
+    def test_resolve_tuple(self):
+        @dataclass
+        class TestList(base.Header):
+            test: Tuple[int, int, int]
+
+        res = TestList(test=(1, 2, 3))
+        assert res.test == (1, 2, 3)
+        res = TestList(test=["1", 2.4, 3.232])
+        assert res.test == (1, 2, 3)
+        res = TestList(test="134")
+        assert res.test == (134,)
+        # wrong number of elements will be shortened to type hint length
+        with self.assertWarns(base.ORSOSchemaWarning):
+            res = TestList(test=(1, 2))
+        assert res.test == (1, 2)
+        with self.assertWarns(base.ORSOSchemaWarning):
+            res = TestList(test=(1, 2, 3, 4))
+        assert res.test == (1, 2, 3)
+
+    def test_subsubclass(self):
+        @dataclass
+        class Test1(base.Header):
+            pass
+
+        with self.assertRaises(NotImplementedError):
+
+            @dataclass
+            class Test2(Test1):
+                pass
+
+    def test_unexpected_error(self):
+        """
+        Test that any unforeseen exception in the resolve function gets
+        reported as ORSOResolveError.
+        """
+
+        @dataclass
+        class TestDatetime(base.Header):
+            test: datetime
+
+        def resolve_type(hint: type, item: Any):
+            raise RuntimeError("Test error")
+
+        TestDatetime._resolve_type = resolve_type
+        with self.assertRaises(base.ORSOResolveError):
+            TestDatetime(test=datetime.now().isoformat())
+
+    def test_empty_creation(self):
+        """
+        Make a class that tests all cases of the empty method.
+        """
+
+        @dataclass
+        class TestEmpty(base.Header):
+            test1: float
+            test2: base.Value
+            test3: Union[base.Value, base.ErrorValue]
+            test4: List[base.Value]
+            test5: List[int]
+            test6: Optional[float] = None
+
+        res = TestEmpty.empty()
+        assert res.test1 is None
+        assert res.test2 == base.Value.empty()
+        assert res.test3 == base.Value.empty()
+        assert res.test4 == [base.Value.empty()]
+        assert res.test5 == []
+        assert res.test6 is None
+        assert res.asdict(res) == res.to_dict()
 
 
 class TestErrorValue(unittest.TestCase):
@@ -138,6 +299,7 @@ class TestValue(unittest.TestCase):
         assert value.user_data == {"my_attr": "hallo ORSO"}
 
     def test_unit_conversion(self):
+        base.unit_registry = None
         value = base.Value(1.0, "mm")
         assert value.as_unit("m") == 1.0e-3
         value = base.Value(1.0, "1/nm^3")
@@ -161,6 +323,7 @@ class TestComplexValue(unittest.TestCase):
         assert value.real == 1.0
         assert value.imag == 2.0
         assert value.unit == "m"
+        repr(value)  # just test that the custom repr method does not through an exception
 
     def test_list_warning(self):
         """
@@ -191,10 +354,13 @@ class TestComplexValue(unittest.TestCase):
         assert value.to_yaml() == "{real: null}\n"
 
     def test_unit_conversion(self):
+        base.unit_registry = None
         value = base.ComplexValue(1.0, 2.0, "mm")
         assert value.as_unit("m") == 1.0e-3 + 2.0e-3j
         value = base.ComplexValue(1.0, 2.0, "1/nm^3")
         assert value.as_unit("1/angstrom^3") == 1.0e-3 + 2.0e-3j
+        value = base.ComplexValue(1.0, None, "mm")
+        assert value.as_unit("m") == 1.0e-3 + 0.0j
 
         with self.assertRaises(pint.DimensionalityError):
             value = base.ComplexValue(1.0, 2.0, "1/nm^3")
@@ -245,7 +411,9 @@ class TestValueVector(unittest.TestCase):
         assert value.to_yaml() == "{x: 1.0, y: 2.0, z: null, unit: m}\n"
 
     def test_unit_conversion(self):
+        base.unit_registry = None
         value = base.ValueVector(1.0, 2.0, 3.0, "mm")
+        assert value.as_unit("mm") == (1.0, 2.0, 3.0)
         assert value.as_unit("m") == (1.0e-3, 2.0e-3, 3.0e-3)
         value = base.ValueVector(1.0, 2.0, 3.0, "1/nm^3")
         assert value.as_unit("1/angstrom^3") == (1.0e-3, 2.0e-3, 3.0e-3)
@@ -305,7 +473,9 @@ class TestValueRange(unittest.TestCase):
         assert value.to_yaml() == "{min: null, max: 1.0}\n"
 
     def test_unit_conversion(self):
+        base.unit_registry = None
         value = base.ValueRange(1.0, 2.0, "mm")
+        assert value.as_unit("mm") == (1.0, 2.0)
         assert value.as_unit("m") == (1.0e-3, 2.0e-3)
         value = base.ValueRange(1.0, 2.0, "1/nm^3")
         assert value.as_unit("1/angstrom^3") == (1.0e-3, 2.0e-3)
@@ -463,6 +633,9 @@ class TestErrorColumn(unittest.TestCase):
         assert value.to_yaml() == "{error_of: q}\n"
 
     def test_sigma_conversion(self):
+        with self.subTest("noop"):
+            value = base.ErrorColumn("q", "uncertainty", "sigma", "gaussian")
+            self.assertEqual(value.to_sigma, 1.0)
         with self.subTest("gauss"):
             value = base.ErrorColumn("q", "uncertainty", "FWHM", "gaussian")
             self.assertEqual(value.to_sigma, 1.0 / (2.0 * sqrt(2.0 * log(2.0))))
@@ -475,6 +648,10 @@ class TestErrorColumn(unittest.TestCase):
         with self.subTest("lorentizan"):
             value = base.ErrorColumn("q", "uncertainty", "FWHM", "lorentzian")
             with self.assertRaises(ValueError):
+                value.to_sigma
+        with self.subTest("unknown"):
+            value = base.ErrorColumn("q", "uncertainty", "FWHM", "unknown")
+            with self.assertRaises(NotImplementedError):
                 value.to_sigma
 
 
@@ -546,7 +723,6 @@ class TestFile(unittest.TestCase):
             + f"{datetime.fromtimestamp(fname.stat().st_mtime).isoformat()}\n"
         )
 
-
-def test_not_orso():
-    with pytest.raises(base.NotOrsoCompatibleFileError, match="First line does not appea"):
-        orso.load_orso(pth / "not_orso.ort")
+    def test_not_orso(self):
+        with pytest.raises(base.NotOrsoCompatibleFileError, match="First line does not appear"):
+            orso.load_orso(open(pth / "not_orso.ort", "r"))

@@ -226,23 +226,31 @@ class Header:
                     if hbase is list:
                         return list([Header._resolve_type(t0, i) for i in item])
                     else:
-                        return tuple([Header._resolve_type(ti, i) for ti, i in zip(get_args(hint), item)])
+                        arg_list = get_args(hint)
+                        if len(arg_list) != len(item):
+                            warnings.warn(
+                                "The Schema expects %i items, %i given" % (len(arg_list), len(item)), ORSOSchemaWarning
+                            )
+                        return tuple([Header._resolve_type(ti, i) for ti, i in zip(arg_list, item)])
                 else:
                     return hbase([Header._resolve_type(t0, item)])
             elif hbase is dict:
                 try:
-                    value_type = get_args(hint)[1]
-                except IndexError:
+                    key_type, value_type = get_args(hint)
+                except ValueError:
                     warnings.warn(
                         "The evaluation of type hints requires key/value definition for Dict, "
-                        "if you want to use unspecified dictionaries use dict instead of Dict."
+                        "if you want to use unspecified dictionaries use dict instead of Dict.",
+                        ORSOSchemaWarning,
                     )
-                    raise
+                    return None
                 try:
+                    res = {}
                     for key, value in item.items():
                         # resolve the type of any value in the dictionary
-                        item[key] = Header._resolve_type(value_type, value)
-                    return item
+                        key = Header._resolve_type(key_type, key)
+                        res[key] = Header._resolve_type(value_type, value)
+                    return res
                 except AttributeError:
                     return None
             elif hbase in [Union, Optional]:
