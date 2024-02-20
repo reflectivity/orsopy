@@ -4,15 +4,18 @@ Tests for fileio module
 
 import unittest
 
+from dataclasses import dataclass
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 
+import h5py
 import numpy as np
 import pytest
 import yaml
 
 from orsopy import fileio as fileio
-from orsopy.fileio.base import Column, File, Person, Value, ValueRange, _read_header_data, _validate_header_data
+from orsopy.fileio.base import Column, File, Header, Person, Value, ValueRange, _read_header_data, _validate_header_data
 from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Polarization, Sample
 from orsopy.fileio.orso import Orso, OrsoDataset
 from orsopy.fileio.reduction import Reduction, Software
@@ -119,6 +122,8 @@ class TestOrso(unittest.TestCase):
         info2.data_source.measurement.instrument_settings.polarization = fileio.Polarization.mo
         info.data_set = "up polarization"
         info2.data_set = "down polarization"
+        info.data_source.comment = "test comment"
+        info2.data_source.comment = "test comment"
         info2.data_source.sample.comment = "this is a comment"
 
         ds = fileio.OrsoDataset(info, data)
@@ -144,6 +149,7 @@ class TestOrso(unittest.TestCase):
             columns=info.columns,
         )
         info3.data_source.measurement.references = ["more", "files"]
+        info3.data_source.comment = None
         ds3 = fileio.OrsoDataset(info3, data)
 
         # .ort read/write
@@ -256,6 +262,28 @@ class TestOrso(unittest.TestCase):
         i_n = ln[0].info.data_source.measurement.instrument_settings
         assert i_n.wavelength.magnitude == 10.0
         assert i_n.incident_angle.magnitude == 2
+
+    def test_nxs_special_cases(self):
+        @dataclass
+        class TestNxs(Header):
+            test: list
+            test2: tuple
+            test3: dict
+
+        res = TestNxs([None, {"a": "b"}], ({"a": "b"},), {})
+        bio = BytesIO()
+        with h5py.File(bio, "w") as f:
+            res.to_nexus(f, name="test")
+        res = TestNxs([None, set((1, 2, 43))], (None,), {"bc": "de"})
+        bio = BytesIO()
+        with h5py.File(bio, "w") as f:
+            with self.assertWarns(UserWarning):
+                res.to_nexus(f, name="test")
+        res = TestNxs([None, {"a": "b"}], ({"a": "b"},), set((1, 2, 3)))
+        bio = BytesIO()
+        with h5py.File(bio, "w") as f:
+            with self.assertWarns(UserWarning):
+                res.to_nexus(f, name="test")
 
 
 class TestFunctions(unittest.TestCase):

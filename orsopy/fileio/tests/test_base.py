@@ -6,7 +6,6 @@ Tests for fileio.base module
 import datetime as datetime_module
 import sys
 import unittest
-import warnings
 
 from dataclasses import dataclass
 from datetime import datetime
@@ -183,6 +182,28 @@ class TestHeaderClass(unittest.TestCase):
         assert res.test5 == []
         assert res.test6 is None
         assert res.asdict(res) == res.to_dict()
+
+    def test_dict_conversion(self):
+        res = base._todict({"a": "b"})
+        assert res == {"a": "b"}
+        res = base._todict([1, 2, 3, 4])
+        assert res == [1, 2, 3, 4]
+
+        class Test1:
+            def _ast(self):
+                return {"a": "b"}
+
+        res = base._todict(Test1())
+        assert res == {"a": "b"}
+
+        @dataclass
+        class Test2:
+            test: int
+            test2: float
+            test3: str
+
+        res = base._todict(Test2(13, 12.4, "1234"), classkey="TestClassKey")
+        assert res == {"test": 13, "test2": 12.4, "test3": "1234", "TestClassKey": "Test2"}
 
 
 class TestErrorValue(unittest.TestCase):
@@ -655,7 +676,8 @@ class TestErrorColumn(unittest.TestCase):
             with self.assertRaises(ValueError):
                 value.to_sigma
         with self.subTest("unknown"):
-            value = base.ErrorColumn("q", "uncertainty", "FWHM", "unknown")
+            with self.assertWarns(base.ORSOSchemaWarning):
+                value = base.ErrorColumn("q", "uncertainty", "FWHM", "unknown")
             with self.assertRaises(NotImplementedError):
                 value.to_sigma
 
@@ -730,4 +752,5 @@ class TestFile(unittest.TestCase):
 
     def test_not_orso(self):
         with pytest.raises(base.NotOrsoCompatibleFileError, match="First line does not appear"):
-            orso.load_orso(open(pth / "not_orso.ort", "r"))
+            with open(pth / "not_orso.ort", "r") as f:
+                orso.load_orso(f)
