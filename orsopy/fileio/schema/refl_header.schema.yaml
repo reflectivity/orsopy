@@ -260,6 +260,7 @@ definitions:
         - $ref: '#/definitions/Polarization'
         - $ref: '#/definitions/ValueVector'
         - type: 'null'
+        default: unpolarized
         description: Polarization described as unpolarized/ po/ mo / op / om / pp
           / pm / mp / mm / vector
       wavelength:
@@ -405,13 +406,8 @@ definitions:
         - string
         - 'null'
       roughness:
-        allOf:
+        anyOf:
         - $ref: '#/definitions/Value'
-        default:
-          comment: null
-          error: null
-          magnitude: 0.3
-          unit: nm
       sld_unit:
         default: 1/angstrom^2
         type:

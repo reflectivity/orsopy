@@ -6,10 +6,10 @@ resolving the model to a simple list of slabs.
 """
 import warnings
 
-from dataclasses import dataclass
+from dataclasses import field
 from typing import Any, Dict, List, Optional, Union
 
-from ..dataclasses import field
+from .. import dataclass
 from ..utils.chemical_formula import Formula
 from ..utils.density_resolver import DensityResolver
 from .base import ComplexValue, Header, Value

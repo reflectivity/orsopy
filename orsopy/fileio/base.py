@@ -7,7 +7,6 @@ import json
 import os.path
 import pathlib
 import re
-import sys
 import warnings
 
 from collections.abc import Mapping
@@ -27,7 +26,9 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
-from ..dataclasses import dataclass, field, fields
+from dataclasses import field, fields
+
+from .. import dataclass
 
 
 def _noop(self, *args, **kw):
@@ -409,8 +410,6 @@ class Header:
                             item_out = child_group.create_dataset(sub_name, data=json.dumps(t_value))
                             item_out.attrs["mimetype"] = JSON_MIMETYPE
                         else:
-                            import warnings
-
                             # raise ValueError(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
                             warnings.warn(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
                             continue
@@ -427,10 +426,7 @@ class Header:
                     dset = group.create_dataset(child_name, data=json.dumps(t_value))
                     dset.attrs["mimetype"] = JSON_MIMETYPE
                 else:
-                    import warnings
-
                     warnings.warn(f"unserializable attribute found: {child_name} = {t_value}")
-                    # raise ValueError(f"unserializable attribute found: {child_name} = {t_value}")
         return group
 
     @staticmethod
@@ -918,9 +914,6 @@ def _validate_header_data(dct_list: List[dict]):
     """
     import jsonschema
 
-    req_cols = ["Qz", "R", "sR", "sQz"]
-    acceptable_Qz_units = ["1/angstrom", "1/nm"]
-
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
     with open(schema_pth, "r") as f:
@@ -928,22 +921,6 @@ def _validate_header_data(dct_list: List[dict]):
 
     for dct in dct_list:
         jsonschema.validate(dct, schema)
-
-        # Validate the column names. Ideally this is done with the jsonschema,
-        # but it's difficult to create a schema from the 'default' orsopy
-        # dataclasses that does that. It is possible but it requires extra
-        # column objects like Qz_column, R_column, etc.
-        cols = dct["columns"]
-
-        ncols = min(4, len(cols))
-        col_names = [col["name"] if "name" in col else "s" + col["error_of"] for col in cols]
-        units = [col.get("unit") for col in cols]
-
-        if col_names[:ncols] != req_cols[:ncols]:
-            raise ValueError("The first four columns should be named" " 'Qz', 'R', ['sR', ['sQz']]")
-
-        if units[0] not in acceptable_Qz_units:
-            raise ValueError("The Qz column must have units of '1/angstrom'" " or '1/nm'")
 
 
 @contextmanager
@@ -1043,8 +1020,6 @@ def _nested_update(d: dict, u: dict) -> dict:
                 d[k] = r
             else:
                 d[k] = u[k]
-        else:
-            d = {k: u[k]}
     return d
 
 

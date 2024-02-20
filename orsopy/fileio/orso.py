@@ -2,12 +2,12 @@
 Implementation of the top level class for the ORSO header.
 """
 
-from dataclasses import dataclass
 from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 
 import numpy as np
 import yaml
 
+from .. import dataclass
 from .base import (JSON_MIMETYPE, Column, ErrorColumn, Header, OrsoDumper, _dict_diff, _nested_update,
                    _possibly_open_file, _read_header_data)
 from .data_source import DataSource
