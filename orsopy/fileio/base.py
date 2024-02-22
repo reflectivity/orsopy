@@ -171,8 +171,9 @@ class Header:
         if hint is Any:
             return item
         elif isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
-            # simple type that we can work with, no Union or List/Dict
+            # ===== simple type that we can work with, no Union or List/Dict ====
             if isinstance(item, hint):
+                # value already has the desired type, just return it
                 return item
             if issubclass(hint, datetime.datetime) and isinstance(item, str):
                 # convert str to datetime
@@ -180,7 +181,9 @@ class Header:
                     return datetime.datetime.fromisoformat(item)
                 except AttributeError:  # python 3.6
                     try:
+                        # remove possible time zone string
                         item = item.split("+", 1)[0]
+                        # go through different supported formats
                         if "T" not in item:
                             return datetime.datetime.strptime(item, "%Y-%m-%d")
                         elif "." in item:
@@ -194,7 +197,7 @@ class Header:
                     # string wasn't ISO8601 format
                     return None
             if issubclass(hint, Header) and isinstance(item, dict):
-                # convert to dataclass instance
+                # convert to ORSO Header instance
                 attribs = hint.__annotations__.keys()
                 realised_items = {k: item[k] for k in item.keys() if k in attribs}
                 # orphan_items are extra dictionary entries that don't correspond to
@@ -213,18 +216,20 @@ class Header:
                 except (ValueError, TypeError):
                     return None
             else:
-                # convert to type
+                # try to convert to type
                 try:
                     return hint(item)
                 except (ValueError, TypeError):
                     return None
         else:
-            # the hint is a combined type (Union/List/Dict etc.)
+            # ======= the hint is a combined type (Union/List/Dict etc.) ========
             hbase = get_origin(hint)
             if hbase in (list, tuple):
+                # type hint is iterable either list or tuple with hint for items
                 t0 = get_args(hint)[0]
                 if isinstance(item, (list, tuple)):
                     if hbase is list:
+                        # convert all items to hint type
                         return list([Header._resolve_type(t0, i) for i in item])
                     else:
                         arg_list = get_args(hint)
@@ -232,10 +237,14 @@ class Header:
                             warnings.warn(
                                 "The Schema expects %i items, %i given" % (len(arg_list), len(item)), ORSOSchemaWarning
                             )
+                        # tuple hint includes a fixed set of types (e.g. (int, int, str)), convert to those
                         return tuple([Header._resolve_type(ti, i) for ti, i in zip(arg_list, item)])
                 else:
+                    # if the value is not an iterable, assume this is a single entry within the list/tuple
+                    # TODO: Is this a good idea? Maybe we should raise a warning in this case.
                     return hbase([Header._resolve_type(t0, item)])
             elif hbase is dict:
+                # Dictionary type hint. Does only make sense if the key/value types are defined.
                 try:
                     key_type, value_type = get_args(hint)
                 except ValueError:
@@ -246,15 +255,18 @@ class Header:
                     )
                     return None
                 try:
+                    # convert all key/value pairs in the data to the hinted type.
                     res = {}
                     for key, value in item.items():
-                        # resolve the type of any value in the dictionary
                         key = Header._resolve_type(key_type, key)
                         res[key] = Header._resolve_type(value_type, value)
                     return res
                 except AttributeError:
                     return None
             elif hbase in [Union, Optional]:
+                # Case of combined type hints.
+                # Look for given value type first,
+                # otherwise try to convert to each type and return the first that fits.
                 subtypes = get_args(hint)
                 if type(item) in subtypes:
                     # check if the item is in the list of allowed
@@ -264,8 +276,11 @@ class Header:
                     # if it's not, then try to resolve its type.
                     res = Header._resolve_type(subt, item)
                     if res is not None:
+                        # This type conversion worked, return the result.
                         return res
             elif hbase is Literal:
+                # Special case of a string Literal, which defines a list of valid strings.
+                # TODO: Should we first convert the value to a string?
                 if item in get_args(hint):
                     return item
                 else:
