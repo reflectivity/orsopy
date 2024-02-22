@@ -35,7 +35,7 @@ class TestHeaderClass(unittest.TestCase):
         res = TestAny(test=test_object)
         assert res.test is test_object
 
-    def test_reolve_datetime(self):
+    def test_resolve_datetime(self):
         @dataclass
         class TestDatetime(base.Header):
             test: datetime
