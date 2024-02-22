@@ -115,21 +115,21 @@ class TestHeaderClass(unittest.TestCase):
 
     def test_resolve_tuple(self):
         @dataclass
-        class TestList(base.Header):
+        class TestTuple(base.Header):
             test: Tuple[int, int, int]
 
-        res = TestList(test=(1, 2, 3))
+        res = TestTuple(test=(1, 2, 3))
         assert res.test == (1, 2, 3)
-        res = TestList(test=["1", 2.4, 3.232])
+        res = TestTuple(test=["1", 2.4, 3.232])
         assert res.test == (1, 2, 3)
-        res = TestList(test="134")
+        res = TestTuple(test="134")
         assert res.test == (134,)
         # wrong number of elements will be shortened to type hint length
         with self.assertWarns(base.ORSOSchemaWarning):
-            res = TestList(test=(1, 2))
+            res = TestTuple(test=(1, 2))
         assert res.test == (1, 2)
         with self.assertWarns(base.ORSOSchemaWarning):
-            res = TestList(test=(1, 2, 3, 4))
+            res = TestTuple(test=(1, 2, 3, 4))
         assert res.test == (1, 2, 3)
 
     def test_subsubclass(self):

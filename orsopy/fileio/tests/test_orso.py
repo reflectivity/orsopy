@@ -15,7 +15,8 @@ import pytest
 import yaml
 
 from orsopy import fileio as fileio
-from orsopy.fileio.base import Column, File, Header, Person, Value, ValueRange, _read_header_data, _validate_header_data
+from orsopy.fileio.base import (Column, File, Header, ORSOSchemaWarning, Person, Value, ValueRange, _read_header_data,
+                                _validate_header_data)
 from orsopy.fileio.data_source import DataSource, Experiment, InstrumentSettings, Measurement, Polarization, Sample
 from orsopy.fileio.orso import Orso, OrsoDataset
 from orsopy.fileio.reduction import Reduction, Software
@@ -163,7 +164,7 @@ class TestOrso(unittest.TestCase):
         # .orb read/write
         fileio.save_nexus([ds, ds2, ds3], "test.orb", comment="Interdiffusion")
 
-        # ls1, ls2, ls3 = fileio.load_nexus("test.orb")
+        ls1, ls2, ls3 = fileio.load_nexus("test.orb")
         assert ls1 == ds
         assert ls2 == ds2
         assert ls3 == ds3
@@ -279,7 +280,8 @@ class TestOrso(unittest.TestCase):
         with h5py.File(bio, "w") as f:
             with self.assertWarns(UserWarning):
                 res.to_nexus(f, name="test")
-        res = TestNxs([None, {"a": "b"}], ({"a": "b"},), set((1, 2, 3)))
+        with self.assertWarns(ORSOSchemaWarning):
+            res = TestNxs([None, {"a": "b"}], ({"a": "b"},), set((1, 2, 3)))
         bio = BytesIO()
         with h5py.File(bio, "w") as f:
             with self.assertWarns(UserWarning):
