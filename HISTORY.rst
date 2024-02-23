@@ -6,6 +6,7 @@ History
 ------------------
 
 * Add some extra attributes from updated ORSO specification.
+* Fix compatibility with Python 3.12, resolving issue #115.
 * Move tests to orsopy sub-folders to prevent interference with other packages.
 * Some updates to the package documentation.
 * Fix some cases where numpy based scalars where not properly converted to YAML.

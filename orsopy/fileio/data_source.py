@@ -146,7 +146,7 @@ class InstrumentSettings(Header):
 
     incident_angle: Union[Value, ValueRange]
     wavelength: Union[Value, ValueRange]
-    polarization: Optional[Union[Polarization, ValueVector]] = field(
+    polarization: Union[Polarization, ValueVector] = field(
         default=Polarization.unpolarized,
         metadata={
             "description": "Polarization described as unpolarized/ po/ mo / op / om / pp / pm / mp / mm / vector"
