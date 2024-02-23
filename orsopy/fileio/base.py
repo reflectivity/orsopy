@@ -766,7 +766,15 @@ class Column(Header):
 
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
-    physical_quantity: Optional[str] = field(default=None, metadata={"description": "A description of the column"})
+    physical_quantity: Optional[str] = field(
+        default=None,
+        metadata={
+            "description": "A description of the physical meaning for this column. "
+            "For quantities defined by ORSO in header metadata the same name should be used."
+            "(For example 'wavelength' or 'incident_angle' to indicate a column specifying "
+            "those quantities on a point-by-point basis.)"
+        },
+    )
 
     flag_is: Optional[List[str]] = field(
         default=None, metadata={"description": "A list of items that a flag-value in this column stands for"}
