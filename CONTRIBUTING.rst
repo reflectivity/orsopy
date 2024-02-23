@@ -94,6 +94,25 @@ Ready to contribute? Here's how to set up `orsopy` for local development.
 
 7. Submit a pull request through the GitHub website.
 
+**Note**: It is easiest to run the automatic code formatting as git pre-commit hook for all changed files::
+
+    #!C:/Program\ Files/Git/bin/sh.exe #<Windows, should be !/bin/bash on Linux/Mac
+    for file in $(git diff --cached --name-only | grep -E '\.(py)$')
+        do
+            if [ -f "$file" ]; then
+            echo "Reformat '$file'"
+            black -l 120 "$file"
+            isort -l 120 -l 120 --lbt 1 "$file"
+            git add "$file"
+
+            flake8 --max-line-length=120 --ignore=F401,W503,E203 "$file"
+            if [ $? -ne 0 ]; then
+                echo "flake8 failed on staged file '$file'"
+                exit 1 # exit with failure status
+            fi
+        fi
+    done
+
 Pull Request Guidelines
 -----------------------
 
@@ -122,11 +141,12 @@ Deploying
 ---------
 
 A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
+Make sure all your changes are committed (including an entry in HISTORY.rst)
+and that the schema file was updated with tool/header_schema.py.
 Then run::
 
-$ bump2version patch # possible: major / minor / patch
-$ git push
-$ git push --tags
+    $ bump2version patch # possible: major / minor / patch
+    $ git push
+    $ git push --tags
 
 GitHub actions will then deploy to PyPI if tests pass.
