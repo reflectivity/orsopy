@@ -2,7 +2,7 @@
 History
 =======
 
-1.1.1 (2023-06-20)
+1.1.1 (2024-02-23)
 ------------------
 
 * Add some extra attributes from updated ORSO specification.

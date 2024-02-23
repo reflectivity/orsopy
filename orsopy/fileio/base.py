@@ -26,7 +26,7 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
-from dataclasses import field, fields
+from dataclasses import MISSING, field, fields
 
 from .. import dataclass
 
@@ -303,6 +303,9 @@ class Header:
             if type(None) in get_args(fld.type):
                 # skip optional arguments
                 continue
+            elif fld.default is not MISSING:
+                # the field has a default, use it instead None/empty
+                attr_items[fld.name] = fld.default
             elif isclass(fld.type) and issubclass(fld.type, Header):
                 attr_items[fld.name] = fld.type.empty()
             elif (
@@ -763,9 +766,7 @@ class Column(Header):
 
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
-    physical_quantity: Optional[str] = field(
-        default=None, metadata={"description": "A description of the column"}
-    )
+    physical_quantity: Optional[str] = field(default=None, metadata={"description": "A description of the column"})
 
     flag_is: Optional[List[str]] = field(
         default=None, metadata={"description": "A list of items that a flag-value in this column stands for"}
