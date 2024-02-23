@@ -94,17 +94,36 @@ Ready to contribute? Here's how to set up `orsopy` for local development.
 
 7. Submit a pull request through the GitHub website.
 
+**Note**: It is easiest to run the automatic code formatting as git pre-commit hook for all changed files::
+
+    #!C:/Program\ Files/Git/bin/sh.exe #<Windows, should be !/bin/bash on Linux/Mac
+    for file in $(git diff --cached --name-only | grep -E '\.(py)$')
+        do
+            if [ -f "$file" ]; then
+            echo "Reformat '$file'"
+            black -l 120 "$file"
+            isort -l 120 -l 120 --lbt 1 "$file"
+            git add "$file"
+
+            flake8 --max-line-length=120 --ignore=F401,W503,E203 "$file"
+            if [ $? -ne 0 ]; then
+                echo "flake8 failed on staged file '$file'"
+                exit 1 # exit with failure status
+            fi
+        fi
+    done
+
 Pull Request Guidelines
 -----------------------
 
 Before you submit a pull request of your feature branch against the `main` branch of the `orsopy` repository,
 check that it meets these guidelines:
 
-2. If the pull request adds functionality, the docs should be updated. Put
+1. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-1. The pull request should include tests for the new functionality. Run the tests in your local machine with `pytest`.
-3. The pull request should work for Python 3.5, 3.6, 3.7 and 3.8, and for PyPy. To make sure that the tests pass
+2. The pull request should include tests for the new functionality. Run the tests in your local machine with `pytest`.
+3. The pull request should work for Python 3.6, 3.7 and 3.8-latest, and for PyPy. To make sure that the tests pass
    for all supported Python versions, you can first create a pull
    request of your feature branch against the `main` branch _of your forked repository_. If the Github actions
    pass, it is highly likely that the GitHub actions will also pass for the pull request against the `main` branch
@@ -121,12 +140,13 @@ $ pytest tests.test_orsopy
 Deploying
 ---------
 
-A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
-Then run::
+A reminder for the maintainers on how to deploy:
 
-$ bump2version patch # possible: major / minor / patch
-$ git push
-$ git push --tags
+1. Update schema file using `python tool/header_schema.py`
+2. Update version string in `orsopy/__init__.py`
+3. Make sure all your changes are committed (including an entry in `HISTORY.rst`)
+4. Tag the commit with `vX.Y.Z`
+5. Push your changes to your fork (e.g. `release` branch)
+6. Create a pull requrest including the label `release` and get reviewer approval
 
 GitHub actions will then deploy to PyPI if tests pass.

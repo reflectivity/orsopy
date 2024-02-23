@@ -101,11 +101,12 @@ def main():
     import orsopy
 
     orsopy.dataclass = pydantic_dataclass
-    from orsopy.fileio import ORSO_VERSION, Header, Orso
+    from orsopy import __version__
+    from orsopy.fileio import Header, Orso
 
     schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
-        "$id": SCHEMA_URL.format(ORSO_VERSION),
+        "$id": SCHEMA_URL.format(__version__),
     }
     schema.update(Orso.__pydantic_model__.schema())
     if ADD_COLUMN_ORDER:

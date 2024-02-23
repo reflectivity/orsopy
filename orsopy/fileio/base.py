@@ -26,7 +26,7 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
-from dataclasses import field, fields
+from dataclasses import MISSING, field, fields
 
 from .. import dataclass
 
@@ -303,6 +303,9 @@ class Header:
             if type(None) in get_args(fld.type):
                 # skip optional arguments
                 continue
+            elif fld.default is not MISSING:
+                # the field has a default, use it instead None/empty
+                attr_items[fld.name] = fld.default
             elif isclass(fld.type) and issubclass(fld.type, Header):
                 attr_items[fld.name] = fld.type.empty()
             elif (
@@ -568,6 +571,12 @@ class Value(Header):
     magnitude: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     error: Optional[ErrorValue] = None
+    offset: Optional[float] = field(
+        default=None,
+        metadata={
+            "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) magnitude"
+        },
+    )
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -650,6 +659,19 @@ class ValueRange(Header):
     min: float
     max: float
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
+    individual_magnitudes: Optional[List[float]] = field(
+        default=None,
+        metadata={
+            "description": "Can list each individual value "
+            "that was present during the experiment, only for information."
+        },
+    )
+    offset: Optional[float] = field(
+        default=None,
+        metadata={
+            "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) min/max"
+        },
+    )
 
     yaml_representer = Header.yaml_representer_compact
 
@@ -714,6 +736,17 @@ class ValueVector(Header):
 
 
 @dataclass
+class AlternatingField(Header):
+    """
+    A physical field with regular variations as AC magnetic field.
+    """
+
+    amplitude: Value
+    frequency: Value
+    phase: Optional[Value] = None
+
+
+@dataclass
 class Person(Header):
     """
     Information about a person, including name, affiliation(s), and contact
@@ -734,9 +767,19 @@ class Column(Header):
     name: str
     unit: Optional[str] = field(default=None, metadata={"description": "SI unit string"})
     physical_quantity: Optional[str] = field(
-        default=None, metadata={"physical_quantity": "A description of the column"}
+        default=None,
+        metadata={
+            "description": "A description of the physical meaning for this column. "
+            "For quantities defined by ORSO in header metadata the same name should be used."
+            "(For example 'wavelength' or 'incident_angle' to indicate a column specifying "
+            "those quantities on a point-by-point basis.)"
+            "For canonical names of physical quantities see https://www.reflectometry.org/file_format/specification."
+        },
     )
 
+    flag_is: Optional[List[str]] = field(
+        default=None, metadata={"description": "A list of items that a flag-value in this column stands for."}
+    )
     yaml_representer = Header.yaml_representer_compact
 
 

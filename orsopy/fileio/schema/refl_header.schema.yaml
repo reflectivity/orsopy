@@ -1,18 +1,49 @@
-$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.0/orsopy/fileio/schema/refl_header.schema.json
+$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.2.0/orsopy/fileio/schema/refl_header.schema.json
 $schema: http://json-schema.org/draft-07/schema#
 definitions:
+  AlternatingField:
+    properties:
+      amplitude:
+        anyOf:
+        - $ref: '#/definitions/Value'
+      comment:
+        type:
+        - string
+        - 'null'
+      frequency:
+        anyOf:
+        - $ref: '#/definitions/Value'
+      phase:
+        anyOf:
+        - $ref: '#/definitions/Value'
+    required:
+    - amplitude
+    - frequency
+    title: AlternatingField
+    type: object
   Column:
     properties:
       comment:
         type:
         - string
         - 'null'
+      flag_is:
+        description: A list of items that a flag-value in this column stands for.
+        items:
+          type: string
+        type:
+        - array
+        - 'null'
       name:
         type:
         - string
         - 'null'
       physical_quantity:
-        physical_quantity: A description of the column
+        description: A description of the physical meaning for this column. For quantities
+          defined by ORSO in header metadata the same name should be used.(For example
+          'wavelength' or 'incident_angle' to indicate a column specifying those quantities
+          on a point-by-point basis.)For canonical names of physical quantities see
+          https://www.reflectometry.org/file_format/specification.
         type:
         - string
         - 'null'
@@ -617,6 +648,7 @@ definitions:
           - $ref: '#/definitions/ValueRange'
           - $ref: '#/definitions/ValueVector'
           - $ref: '#/definitions/ComplexValue'
+          - $ref: '#/definitions/AlternatingField'
         description: Using keys for parameters and Value* objects for values.
         type:
         - object
@@ -748,6 +780,12 @@ definitions:
         type:
         - number
         - 'null'
+      offset:
+        description: The offset applied to a value (e.g. motor) to retrieve the reported
+          (corrected) magnitude
+        type:
+        - number
+        - 'null'
       unit:
         description: SI unit string
         type:
@@ -763,11 +801,25 @@ definitions:
         type:
         - string
         - 'null'
+      individual_magnitudes:
+        description: Can list each individual value that was present during the experiment,
+          only for information.
+        items:
+          type: number
+        type:
+        - array
+        - 'null'
       max:
         type:
         - number
         - 'null'
       min:
+        type:
+        - number
+        - 'null'
+      offset:
+        description: The offset applied to a value (e.g. motor) to retrieve the reported
+          (corrected) min/max
         type:
         - number
         - 'null'
