@@ -1,4 +1,4 @@
-$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.1.1/orsopy/fileio/schema/refl_header.schema.json
+$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.2.0/orsopy/fileio/schema/refl_header.schema.json
 $schema: http://json-schema.org/draft-07/schema#
 definitions:
   AlternatingField:
