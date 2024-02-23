@@ -166,7 +166,7 @@ class Measurement(Header):
 
     :param instrument_settings: Instrumentation details.
     :param data_files: Raw data files produced in the measurement.
-    :param references: Raw reference files used in the reduction.
+    :param additional_files: Raw reference files used in the reduction.
     :param scheme: Measurement scheme (one of :code:`'angle-dispersive'`,
         :code:`'energy-dispersive'`/:code:`'angle- and energy-dispersive'`).
     """
