@@ -6,12 +6,13 @@ resolving the model to a simple list of slabs.
 """
 import warnings
 
+from dataclasses import field
 from typing import Any, Dict, List, Optional, Union
 
-from ..dataclasses import field
+from .. import dataclass
 from ..utils.chemical_formula import Formula
 from ..utils.density_resolver import DensityResolver
-from .base import ComplexValue, Header, Value, orsodataclass
+from .base import ComplexValue, Header, Value
 
 DENSITY_RESOLVERS: List[DensityResolver] = []
 
@@ -25,7 +26,7 @@ def find_idx(string, start, value):
     return next_idx
 
 
-@orsodataclass
+@dataclass
 class ModelParameters(Header):
     roughness: Value = field(default_factory=lambda: Value(0.3, "nm"))
     length_unit: str = "nm"
@@ -35,7 +36,7 @@ class ModelParameters(Header):
     magnetic_moment_unit: str = "muB"
 
 
-@orsodataclass
+@dataclass
 class Material(Header):
     formula: Optional[str] = None
     mass_density: Optional[Union[float, Value]] = None
@@ -149,7 +150,7 @@ class Material(Header):
             return 0.0j
 
 
-@orsodataclass
+@dataclass
 class Composit(Header):
     composition: Dict[str, float]
 
@@ -199,7 +200,7 @@ SPECIAL_MATERIALS = {
 CACHED_MATERIALS = {}
 
 
-@orsodataclass
+@dataclass
 class Layer(Header):
     thickness: Optional[Union[float, Value]] = None
     roughness: Optional[Union[float, Value]] = None
@@ -282,7 +283,7 @@ class Layer(Header):
         )
 
 
-@orsodataclass
+@dataclass
 class SubStack(Header):
     repetitions: int = 1
     stack: Optional[str] = None
@@ -355,7 +356,7 @@ class SubStack(Header):
         return layers * self.repetitions
 
 
-@orsodataclass
+@dataclass
 class SampleModel(Header):
     stack: str
     origin: Optional[str] = None

@@ -7,10 +7,11 @@ import datetime
 from dataclasses import field
 from typing import List, Optional, Union
 
-from .base import Header, Person, orsodataclass
+from .. import dataclass
+from .base import Header, Person
 
 
-@orsodataclass
+@dataclass
 class Software(Header):
     """
     Software description.
@@ -27,7 +28,7 @@ class Software(Header):
     yaml_representer = Header.yaml_representer_compact
 
 
-@orsodataclass
+@dataclass
 class Reduction(Header):
     """
     A description of the reduction that has been performed.

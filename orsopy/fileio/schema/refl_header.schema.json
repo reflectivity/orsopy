@@ -608,13 +608,7 @@
       "type": "object",
       "properties": {
         "roughness": {
-          "default": {
-            "magnitude": 0.3,
-            "unit": "nm",
-            "error": null,
-            "comment": null
-          },
-          "allOf": [
+          "anyOf": [
             {
               "$ref": "#/definitions/Value"
             }
@@ -880,6 +874,7 @@
         },
         "polarization": {
           "description": "Polarization described as unpolarized/ po/ mo / op / om / pp / pm / mp / mm / vector",
+          "default": "unpolarized",
           "anyOf": [
             {
               "$ref": "#/definitions/Polarization"

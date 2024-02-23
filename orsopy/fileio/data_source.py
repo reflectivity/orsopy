@@ -8,7 +8,8 @@ from typing import Dict, List, Optional, Union
 
 import yaml
 
-from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector, orsodataclass
+from .. import dataclass
+from .base import ComplexValue, File, Header, Person, Value, ValueRange, ValueVector
 from .model_language import SampleModel
 
 # typing stuff introduced in python 3.8
@@ -18,7 +19,7 @@ except ImportError:
     from .typing_backport import Literal
 
 
-@orsodataclass
+@dataclass
 class Experiment(Header):
     """
     A definition of the experiment performed.
@@ -43,7 +44,7 @@ class Experiment(Header):
     doi: Optional[str] = None
 
 
-@orsodataclass
+@dataclass
 class Sample(Header):
     """
     A description of the sample measured.
@@ -118,7 +119,7 @@ class Polarization(str, Enum):
         return dumper.represent_str(output)
 
 
-@orsodataclass
+@dataclass
 class InstrumentSettings(Header):
     """
     Settings associated with the instrumentation.
@@ -148,7 +149,7 @@ class InstrumentSettings(Header):
     __repr__ = Header._staggered_repr
 
 
-@orsodataclass
+@dataclass
 class Measurement(Header):
     """
     The measurement elements for the header.
@@ -168,7 +169,7 @@ class Measurement(Header):
     __repr__ = Header._staggered_repr
 
 
-@orsodataclass
+@dataclass
 class DataSource(Header):
     """
     The data_source object definition.

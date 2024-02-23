@@ -2,14 +2,14 @@
 Implementation of the top level class for the ORSO header.
 """
 
-from dataclasses import dataclass, fields
 from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 
 import numpy as np
 import yaml
 
-from .base import (JSON_MIMETYPE, ORSO_DATACLASSES, Column, ErrorColumn, Header, _dict_diff, _nested_update,
-                   _possibly_open_file, _read_header_data, orsodataclass)
+from .. import dataclass
+from .base import (JSON_MIMETYPE, Column, ErrorColumn, Header, OrsoDumper, _dict_diff, _nested_update,
+                   _possibly_open_file, _read_header_data)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -19,7 +19,7 @@ ORSO_DESIGNATE = (
 )
 
 
-@orsodataclass
+@dataclass
 class Orso(Header):
     """
     The Orso object collects the necessary metadata.
@@ -56,8 +56,8 @@ class Orso(Header):
         self.data_set = data_set
         self.__post_init__()
         # additional keywords used to add fields to the file header
-        # some recreation does not work when using the attribute directly so it's wrapped in a property
-        self._user_data = user_data
+        for key, value in user_data.items():
+            setattr(self, key, value)
 
     @classmethod
     def empty(cls) -> "Orso":
@@ -70,16 +70,6 @@ class Orso(Header):
         res = super(Orso, cls).empty()
         res.columns = [Column("Qz", "1/angstrom"), Column("R")]
         return res
-
-    @property
-    def user_data(self):
-        return self._user_data
-
-    @user_data.setter
-    def user_data(self, value):
-        if not type(value) is dict:
-            raise ValueError("user_data has to be a dictionary")
-        self._user_data = value
 
     def column_header(self) -> str:
         """
@@ -137,7 +127,6 @@ class Orso(Header):
         Adds the user data to the returned dictionary.
         """
         out = super().to_dict()
-        out.update(self._user_data)
         # put columns at the end of the dictionary
         cols = out.pop("columns")
         out["columns"] = cols
@@ -145,7 +134,6 @@ class Orso(Header):
 
     def _to_object_dict(self):
         out = super()._to_object_dict()
-        out.update(self._user_data)
         # put columns at the end of the dictionary
         cols = out.pop("columns")
         out["columns"] = cols
@@ -168,6 +156,11 @@ class OrsoDataset:
     def __post_init__(self):
         if self.data.shape[1] != len(self.info.columns):
             raise ValueError("Data has to have the same number of columns as header")
+
+    @classmethod
+    def from_dict(self, data_dict):
+        # TODO: verify that no additional treatment of data_dict is needed
+        return OrsoDataset(**data_dict)
 
     def header(self) -> str:
         """
@@ -194,7 +187,7 @@ class OrsoDataset:
         out_dict.update(_diff)
         out_dict["data_set"] = other.info.data_set
 
-        out = yaml.dump(out_dict, sort_keys=False)
+        out = yaml.dump(out_dict, Dumper=OrsoDumper, sort_keys=False)
         out += self.info.column_header()
         return out
 
@@ -208,9 +201,6 @@ class OrsoDataset:
 
     def __eq__(self, other: "OrsoDataset"):
         return self.info == other.info and (self.data == other.data).all()
-
-
-ORSO_DATACLASSES["OrsoDataset"] = OrsoDataset
 
 
 def save_orso(
@@ -272,7 +262,7 @@ def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
     ods = []
 
     for dct, data in zip(dct_list, datas):
-        o = Orso(**dct)
+        o = Orso.from_dict(dct)
         od = OrsoDataset(o, data)
         ods.append(od)
     return ods
@@ -296,8 +286,10 @@ def _from_nexus_group(group):
                 # TODO: remove swapaxes if order of data is changed (PR #107)
                 # reorder columns so column index is second:
                 dct["data"] = np.asarray(dct["data"]).swapaxes(0, 1)
-            cls = ORSO_DATACLASSES[ORSO_class]
-            return cls(**dct)
+                cls = OrsoDataset
+            else:
+                cls = Header._subclass_dict_[ORSO_class]
+            return cls.from_dict(dct)
         else:
             return dct
 
@@ -327,12 +319,13 @@ def load_nexus(fname: Union[str, BinaryIO]) -> List[OrsoDataset]:
 
     f = h5py.File(fname, "r")
     # Use '/' because order is not tracked on the File object, but is on the '/' group!
-    root = f['/']
+    root = f["/"]
     return [_from_nexus_group(g) for g in root.values() if g.attrs.get("ORSO_class", None) == "OrsoDataset"]
 
 
 def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment: Optional[str] = None) -> BinaryIO:
     import h5py
+
     h5py.get_config().track_order = True
 
     for idx, dataset in enumerate(datasets):
@@ -373,7 +366,7 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
                 col_data = data_group.create_dataset(column.name, data=dsi.data[:, column_index])
                 col_data.attrs["sequence_index"] = column_index
                 col_data.attrs["target"] = col_data.name
-                physical_quantity = getattr(column, 'physical_quantity', None)
+                physical_quantity = getattr(column, "physical_quantity", None)
                 if physical_quantity is not None:
                     col_data.attrs["physical_quantity"] = physical_quantity
                 if isinstance(column, ErrorColumn):

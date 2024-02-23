@@ -7,7 +7,6 @@ import json
 import os.path
 import pathlib
 import re
-import sys
 import warnings
 
 from collections.abc import Mapping
@@ -27,8 +26,9 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
-from ..dataclasses import (_FIELD, _FIELD_INITVAR, _FIELDS, _HAS_DEFAULT_FACTORY, _POST_INIT_NAME, MISSING, _create_fn,
-                           _field_init, _init_param, _set_new_attribute, dataclass, field, fields)
+from dataclasses import field, fields
+
+from .. import dataclass
 
 
 def _noop(self, *args, **kw):
@@ -45,93 +45,71 @@ yaml.constructor.SafeConstructor.yaml_constructors[
 ] = yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
 
 
-def _custom_init_fn(fieldsarg, frozen, has_post_init, self_name, globals):
-    """
-    _init_fn from dataclasses adapted to accept additional keywords.
-    See dataclasses source for comments on code.
-    """
-    seen_default = False
-    for f in fieldsarg:
-        if f.init:
-            if not (f.default is MISSING and f.default_factory is MISSING):
-                seen_default = True
-            elif seen_default:
-                raise TypeError(f"non-default argument {f.name!r} " "follows default argument")
-
-    locals = {f"_type_{f.name}": f.type for f in fieldsarg}
-    locals.update({"MISSING": MISSING, "_HAS_DEFAULT_FACTORY": _HAS_DEFAULT_FACTORY})
-
-    body_lines = []
-    for f in fieldsarg:
-        line = _field_init(f, frozen, locals, self_name)
-        if line:
-            body_lines.append(line)
-
-    if has_post_init:
-        params_str = ",".join(f.name for f in fieldsarg if f._field_type is _FIELD_INITVAR)
-        body_lines.append(f"{self_name}.{_POST_INIT_NAME}({params_str})")
-
-    # processing of additional user keyword arguments
-    body_lines += ["for k,v in user_kwds.items():", "    setattr(self, k, v)"]
-
-    return _create_fn(
-        "__init__",
-        [self_name] + [_init_param(f) for f in fieldsarg if f.init] + ["**user_kwds"],
-        body_lines,
-        locals=locals,
-        globals=globals,
-        return_type=None,
-    )
-
-
-# register all ORSO classes here:
-ORSO_DATACLASSES = dict()
-
-
-def orsodataclass(cls: type):
-    ORSO_DATACLASSES[cls.__name__] = cls
-    attrs = cls.__dict__
-    bases = cls.__bases__
-    if "__annotations__" in attrs and len([k for k in attrs["__annotations__"].keys() if not k.startswith("_")]) > 0:
-        # only applies to dataclass children of Header
-        # add optional comment attribute, needs to come last
-        attrs["__annotations__"]["comment"] = Optional[str]
-        setattr(cls, "comment", field(default=None))
-
-        # create the _orso_optional attribute
-        orso_optionals = []
-        for fname, ftype in attrs["__annotations__"].items():
-            if type(None) in get_args(ftype):
-                orso_optionals.append(fname)
-        for base in bases:
-            if hasattr(base, "_orso_optionals"):
-                orso_optionals += getattr(base, "_orso_optionals")
-        setattr(cls, "_orso_optionals", orso_optionals)
-        out = dataclass(cls, repr=False, init=False)
-        fieldsarg = getattr(out, _FIELDS)
-
-        # Generate custom __init__ method that allows arbitrary extra keyword arguments
-        has_post_init = hasattr(out, _POST_INIT_NAME)
-        # Include InitVars and regular fields (so, not ClassVars).
-        flds = [f for f in fieldsarg.values() if f._field_type in (_FIELD, _FIELD_INITVAR)]
-        init_fun = _custom_init_fn(flds, False, has_post_init, "self", globals())
-        _set_new_attribute(out, "__init__", init_fun)
-
-        return out
-    else:
-        return cls
-
-
 class ORSOResolveError(ValueError):
+    pass
+
+
+class ORSOSchemaWarning(RuntimeWarning):
     pass
 
 
 class Header:
     """
-    The super class for all of the items in the orso module.
+    The super class for all the items in the orso module.
     """
 
     _orso_optionals: List[str] = []
+    _subclass_dict_ = {}
+
+    def __init_subclass__(cls, **kwargs):
+        """
+        For each subclass of Header, collect optional arguments in
+        _orso_optionals to prevent writing to yaml if empty.
+        """
+        cls._orso_optionals = ["comment"]
+        super().__init_subclass__(**kwargs)
+        if cls.__bases__[0] != Header:
+            # Having subclasses of a dataclass can lead to issues,
+            # if they use optional arguments, currently just forbid subclassing.
+            # Could be worked around by transferring parent attributes to child
+            # and setting the base to Header.
+            raise NotImplementedError("ORSO Header does not support subclasses at the moment")
+        for fname, ftype in cls.__annotations__.items():
+            if type(None) in get_args(ftype):
+                cls._orso_optionals.append(fname)
+        # add an optional comment argument to all Header derived classes
+        cls.__annotations__["comment"] = Optional[str]
+        cls.comment = None
+        # register class for NeXus reconstruction
+        Header._subclass_dict_[cls.__name__] = cls
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        """
+        Create class from dictionary as is returned from yaml file reader.
+
+        If user-supplied attributes are provided, they are not passed to the
+        constructor but applied after instance generation.
+        """
+        construct_dict = {}
+        construct_fields = fields(cls)
+        field_keys = [fi.name for fi in construct_fields]
+        user_dict = {}
+
+        for key, value in data_dict.items():
+            if key in field_keys:
+                ftype = construct_fields[field_keys.index(key)].type
+                # convert dictionary to Header derived class if possible
+                if type(ftype) is type and type(value) is dict and issubclass(ftype, Header):
+                    # the field requires a ORSO Header type
+                    value = construct_fields[field_keys.index(key)].type.from_dict(value)
+                construct_dict[key] = value
+            else:
+                user_dict[key] = value
+        output = cls(**construct_dict)
+        for key, value in user_dict.items():
+            setattr(output, key, value)
+        return output
 
     def __post_init__(self):
         """Make sure Header types are correct."""
@@ -157,7 +135,7 @@ class Header:
                         f"No suitable conversion found for {fld.name}, "
                         f"{fld.type} with value {attr}, "
                         "setting attribute with raw value from ORSO file",
-                        RuntimeWarning,
+                        ORSOSchemaWarning,
                     )
                     setattr(self, fld.name, attr)
                     # raise ValueError(f"No suitable conversion found for {fld.type} with value {attr}")
@@ -193,8 +171,9 @@ class Header:
         if hint is Any:
             return item
         elif isclass(hint) and not getattr(hint, "__origin__", None) in [Dict, List, Tuple, Union, Literal]:
-            # simple type that we can work with, no Union or List/Dict
+            # ===== simple type that we can work with, no Union or List/Dict ====
             if isinstance(item, hint):
+                # value already has the desired type, just return it
                 return item
             if issubclass(hint, datetime.datetime) and isinstance(item, str):
                 # convert str to datetime
@@ -202,8 +181,12 @@ class Header:
                     return datetime.datetime.fromisoformat(item)
                 except AttributeError:  # python 3.6
                     try:
+                        # remove possible time zone string
                         item = item.split("+", 1)[0]
-                        if "." in item:
+                        # go through different supported formats
+                        if "T" not in item:
+                            return datetime.datetime.strptime(item, "%Y-%m-%d")
+                        elif "." in item:
                             return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S.%f")
                         else:
                             return datetime.datetime.strptime(item, "%Y-%m-%dT%H:%M:%S")
@@ -214,7 +197,7 @@ class Header:
                     # string wasn't ISO8601 format
                     return None
             if issubclass(hint, Header) and isinstance(item, dict):
-                # convert to dataclass instance
+                # convert to ORSO Header instance
                 attribs = hint.__annotations__.keys()
                 realised_items = {k: item[k] for k in item.keys() if k in attribs}
                 # orphan_items are extra dictionary entries that don't correspond to
@@ -233,40 +216,57 @@ class Header:
                 except (ValueError, TypeError):
                     return None
             else:
-                # convert to type
+                # try to convert to type
                 try:
                     return hint(item)
                 except (ValueError, TypeError):
                     return None
         else:
-            # the hint is a combined type (Union/List/Dict etc.)
+            # ======= the hint is a combined type (Union/List/Dict etc.) ========
             hbase = get_origin(hint)
             if hbase in (list, tuple):
+                # type hint is iterable either list or tuple with hint for items
                 t0 = get_args(hint)[0]
                 if isinstance(item, (list, tuple)):
                     if hbase is list:
+                        # convert all items to hint type
                         return list([Header._resolve_type(t0, i) for i in item])
                     else:
-                        return tuple([Header._resolve_type(ti, i) for ti, i in zip(get_args(hint), item)])
+                        arg_list = get_args(hint)
+                        if len(arg_list) != len(item):
+                            warnings.warn(
+                                "The Schema expects %i items, %i given" % (len(arg_list), len(item)), ORSOSchemaWarning
+                            )
+                        # tuple hint includes a fixed set of types (e.g. (int, int, str)), convert to those
+                        return tuple([Header._resolve_type(ti, i) for ti, i in zip(arg_list, item)])
                 else:
+                    # if the value is not an iterable, assume this is a single entry within the list/tuple
+                    # TODO: Is this a good idea? Maybe we should raise a warning in this case.
                     return hbase([Header._resolve_type(t0, item)])
             elif hbase is dict:
+                # Dictionary type hint. Does only make sense if the key/value types are defined.
                 try:
-                    value_type = get_args(hint)[1]
-                except IndexError:
+                    key_type, value_type = get_args(hint)
+                except ValueError:
                     warnings.warn(
                         "The evaluation of type hints requires key/value definition for Dict, "
-                        "if you want to use unspecified dictionaries use dict instead of Dict."
+                        "if you want to use unspecified dictionaries use dict instead of Dict.",
+                        ORSOSchemaWarning,
                     )
-                    raise
+                    return None
                 try:
+                    # convert all key/value pairs in the data to the hinted type.
+                    res = {}
                     for key, value in item.items():
-                        # resolve the type of any value in the dictionary
-                        item[key] = Header._resolve_type(value_type, value)
-                    return item
+                        key = Header._resolve_type(key_type, key)
+                        res[key] = Header._resolve_type(value_type, value)
+                    return res
                 except AttributeError:
                     return None
             elif hbase in [Union, Optional]:
+                # Case of combined type hints.
+                # Look for given value type first,
+                # otherwise try to convert to each type and return the first that fits.
                 subtypes = get_args(hint)
                 if type(item) in subtypes:
                     # check if the item is in the list of allowed
@@ -276,14 +276,16 @@ class Header:
                     # if it's not, then try to resolve its type.
                     res = Header._resolve_type(subt, item)
                     if res is not None:
+                        # This type conversion worked, return the result.
                         return res
             elif hbase is Literal:
+                # Special case of a string Literal, which defines a list of valid strings.
+                # TODO: Should we first convert the value to a string?
                 if item in get_args(hint):
                     return item
                 else:
                     warnings.warn(
-                        f"Has to be one of {get_args(hint)} got {item}",
-                        RuntimeWarning,
+                        f"Has to be one of {get_args(hint)} got {item}", ORSOSchemaWarning,
                     )
                     return str(item)
         return None
@@ -402,7 +404,7 @@ class Header:
             if child_name.startswith("_") or (value is None and child_name in self._orso_optionals):
                 continue
 
-            if value.__class__ in ORSO_DATACLASSES.values():
+            if isinstance(value, Header):
                 value.to_nexus(root=group, name=child_name)
             elif isinstance(value, (list, tuple)):
                 child_group = group.create_group(child_name)
@@ -410,7 +412,7 @@ class Header:
                 for index, item in enumerate(value):
                     # use the 'name' attribute of children if it exists, else index:
                     sub_name = getattr(item, "name", str(index))
-                    if item.__class__ in ORSO_DATACLASSES.values():
+                    if isinstance(item, Header):
                         item_out = item.to_nexus(root=child_group, name=sub_name)
                     else:
                         t_value = nexus_value_converter(item)
@@ -423,7 +425,6 @@ class Header:
                             item_out = child_group.create_dataset(sub_name, data=json.dumps(t_value))
                             item_out.attrs["mimetype"] = JSON_MIMETYPE
                         else:
-                            import warnings
                             # raise ValueError(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
                             warnings.warn(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
                             continue
@@ -440,9 +441,7 @@ class Header:
                     dset = group.create_dataset(child_name, data=json.dumps(t_value))
                     dset.attrs["mimetype"] = JSON_MIMETYPE
                 else:
-                    import warnings
                     warnings.warn(f"unserializable attribute found: {child_name} = {t_value}")
-                    # raise ValueError(f"unserializable attribute found: {child_name} = {t_value}")
         return group
 
     @staticmethod
@@ -510,7 +509,7 @@ class OrsoDumper(yaml.SafeDumper):
 unit_registry = None
 
 
-@orsodataclass
+@dataclass
 class ErrorValue(Header):
     """
     Information about errors on a value.
@@ -560,7 +559,7 @@ class ErrorValue(Header):
             return self.error_value
 
 
-@orsodataclass
+@dataclass
 class Value(Header):
     """
     A value or list of values with an optional unit.
@@ -598,7 +597,7 @@ class Value(Header):
         return val.to(output_unit).magnitude
 
 
-@orsodataclass
+@dataclass
 class ComplexValue(Header):
     """
     A value or list of values with an optional unit.
@@ -642,7 +641,7 @@ class ComplexValue(Header):
         return val.to(output_unit).magnitude
 
 
-@orsodataclass
+@dataclass
 class ValueRange(Header):
     """
     A range or list of ranges with mins, maxs, and an optional unit.
@@ -672,7 +671,7 @@ class ValueRange(Header):
         return (vmin.to(output_unit).magnitude, vmax.to(output_unit).magnitude)
 
 
-@orsodataclass
+@dataclass
 class ValueVector(Header):
     """
     A vector or list of vectors with an optional unit.
@@ -714,7 +713,7 @@ class ValueVector(Header):
         return (vx.to(output_unit).magnitude, vy.to(output_unit).magnitude, vz.to(output_unit).magnitude)
 
 
-@orsodataclass
+@dataclass
 class Person(Header):
     """
     Information about a person, including name, affiliation(s), and contact
@@ -726,7 +725,7 @@ class Person(Header):
     contact: Optional[str] = field(default=None, metadata={"description": "Contact (email) address"})
 
 
-@orsodataclass
+@dataclass
 class Column(Header):
     """
     Information about a data column.
@@ -741,7 +740,7 @@ class Column(Header):
     yaml_representer = Header.yaml_representer_compact
 
 
-@orsodataclass
+@dataclass
 class ErrorColumn(Header):
     """
     Information about a data column.
@@ -796,7 +795,7 @@ class ErrorColumn(Header):
             return 1.0
 
 
-@orsodataclass
+@dataclass
 class File(Header):
     """
     A file with file path and a last modified timestamp.
@@ -930,9 +929,6 @@ def _validate_header_data(dct_list: List[dict]):
     """
     import jsonschema
 
-    req_cols = ["Qz", "R", "sR", "sQz"]
-    acceptable_Qz_units = ["1/angstrom", "1/nm"]
-
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
     with open(schema_pth, "r") as f:
@@ -940,22 +936,6 @@ def _validate_header_data(dct_list: List[dict]):
 
     for dct in dct_list:
         jsonschema.validate(dct, schema)
-
-        # Validate the column names. Ideally this is done with the jsonschema,
-        # but it's difficult to create a schema from the 'default' orsopy
-        # dataclasses that does that. It is possible but it requires extra
-        # column objects like Qz_column, R_column, etc.
-        cols = dct["columns"]
-
-        ncols = min(4, len(cols))
-        col_names = [col["name"] if "name" in col else "s" + col["error_of"] for col in cols]
-        units = [col.get("unit") for col in cols]
-
-        if col_names[:ncols] != req_cols[:ncols]:
-            raise ValueError("The first four columns should be named" " 'Qz', 'R', ['sR', ['sQz']]")
-
-        if units[0] not in acceptable_Qz_units:
-            raise ValueError("The Qz column must have units of '1/angstrom'" " or '1/nm'")
 
 
 @contextmanager
@@ -1023,7 +1003,7 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
 
 def json_datetime_trap(obj):
     if isinstance(obj, datetime.datetime):
-        return obj.isoformat()
+        return obj.isoformat("T")
     return obj
 
 
@@ -1055,8 +1035,6 @@ def _nested_update(d: dict, u: dict) -> dict:
                 d[k] = r
             else:
                 d[k] = u[k]
-        else:
-            d = {k: u[k]}
     return d
 
 

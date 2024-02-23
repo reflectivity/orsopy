@@ -14,6 +14,8 @@ from pydantic.dataclasses import dataclass as _dataclass
 class PydanticConfig:
     """ for schema generation, otherwise unused """
 
+    arbitrary_types_allowed = True
+
     @staticmethod
     def schema_extra(schema: Dict[str, Any]) -> None:
         for prop, value in schema.get("properties", {}).items():
@@ -34,7 +36,6 @@ class PydanticConfig:
 
 
 pydantic_dataclass = functools.partial(_dataclass, config=PydanticConfig)
-
 
 ADD_COLUMN_ORDER = True
 COLUMN_ORDER = ["Qz", "R", "sR", "sQz"]
@@ -97,14 +98,10 @@ def add_column_ordering(schema: Dict, column_order: List[str] = COLUMN_ORDER):
 
 
 def main():
-    # replace the dataclass function in the local import:
-    from orsopy import dataclasses
-
-    dataclasses.dataclass = pydantic_dataclass
-
     import orsopy
 
-    from orsopy.fileio.orso import ORSO_VERSION, Orso
+    orsopy.dataclass = pydantic_dataclass
+    from orsopy.fileio import ORSO_VERSION, Header, Orso
 
     schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
