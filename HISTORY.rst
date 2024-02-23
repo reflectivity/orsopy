@@ -2,10 +2,12 @@
 History
 =======
 
-1.1.1 (2024-02-23)
+1.2.0 (2024-02-23)
 ------------------
 
-* Add some extra attributes from updated ORSO specification.
+* Introduce reading and writing of NeXus files ORSO binary standard (*.orb)
+* Add some extra attributes from updated ORSO specification (v1.1).
+* Add polarization options for x-ray instruments.
 * Fix compatibility with Python 3.12, resolving issue #115.
 * Move tests to orsopy sub-folders to prevent interference with other packages.
 * Some updates to the package documentation.
