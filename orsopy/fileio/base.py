@@ -773,11 +773,12 @@ class Column(Header):
             "For quantities defined by ORSO in header metadata the same name should be used."
             "(For example 'wavelength' or 'incident_angle' to indicate a column specifying "
             "those quantities on a point-by-point basis.)"
+            "For canonical names of physical quantities see https://www.reflectometry.org/file_format/specification."
         },
     )
 
     flag_is: Optional[List[str]] = field(
-        default=None, metadata={"description": "A list of items that a flag-value in this column stands for"}
+        default=None, metadata={"description": "A list of items that a flag-value in this column stands for."}
     )
     yaml_representer = Header.yaml_representer_compact
 
