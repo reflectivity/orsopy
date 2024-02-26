@@ -1,14 +1,13 @@
 """
 Implementation of the data_source for the ORSO header.
 """
-from dataclasses import field
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Dict, List, Optional, Union
 
 import yaml
 
-from .. import dataclass
 from .base import AlternatingField, ComplexValue, File, Header, Person, Value, ValueRange, ValueVector
 from .model_language import SampleModel
 

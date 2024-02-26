@@ -26,9 +26,7 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
-from dataclasses import MISSING, field, fields
-
-from .. import dataclass
+from dataclasses import MISSING, dataclass, field, fields
 
 
 def _noop(self, *args, **kw):
