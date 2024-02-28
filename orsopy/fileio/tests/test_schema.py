@@ -44,7 +44,7 @@ class TestSchema(unittest.TestCase):
     def test_wrong_schema(self):
         vi = sys.version_info
 
-        with self.assertRaises(jsonschema.exceptions.ValidationError):
+        with self.assertRaises(ValueError):
             _validate_header_data([{}])
         test = fileio.Orso.empty()
 
@@ -53,7 +53,7 @@ class TestSchema(unittest.TestCase):
             with self.assertWarns(fileio.base.ORSOSchemaWarning):
                 _validate_header_data([test.to_dict()])
         else:
-            with self.assertRaises(jsonschema.exceptions.ValidationError):
+            with self.assertRaises(ValueError):
                 _validate_header_data([test.to_dict()])
 
         test.columns[0].unit = "1/nm"
@@ -64,5 +64,5 @@ class TestSchema(unittest.TestCase):
             with self.assertWarns(fileio.base.ORSOSchemaWarning):
                 _validate_header_data([test.to_dict()])
         else:
-            with self.assertRaises(jsonschema.exceptions.ValidationError):
+            with self.assertRaises(ValueError):
                 _validate_header_data([test.to_dict()])

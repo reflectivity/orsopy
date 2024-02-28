@@ -954,6 +954,33 @@ def _read_header_data(file: Union[TextIO, str], validate: bool = False) -> Tuple
     return dct_list, data, version
 
 
+def _validate_columns(cols: List):
+    """
+    Checks that the first four columns have the correct properties, i.e. names, units, etc.
+
+    :param cols: list of column information entries.
+    """
+    if len(cols) < 2:
+        raise ValueError(
+            "The ORSO specification requires at least 'Qz' and 'R' columns to be present"
+        )
+
+    names = ["Qz", "R", "sR", "sQz"]
+    for idx, col in enumerate(cols):
+        col_name = col.get("name", None)
+        if col_name is not None and col_name != names[idx]:
+            raise ValueError(
+                "The first four columns should be named 'Qz', 'R', 'sR', 'sQz')"
+            )
+    if cols[0]["unit"] not in ["1/angstrom", "1/nm"]:
+        raise ValueError(
+            "The Qz column should have units of '1/angstrom' or '1/nm'"
+        )
+    # sQz unit has to be the same as Qz
+    if len(cols) > 3 and cols[3].get("unit", None) is not None and cols[0]["unit"] != cols[3]["unit"]:
+        raise ValueError("The sQz column should have the same units as the Qz column")
+
+
 def _validate_header_data(dct_list: List[dict]):
     """
     Checks whether a json dictionary corresponds to a valid ORSO header.
@@ -970,6 +997,9 @@ def _validate_header_data(dct_list: List[dict]):
         :code:`'sQz'` are not the same.
     """
     import jsonschema
+
+    for dct in dct_list:
+        _validate_columns(dct.get("columns", []))
 
     vi = sys.version_info
     if vi.minor < 7:
