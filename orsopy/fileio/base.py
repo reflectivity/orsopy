@@ -966,9 +966,9 @@ def _validate_columns(cols: List):
         )
 
     names = ["Qz", "R", "sR", "sQz"]
-    for idx, col in enumerate(cols):
+    for name, col in zip(names, cols):
         col_name = col.get("name", None)
-        if col_name is not None and col_name != names[idx]:
+        if col_name is not None and col_name != name:
             raise ValueError(
                 "The first four columns should be named 'Qz', 'R', 'sR', 'sQz')"
             )
