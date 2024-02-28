@@ -1,591 +1,49 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v1.2.0/orsopy/fileio/schema/refl_header.schema.json",
-  "title": "Orso",
-  "type": "object",
-  "properties": {
-    "data_source": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/DataSource"
-        }
-      ]
-    },
-    "reduction": {
-      "anyOf": [
-        {
-          "$ref": "#/definitions/Reduction"
-        }
-      ]
-    },
-    "columns": {
-      "items": [
-        {
-          "$ref": "#/definitions/Qz_column"
-        },
-        {
-          "$ref": "#/definitions/R_column"
-        },
-        {
-          "$ref": "#/definitions/sR_column"
-        },
-        {
-          "$ref": "#/definitions/sQz_column"
-        }
-      ],
-      "type": [
-        "array",
-        "null"
-      ],
-      "additionalItems": {
-        "$ref": "#/definitions/Column"
-      }
-    },
-    "data_set": {
-      "anyOf": [
-        {
-          "type": "integer"
-        },
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "comment": {
-      "type": [
-        "string",
-        "null"
-      ]
-    }
-  },
-  "required": [
-    "data_source",
-    "reduction",
-    "columns"
-  ],
-  "definitions": {
-    "Person": {
-      "title": "Person",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "affiliation": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "contact": {
-          "description": "Contact (email) address",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "name",
-        "affiliation"
-      ]
-    },
-    "Experiment": {
-      "title": "Experiment",
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "instrument": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "start_date": {
-          "format": "date-time",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "probe": {
-          "enum": [
-            "neutron",
-            "x-ray",
-            null
-          ],
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "facility": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "proposalID": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "doi": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "title",
-        "instrument",
-        "start_date",
-        "probe"
-      ]
-    },
-    "ErrorValue": {
-      "title": "ErrorValue",
-      "type": "object",
-      "properties": {
-        "error_value": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "error_type": {
-          "enum": [
-            "uncertainty",
-            "resolution",
-            null
-          ],
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "value_is": {
-          "enum": [
-            "sigma",
-            "FWHM",
-            null
-          ],
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "distribution": {
-          "enum": [
-            "gaussian",
-            "triangular",
-            "uniform",
-            "lorentzian",
-            null
-          ],
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "error_value"
-      ]
-    },
-    "ValueVector": {
-      "title": "ValueVector",
-      "type": "object",
-      "properties": {
-        "x": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "y": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "z": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "error": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ErrorValue"
-            }
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "x",
-        "y",
-        "z"
-      ]
-    },
-    "Value": {
-      "title": "Value",
-      "type": "object",
-      "properties": {
-        "magnitude": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "error": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ErrorValue"
-            }
-          ]
-        },
-        "offset": {
-          "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) magnitude",
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "magnitude"
-      ]
-    },
-    "ValueRange": {
-      "title": "ValueRange",
-      "type": "object",
-      "properties": {
-        "min": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "max": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "individual_magnitudes": {
-          "description": "Can list each individual value that was present during the experiment, only for information.",
-          "items": {
-            "type": "number"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "offset": {
-          "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) min/max",
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "min",
-        "max"
-      ]
-    },
-    "ComplexValue": {
-      "title": "ComplexValue",
-      "type": "object",
-      "properties": {
-        "real": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "imag": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "unit": {
-          "description": "SI unit string",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "error": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ErrorValue"
-            }
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "real"
-      ]
-    },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v1.1/orsopy/fileio/schema/refl_header.schema.json",
+  "$defs": {
     "AlternatingField": {
-      "title": "AlternatingField",
-      "type": "object",
       "properties": {
         "amplitude": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Value"
-            }
-          ]
+          "$ref": "#/$defs/Value"
         },
         "frequency": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Value"
-            }
-          ]
+          "$ref": "#/$defs/Value"
         },
         "phase": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Value"
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
             }
-          ]
+          ],
+          "default": null
         },
         "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "amplitude",
         "frequency"
-      ]
+      ],
+      "title": "AlternatingField",
+      "type": "object"
     },
-    "Material": {
-      "title": "Material",
-      "type": "object",
+    "Column": {
       "properties": {
-        "formula": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "mass_density": {
+        "name": {
           "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "number_density": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "sld": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "$ref": "#/definitions/ComplexValue"
-            },
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "magnetic_moment": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "relative_density": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      }
-    },
-    "Composit": {
-      "title": "Composit",
-      "type": "object",
-      "properties": {
-        "composition": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "composition"
-      ]
-    },
-    "Layer": {
-      "title": "Layer",
-      "type": "object",
-      "properties": {
-        "thickness": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "roughness": {
-          "anyOf": [
-            {
-              "type": "number"
-            },
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "material": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Material"
-            },
-            {
-              "$ref": "#/definitions/Composit"
-            },
             {
               "type": "string"
             },
@@ -594,296 +52,952 @@
             }
           ]
         },
-        "composition": {
-          "additionalProperties": {
-            "type": "number"
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      }
-    },
-    "SubStack": {
-      "title": "SubStack",
-      "type": "object",
-      "properties": {
-        "repetitions": {
-          "default": 1,
-          "type": [
-            "integer",
-            "null"
-          ]
-        },
-        "stack": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "sequence": {
-          "items": {
-            "$ref": "#/definitions/Layer"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "represents": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "arguments": {
-          "items": {},
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "keywords": {
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      }
-    },
-    "ModelParameters": {
-      "title": "ModelParameters",
-      "type": "object",
-      "properties": {
-        "roughness": {
+        "unit": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Value"
+              "type": "string"
+            },
+            {
+              "type": "null"
             }
-          ]
+          ],
+          "default": null,
+          "description": "SI unit string"
         },
-        "length_unit": {
-          "default": "nm",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "mass_density_unit": {
-          "default": "g/cm^3",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "number_density_unit": {
-          "default": "1/nm^3",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "sld_unit": {
-          "default": "1/angstrom^2",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "magnetic_moment_unit": {
-          "default": "muB",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      }
-    },
-    "SampleModel": {
-      "title": "SampleModel",
-      "type": "object",
-      "properties": {
-        "stack": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "origin": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "sub_stacks": {
-          "additionalProperties": {
-            "$ref": "#/definitions/SubStack"
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "layers": {
-          "additionalProperties": {
-            "$ref": "#/definitions/Layer"
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "materials": {
-          "additionalProperties": {
-            "$ref": "#/definitions/Material"
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "composits": {
-          "additionalProperties": {
-            "$ref": "#/definitions/Composit"
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "globals": {
+        "physical_quantity": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ModelParameters"
+              "type": "string"
+            },
+            {
+              "type": "null"
             }
-          ]
+          ],
+          "default": null,
+          "description": "A description of the physical meaning for this column. For quantities defined by ORSO in header metadata the same name should be used.(For example 'wavelength' or 'incident_angle' to indicate a column specifying those quantities on a point-by-point basis.)For canonical names of physical quantities see https://www.reflectometry.org/file_format/specification."
         },
-        "reference": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "stack"
-      ]
-    },
-    "Sample": {
-      "title": "Sample",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "category": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "composition": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "description": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "size": {
+        "flag_is": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ValueVector"
-            }
-          ]
-        },
-        "environment": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "sample_parameters": {
-          "description": "Using keys for parameters and Value* objects for values.",
-          "additionalProperties": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/Value"
+              "items": {
+                "type": "string"
               },
-              {
-                "$ref": "#/definitions/ValueRange"
-              },
-              {
-                "$ref": "#/definitions/ValueVector"
-              },
-              {
-                "$ref": "#/definitions/ComplexValue"
-              },
-              {
-                "$ref": "#/definitions/AlternatingField"
-              }
-            ]
-          },
-          "type": [
-            "object",
-            "null"
-          ]
-        },
-        "model": {
-          "anyOf": [
+              "type": "array"
+            },
             {
-              "$ref": "#/definitions/SampleModel"
+              "type": "null"
             }
-          ]
+          ],
+          "default": null,
+          "description": "A list of items that a flag-value in this column stands for."
         },
         "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "name"
-      ]
+      ],
+      "title": "Column",
+      "type": "object"
+    },
+    "ComplexValue": {
+      "properties": {
+        "real": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "imag": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SI unit string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "real"
+      ],
+      "title": "ComplexValue",
+      "type": "object"
+    },
+    "Composit": {
+      "properties": {
+        "composition": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "composition"
+      ],
+      "title": "Composit",
+      "type": "object"
+    },
+    "DataSource": {
+      "properties": {
+        "owner": {
+          "$ref": "#/$defs/Person"
+        },
+        "experiment": {
+          "$ref": "#/$defs/Experiment"
+        },
+        "sample": {
+          "$ref": "#/$defs/Sample"
+        },
+        "measurement": {
+          "$ref": "#/$defs/Measurement"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "owner",
+        "experiment",
+        "sample",
+        "measurement"
+      ],
+      "title": "DataSource",
+      "type": "object"
+    },
+    "ErrorColumn": {
+      "properties": {
+        "error_of": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "uncertainty",
+                "resolution"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value_is": {
+          "anyOf": [
+            {
+              "enum": [
+                "sigma",
+                "FWHM"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "distribution": {
+          "anyOf": [
+            {
+              "enum": [
+                "gaussian",
+                "triangular",
+                "uniform",
+                "lorentzian"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "error_of"
+      ],
+      "title": "ErrorColumn",
+      "type": "object"
+    },
+    "ErrorValue": {
+      "properties": {
+        "error_value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "uncertainty",
+                "resolution"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value_is": {
+          "anyOf": [
+            {
+              "enum": [
+                "sigma",
+                "FWHM"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "distribution": {
+          "anyOf": [
+            {
+              "enum": [
+                "gaussian",
+                "triangular",
+                "uniform",
+                "lorentzian"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "error_value"
+      ],
+      "title": "ErrorValue",
+      "type": "object"
+    },
+    "Experiment": {
+      "properties": {
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "instrument": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start_date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "format": "date-time"
+        },
+        "probe": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "enum": [
+            "neutron",
+            "x-ray",
+            null
+          ]
+        },
+        "facility": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "proposalID": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "title",
+        "instrument",
+        "start_date",
+        "probe"
+      ],
+      "title": "Experiment",
+      "type": "object"
+    },
+    "File": {
+      "properties": {
+        "file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timestamp": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Last modified timestamp. If it's not specified, then an attempt will be made to check on the file itself"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "file"
+      ],
+      "title": "File",
+      "type": "object"
+    },
+    "InstrumentSettings": {
+      "properties": {
+        "incident_angle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "$ref": "#/$defs/ValueRange"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "wavelength": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "$ref": "#/$defs/ValueRange"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "polarization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Polarization"
+            },
+            {
+              "$ref": "#/$defs/ValueVector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "unpolarized",
+          "description": "Polarization described as unpolarized/ po/ mo / op / om / pp / pm / mp / mm / vector"
+        },
+        "configuration": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "half / full polarized | liquid_surface | etc"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "incident_angle",
+        "wavelength"
+      ],
+      "title": "InstrumentSettings",
+      "type": "object"
+    },
+    "Layer": {
+      "properties": {
+        "thickness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "roughness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "material": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Material"
+            },
+            {
+              "$ref": "#/$defs/Composit"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "composition": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "number"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "Layer",
+      "type": "object"
+    },
+    "Material": {
+      "properties": {
+        "formula": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "mass_density": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "number_density": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sld": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/ComplexValue"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "magnetic_moment": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "relative_density": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "Material",
+      "type": "object"
+    },
+    "Measurement": {
+      "properties": {
+        "instrument_settings": {
+          "$ref": "#/$defs/InstrumentSettings"
+        },
+        "data_files": {
+          "anyOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/File"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "additional_files": {
+          "anyOf": [
+            {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/File"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "scheme": {
+          "anyOf": [
+            {
+              "enum": [
+                "angle- and energy-dispersive",
+                "angle-dispersive",
+                "energy-dispersive"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "instrument_settings",
+        "data_files"
+      ],
+      "title": "Measurement",
+      "type": "object"
+    },
+    "ModelParameters": {
+      "properties": {
+        "roughness": {
+          "$ref": "#/$defs/Value"
+        },
+        "length_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "nm"
+        },
+        "mass_density_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "g/cm^3"
+        },
+        "number_density_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "1/nm^3"
+        },
+        "sld_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "1/angstrom^2"
+        },
+        "magnetic_moment_unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "muB"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "ModelParameters",
+      "type": "object"
+    },
+    "Person": {
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "affiliation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "contact": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Contact (email) address"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "name",
+        "affiliation"
+      ],
+      "title": "Person",
+      "type": "object"
     },
     "Polarization": {
-      "title": "Polarization",
       "description": "Polarization of the beam used for the reflectivity.\n\nNeutrons:\nThe first symbol indicates the magnetisation direction of the incident\nbeam, the second symbol indicates the direction of the scattered\nbeam. If either polarization or analysis are not employed the\nsymbol is replaced by \"o\".\n\nX-rays:\nUses the conventional names pi, sigma, left and right. In experiments\nwith polarization analysis the incident and outgoing polarizations\nare separated with an underscore \"_\".",
       "enum": [
         "unpolarized",
@@ -904,425 +1018,727 @@
         "pi_sigma",
         "sigma_pi"
       ],
+      "title": "Polarization",
       "type": "string"
     },
-    "InstrumentSettings": {
-      "title": "InstrumentSettings",
-      "type": "object",
-      "properties": {
-        "incident_angle": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "$ref": "#/definitions/ValueRange"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "wavelength": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Value"
-            },
-            {
-              "$ref": "#/definitions/ValueRange"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "polarization": {
-          "description": "Polarization described as unpolarized/ po/ mo / op / om / pp / pm / mp / mm / vector",
-          "default": "unpolarized",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Polarization"
-            },
-            {
-              "$ref": "#/definitions/ValueVector"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "configuration": {
-          "description": "half / full polarized | liquid_surface | etc",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "incident_angle",
-        "wavelength"
-      ]
-    },
-    "File": {
-      "title": "File",
-      "type": "object",
-      "properties": {
-        "file": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "timestamp": {
-          "description": "Last modified timestamp. If it's not specified, then an attempt will be made to check on the file itself",
-          "format": "date-time",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "file"
-      ]
-    },
-    "Measurement": {
-      "title": "Measurement",
-      "type": "object",
-      "properties": {
-        "instrument_settings": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/InstrumentSettings"
-            }
-          ]
-        },
-        "data_files": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/File"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "additional_files": {
-          "items": {
-            "anyOf": [
-              {
-                "$ref": "#/definitions/File"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "type": [
-            "array",
-            "null"
-          ]
-        },
-        "scheme": {
-          "enum": [
-            "angle- and energy-dispersive",
-            "angle-dispersive",
-            "energy-dispersive",
-            null
-          ],
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "instrument_settings",
-        "data_files"
-      ]
-    },
-    "DataSource": {
-      "title": "DataSource",
-      "type": "object",
-      "properties": {
-        "owner": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Person"
-            }
-          ]
-        },
-        "experiment": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Experiment"
-            }
-          ]
-        },
-        "sample": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Sample"
-            }
-          ]
-        },
-        "measurement": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Measurement"
-            }
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "owner",
-        "experiment",
-        "sample",
-        "measurement"
-      ]
-    },
-    "Software": {
-      "title": "Software",
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "version": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "platform": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      },
-      "required": [
-        "name"
-      ]
-    },
     "Reduction": {
-      "title": "Reduction",
-      "type": "object",
       "properties": {
         "software": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Software"
-            }
-          ]
+          "$ref": "#/$defs/Software"
         },
         "timestamp": {
-          "description": "Timestamp string, formatted as ISO 8601 datetime",
-          "format": "date-time",
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Timestamp string, formatted as ISO 8601 datetime"
         },
         "creator": {
           "anyOf": [
             {
-              "$ref": "#/definitions/Person"
+              "$ref": "#/$defs/Person"
+            },
+            {
+              "type": "null"
             }
-          ]
+          ],
+          "default": null
         },
         "corrections": {
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "computer": {
-          "description": "Computer used for reduction",
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Computer used for reduction"
         },
         "call": {
-          "description": "The command line call used",
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The command line call used"
         },
         "script": {
-          "description": "Path to reduction script or notebook",
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to reduction script or notebook"
         },
         "binary": {
-          "description": "Path to full information file",
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path to full information file"
         },
         "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "software"
-      ]
+      ],
+      "title": "Reduction",
+      "type": "object"
     },
-    "Column": {
-      "title": "Column",
-      "type": "object",
+    "Sample": {
       "properties": {
         "name": {
-          "type": [
-            "string",
-            "null"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
-        "unit": {
-          "description": "SI unit string",
-          "type": [
-            "string",
-            "null"
-          ]
+        "category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
-        "physical_quantity": {
-          "description": "A description of the physical meaning for this column. For quantities defined by ORSO in header metadata the same name should be used.(For example 'wavelength' or 'incident_angle' to indicate a column specifying those quantities on a point-by-point basis.)For canonical names of physical quantities see https://www.reflectometry.org/file_format/specification.",
-          "type": [
-            "string",
-            "null"
-          ]
+        "composition": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
-        "flag_is": {
-          "description": "A list of items that a flag-value in this column stands for.",
-          "items": {
-            "type": "string"
-          },
-          "type": [
-            "array",
-            "null"
-          ]
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "size": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ValueVector"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sample_parameters": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Value"
+                  },
+                  {
+                    "$ref": "#/$defs/ValueRange"
+                  },
+                  {
+                    "$ref": "#/$defs/ValueVector"
+                  },
+                  {
+                    "$ref": "#/$defs/ComplexValue"
+                  },
+                  {
+                    "$ref": "#/$defs/AlternatingField"
+                  }
+                ]
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Using keys for parameters and Value* objects for values."
+        },
+        "model": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SampleModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
         "name"
-      ]
+      ],
+      "title": "Sample",
+      "type": "object"
     },
-    "ErrorColumn": {
-      "title": "ErrorColumn",
-      "type": "object",
+    "SampleModel": {
       "properties": {
-        "error_of": {
-          "type": [
-            "string",
-            "null"
+        "stack": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ]
         },
-        "error_type": {
-          "enum": [
-            "uncertainty",
-            "resolution",
-            null
+        "origin": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "type": [
-            "string",
-            "null"
-          ]
+          "default": null
         },
-        "value_is": {
-          "enum": [
-            "sigma",
-            "FWHM",
-            null
+        "sub_stacks": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/SubStack"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "type": [
-            "string",
-            "null"
-          ]
+          "default": null
         },
-        "distribution": {
-          "enum": [
-            "gaussian",
-            "triangular",
-            "uniform",
-            "lorentzian",
-            null
+        "layers": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Layer"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "type": [
-            "string",
-            "null"
-          ]
+          "default": null
+        },
+        "materials": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Material"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "composits": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Composit"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "globals": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ModelParameters"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "comment": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
-        "error_of"
-      ]
+        "stack"
+      ],
+      "title": "SampleModel",
+      "type": "object"
+    },
+    "Software": {
+      "properties": {
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "platform": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Software",
+      "type": "object"
+    },
+    "SubStack": {
+      "properties": {
+        "repetitions": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 1
+        },
+        "stack": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sequence": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Layer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "represents": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "arguments": {
+          "anyOf": [
+            {
+              "items": {},
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "keywords": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "SubStack",
+      "type": "object"
+    },
+    "Value": {
+      "properties": {
+        "magnitude": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SI unit string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) magnitude"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "magnitude"
+      ],
+      "title": "Value",
+      "type": "object"
+    },
+    "ValueRange": {
+      "properties": {
+        "min": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SI unit string"
+        },
+        "individual_magnitudes": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Can list each individual value that was present during the experiment, only for information."
+        },
+        "offset": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The offset applied to a value (e.g. motor) to retrieve the reported (corrected) min/max"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "title": "ValueRange",
+      "type": "object"
+    },
+    "ValueVector": {
+      "properties": {
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "z": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SI unit string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ErrorValue"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "z"
+      ],
+      "title": "ValueVector",
+      "type": "object"
     },
     "Qz_column": {
-      "title": "Qz",
-      "type": "object",
       "properties": {
         "name": {
           "enum": [
@@ -1331,15 +1747,14 @@
         },
         "unit": {
           "enum": [
-            "1/angstrom",
+            null,
             "1/nm",
+            "1/angstrom",
             "1",
-            "1/s",
-            null
+            "1/s"
           ]
         },
         "physical_quantity": {
-          "physical_quantity": "physical quantity the column describes",
           "anyOf": [
             {
               "type": "string"
@@ -1347,7 +1762,26 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": null,
+          "description": "A description of the physical meaning for this column. For quantities defined by ORSO in header metadata the same name should be used.(For example 'wavelength' or 'incident_angle' to indicate a column specifying those quantities on a point-by-point basis.)For canonical names of physical quantities see https://www.reflectometry.org/file_format/specification.",
+          "title": "Physical Quantity"
+        },
+        "flag_is": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of items that a flag-value in this column stands for.",
+          "title": "Flag Is"
         },
         "comment": {
           "anyOf": [
@@ -1357,16 +1791,18 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": null,
+          "title": "Comment"
         }
       },
       "required": [
         "name"
-      ]
+      ],
+      "title": "Qz",
+      "type": "object"
     },
     "R_column": {
-      "title": "R",
-      "type": "object",
       "properties": {
         "name": {
           "enum": [
@@ -1375,15 +1811,14 @@
         },
         "unit": {
           "enum": [
-            "1/angstrom",
+            null,
             "1/nm",
+            "1/angstrom",
             "1",
-            "1/s",
-            null
+            "1/s"
           ]
         },
         "physical_quantity": {
-          "physical_quantity": "physical quantity the column describes",
           "anyOf": [
             {
               "type": "string"
@@ -1391,7 +1826,26 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": null,
+          "description": "A description of the physical meaning for this column. For quantities defined by ORSO in header metadata the same name should be used.(For example 'wavelength' or 'incident_angle' to indicate a column specifying those quantities on a point-by-point basis.)For canonical names of physical quantities see https://www.reflectometry.org/file_format/specification.",
+          "title": "Physical Quantity"
+        },
+        "flag_is": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A list of items that a flag-value in this column stands for.",
+          "title": "Flag Is"
         },
         "comment": {
           "anyOf": [
@@ -1401,28 +1855,74 @@
             {
               "type": "null"
             }
-          ]
+          ],
+          "default": null,
+          "title": "Comment"
         }
       },
       "required": [
         "name"
-      ]
+      ],
+      "title": "R",
+      "type": "object"
     },
     "sR_column": {
-      "title": "sR",
-      "type": "object",
       "properties": {
         "error_of": {
-          "enum": [
-            "R"
-          ]
+          "title": "Error Of",
+          "type": "string"
         },
         "error_type": {
-          "enum": [
-            "uncertainty",
-            "resolution",
-            "null"
+          "anyOf": [
+            {
+              "enum": [
+                "uncertainty",
+                "resolution"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
+          "default": null,
+          "title": "Error Type"
+        },
+        "value_is": {
+          "anyOf": [
+            {
+              "enum": [
+                "sigma",
+                "FWHM"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Is"
+        },
+        "distribution": {
+          "anyOf": [
+            {
+              "enum": [
+                "gaussian",
+                "triangular",
+                "uniform",
+                "lorentzian"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Distribution"
+        },
+        "comment": {
           "anyOf": [
             {
               "type": "string"
@@ -1430,28 +1930,79 @@
             {
               "type": "null"
             }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "name": {
+          "enum": [
+            "sR"
           ]
         }
       },
       "required": [
         "error_of"
-      ]
+      ],
+      "title": "sR",
+      "type": "object"
     },
     "sQz_column": {
-      "title": "sQz",
-      "type": "object",
       "properties": {
         "error_of": {
-          "enum": [
-            "Qz"
-          ]
+          "title": "Error Of",
+          "type": "string"
         },
         "error_type": {
-          "enum": [
-            "uncertainty",
-            "resolution",
-            "null"
+          "anyOf": [
+            {
+              "enum": [
+                "uncertainty",
+                "resolution"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
+          "default": null,
+          "title": "Error Type"
+        },
+        "value_is": {
+          "anyOf": [
+            {
+              "enum": [
+                "sigma",
+                "FWHM"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Is"
+        },
+        "distribution": {
+          "anyOf": [
+            {
+              "enum": [
+                "gaussian",
+                "triangular",
+                "uniform",
+                "lorentzian"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Distribution"
+        },
+        "comment": {
           "anyOf": [
             {
               "type": "string"
@@ -1459,12 +2010,95 @@
             {
               "type": "null"
             }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "name": {
+          "enum": [
+            "sQz"
           ]
         }
       },
       "required": [
         "error_of"
-      ]
+      ],
+      "title": "sQz",
+      "type": "object"
     }
-  }
+  },
+  "properties": {
+    "data_source": {
+      "$ref": "#/$defs/DataSource"
+    },
+    "reduction": {
+      "$ref": "#/$defs/Reduction"
+    },
+    "columns": {
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#/$defs/Column"
+          },
+          {
+            "$ref": "#/$defs/ErrorColumn"
+          }
+        ]
+      },
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/Qz_column"
+        },
+        {
+          "$ref": "#/$defs/R_column"
+        },
+        {
+          "$ref": "#/$defs/sR_column"
+        },
+        {
+          "$ref": "#/$defs/sQz_column"
+        }
+      ]
+    },
+    "data_set": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "comment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "data_source",
+    "reduction",
+    "columns"
+  ],
+  "title": "Orso",
+  "type": "object"
 }

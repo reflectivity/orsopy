@@ -2,6 +2,7 @@
 Implementation of the base classes for the ORSO header.
 """
 
+import sys
 import datetime
 import json
 import os.path
@@ -26,9 +27,7 @@ try:
 except ImportError:
     from .typing_backport import Literal, get_args, get_origin
 
-from dataclasses import MISSING, field, fields
-
-from .. import dataclass
+from dataclasses import MISSING, dataclass, field, fields
 
 
 def _noop(self, *args, **kw):
@@ -971,6 +970,13 @@ def _validate_header_data(dct_list: List[dict]):
         :code:`'sQz'` are not the same.
     """
     import jsonschema
+
+    vi = sys.version_info
+    if vi.minor < 7:
+        warnings.warn(
+            "Validation not possible with Python 3.6 with 2020-12 json schema",
+            ORSOSchemaWarning
+        )
 
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")

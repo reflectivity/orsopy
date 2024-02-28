@@ -4,10 +4,9 @@ The reduction elements for the ORSO header
 
 import datetime
 
-from dataclasses import field
+from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
-from .. import dataclass
 from .base import Header, Person
 
 
