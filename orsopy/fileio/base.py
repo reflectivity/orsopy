@@ -974,8 +974,8 @@ def _validate_header_data(dct_list: List[dict]):
     vi = sys.version_info
     if vi.minor < 7:
         warnings.warn(
-            ORSOSchemaWarning,
-            "Validation not possible with Python 3.6 with 2020-12 json schema"
+            "Validation not possible with Python 3.6 with 2020-12 json schema",
+            ORSOSchemaWarning
         )
 
     pth = os.path.dirname(__file__)
