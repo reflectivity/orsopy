@@ -1,6 +1,5 @@
 import json
 import unittest
-import sys
 
 from pathlib import Path
 
@@ -42,8 +41,6 @@ class TestSchema(unittest.TestCase):
         _validate_header_data([test.to_dict()])
 
     def test_wrong_schema(self):
-        vi = sys.version_info
-
         with self.assertRaises(ValueError):
             _validate_header_data([{}])
         test = fileio.Orso.empty()
