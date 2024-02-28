@@ -49,20 +49,11 @@ class TestSchema(unittest.TestCase):
         test = fileio.Orso.empty()
 
         test.columns[0].unit = "test_fail_unit"
-        if vi.minor < 7:
-            with self.assertWarns(fileio.base.ORSOSchemaWarning):
-                _validate_header_data([test.to_dict()])
-        else:
-            with self.assertRaises(ValueError):
-                _validate_header_data([test.to_dict()])
+        with self.assertRaises(ValueError):
+            _validate_header_data([test.to_dict()])
 
         test.columns[0].unit = "1/nm"
         _validate_header_data([test.to_dict()])
         test.columns[1].name = "NotRightColumn"
-
-        if vi.minor < 7:
-            with self.assertWarns(fileio.base.ORSOSchemaWarning):
-                _validate_header_data([test.to_dict()])
-        else:
-            with self.assertRaises(ValueError):
-                _validate_header_data([test.to_dict()])
+        with self.assertRaises(ValueError):
+            _validate_header_data([test.to_dict()])
