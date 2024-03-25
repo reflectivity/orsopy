@@ -188,7 +188,7 @@ class OrsoDataset:
         out_dict["data_set"] = other.info.data_set
 
         out = yaml.dump(out_dict, Dumper=OrsoDumper, sort_keys=False)
-        out += self.info.column_header()
+        out += other.info.column_header()
         return out
 
     def save(self, fname: Union[TextIO, str]):
