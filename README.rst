@@ -31,7 +31,7 @@ Features
 .. _`reduced data file format`: https://www.reflectometry.org/file_formats/
 .. _`ORSO defined specification`: https://www.reflectometry.org/file_format/specification
 .. _`ORSO`: https://www.reflectometry.org
-.. _`Documents`: https://orsopy.readthedocs.io/en/latest/documents.html
-.. _`contribute`: https://orsopy.readthedocs.io/en/latest/contributing.html
+.. _`Documents`: https://www.reflectometry.org/orsopy/documents
+.. _`contribute`: https://www.reflectometry.org/orsopy/contributing
 .. _`ORSO Slack`: https://join.slack.com/t/orso-co/shared_invite/zt-z7p3v89g-~JgCbzcxurQP6ufqdfTCfw
 .. _`Reading and writing of ORSO specification reduced reflectivity files`: modules.html#fileio
