@@ -27,6 +27,12 @@ jobs:
         shell: bash -l {0}
         run: |
           python setup.py install
+      - name: Generate coverage report
+        shell: bash -l {0}
+        run: |
+          python -m pip install coverage
+          coverage run -m pytest
+          coverage html -d docs/_build/html/coverage
       - name: Running the Sphinx to gh-pages Action
         uses: uibcdf/action-sphinx-docs-to-gh-pages@v2.1.0
         with:
