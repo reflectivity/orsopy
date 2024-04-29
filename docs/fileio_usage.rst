@@ -18,7 +18,7 @@ For example, if we want to identify the probing radiation as neutrons, we includ
 
 .. code-block:: python 
 
-    header.data_source.experiment.probe = 'neutrons'
+    header.data_source.experiment.probe = 'neutron'
 
 Full details of the different components that can be populated can be found in the `documentation`_ here or in the `file format specification`_.
 Note that this specification includes information regarding the **required** and optional components to be included for a file to be considered a **valid** .ort file.
