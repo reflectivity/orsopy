@@ -36,17 +36,6 @@ jobs:
         run: |
           pytest --pyargs orsopy
 
-      - name: Test with coverage
-        run: |
-          coverage run -m pytest
-
-      - name: Coveralls
-        if: github.repository == 'reflectivity/orsopy'
-        run: |
-          coveralls --service=github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   backport:
     runs-on: ubuntu-20.04
     strategy:
