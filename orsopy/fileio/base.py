@@ -425,7 +425,7 @@ class Header:
                             # special handling for null datasets: no data
                             item_out = child_group.create_dataset(sub_name, dtype="f")
                         elif isinstance(t_value, dict):
-                            item_out = child_group.create_dataset(sub_name, data=json.dumps(t_value))
+                            item_out = child_group.create_dataset(sub_name, data=json.dumps(t_value, default=lambda o: o.__dict__))
                             item_out.attrs["mimetype"] = JSON_MIMETYPE
                         else:
                             # raise ValueError(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
