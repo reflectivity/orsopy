@@ -2,12 +2,12 @@
 Implementation of the base classes for the ORSO header.
 """
 
-import sys
 import datetime
 import json
 import os.path
 import pathlib
 import re
+import sys
 import warnings
 
 from collections.abc import Mapping
@@ -39,9 +39,9 @@ JSON_MIMETYPE = "application/json"
 yaml.emitter.Emitter.process_tag = _noop
 
 # make sure that datetime strings get loaded as str not datetime instances
-yaml.constructor.SafeConstructor.yaml_constructors[
-    "tag:yaml.org,2002:timestamp"
-] = yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
+yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:timestamp"] = (
+    yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
+)
 
 
 class ORSOResolveError(ValueError):
@@ -284,7 +284,8 @@ class Header:
                     return item
                 else:
                     warnings.warn(
-                        f"Has to be one of {get_args(hint)} got {item}", ORSOSchemaWarning,
+                        f"Has to be one of {get_args(hint)} got {item}",
+                        ORSOSchemaWarning,
                     )
                     return str(item)
         return None
@@ -424,7 +425,9 @@ class Header:
                             # special handling for null datasets: no data
                             item_out = child_group.create_dataset(sub_name, dtype="f")
                         elif isinstance(t_value, dict):
-                            item_out = child_group.create_dataset(sub_name, data=json.dumps(t_value))
+                            item_out = child_group.create_dataset(
+                                sub_name, data=json.dumps(t_value, default=lambda o: o.__dict__)
+                            )
                             item_out.attrs["mimetype"] = JSON_MIMETYPE
                         else:
                             # raise ValueError(f"unserializable attribute found: {child_name}[{index}] = {t_value}")
@@ -440,7 +443,7 @@ class Header:
                 elif t_value is None:
                     group.create_dataset(child_name, dtype="f")
                 elif isinstance(t_value, dict):
-                    dset = group.create_dataset(child_name, data=json.dumps(t_value))
+                    dset = group.create_dataset(child_name, data=json.dumps(t_value, default=lambda o: o.__dict__))
                     dset.attrs["mimetype"] = JSON_MIMETYPE
                 else:
                     warnings.warn(f"unserializable attribute found: {child_name} = {t_value}")
@@ -973,10 +976,7 @@ def _validate_header_data(dct_list: List[dict]):
 
     vi = sys.version_info
     if vi.minor < 7:
-        warnings.warn(
-            "Validation not possible with Python 3.6 with 2020-12 json schema",
-            ORSOSchemaWarning
-        )
+        warnings.warn("Validation not possible with Python 3.6 with 2020-12 json schema", ORSOSchemaWarning)
 
     pth = os.path.dirname(__file__)
     schema_pth = os.path.join(pth, "schema", "refl_header.schema.json")
@@ -1025,7 +1025,7 @@ def _todict(obj: Any, classkey: Any = None) -> dict:
     """
     if isinstance(obj, dict):
         data = {}
-        for (k, v) in obj.items():
+        for k, v in obj.items():
             data[k] = _todict(v, classkey)
         return data
     elif isinstance(obj, Enum):
