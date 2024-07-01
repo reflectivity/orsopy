@@ -2,6 +2,16 @@
 History
 =======
 
+1.2.1 (2024-07-01)
+------------------
+
+* Add full compatibility with standard Python dataclasses.
+* Add scripts to convert text to binary format and back (orsopy.ort2orb and orsopy.orb2ort).
+* Multiple updates to documentation.
+* Fix column header line for multi-dataset files written wrongly #128.
+* Fix some issues with validation and schema generation.
+* Fix bug in NeXus file writer for certain header configurations.
+
 1.2.0 (2024-02-23)
 ------------------
 
