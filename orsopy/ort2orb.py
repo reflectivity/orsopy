@@ -7,7 +7,7 @@ def main():
     for fn in sys.argv[1:]:
         print(fn)
         res = load_orso(fn)
-        save_nexus(res, fn[:-4] + ".orb")
+        save_nexus(res, fn.rsplit(".", 1)[0] + ".orb")
 
 
 if __name__ == "__main__":
