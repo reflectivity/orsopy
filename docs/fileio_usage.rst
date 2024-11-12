@@ -70,8 +70,8 @@ Columns are defined as follows, using the :code:`orsopy.fileio.base.Column` and 
 
 .. code-block:: python
 
+    # Interpreted units are ["1/angstrom", "1/nm", "1", "1/s", None]
     q_column = fileio.base.Column(name='Qz', unit='1/angstrom', physical_quantity='wavevector transfer')
-    # Note that the unit is not fixed to 1/angstrom by the standard, but currently the data loader interprets all values as 1/angstrom irrespective of what is stated here
     r_column = fileio.base.Column(name='R', unit=None, physical_quantity='reflectivity')
     dr_column = fileio.base.ErrorColumn(error_of='R', error_type='uncertainty', value_is='sigma')
     dq_column = fileio.base.ErrorColumn(error_of='Qz', error_type='resolution', value_is='sigma')
