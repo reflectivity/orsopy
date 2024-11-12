@@ -65,7 +65,7 @@ We can now wrap together the user, experiment, sample and measurement informatio
 .. code-block:: python
     data_source_info = DataSource(user, experiment, sample, measurment)
 
-It is not possible to write a .ort file without defining the columns present in the dataset, in this example we will have four columns of data, namely q, R, dR and dq (the final column is a description of the resolution function).
+It is not possible to write an `.ort` file without defining the columns present in the dataset, in this example we will have four columns of data, namely q, R, dR and dq (the final column is a description of the resolution function).
 Columns are defined as follows, using the :code:`orsopy.fileio.base.Column` and :code:`orsopy.fileio.base.ErrorColumn` class objects.
 
 .. code-block:: python
