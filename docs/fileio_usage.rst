@@ -33,7 +33,7 @@ In this example we fill out the experiment details and then wrap them in the app
 
 Full details of the different components that can be populated can be found in the `documentation`_ here or in the `file format specification`_.
 Note that this specification includes information regarding the **required** and optional components to be included for a file to be considered a **valid** .ort file.
-What we show here is not the minimum needed to write an `.ort file, rather the minium to fill out all the major fields with information which is likely to be available at time of writing.
+What we show here is not the minimum needed to write an `.ort` file, rather the minium to fill out all the major fields with information which is likely to be available at time of writing.
 
 We now write out the user and sample details, but note that the sample can be alot more descriptive than just a name.
 
