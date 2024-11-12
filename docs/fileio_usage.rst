@@ -23,7 +23,7 @@ In this example we fill out the experiment details and then wrap them in the app
 
     title = 'my title'
     instrument = 'PLATYPUS'
-    start_date = datetime.date.today()  # This needs to be a datetime object
+    start_date = datetime.date.today()  # This needs to be an object of the type datetime
     probe = 'neutron'
     facility = 'ESS'
     proposalID = 999999
