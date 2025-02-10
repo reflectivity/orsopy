@@ -1,5 +1,6 @@
 """
-Implementation of the Orso class that defined the header.
+The role of the :py:mod:`fileio` module is to enable the creation of and parsing from ORSO reduced data files.
+All public classes and functions in the :py:mod:`fileio` module are available directly from :py:mod:`fileio` without needing to specify a particular submodule.
 """
 
 from .base import (Column, ComplexValue, ErrorColumn, File, Header, Person, Value, ValueRange, ValueVector,
