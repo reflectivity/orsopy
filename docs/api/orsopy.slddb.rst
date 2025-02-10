@@ -12,17 +12,69 @@ Subpackages
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 1
+orsopy.slddb.comparators module
+-------------------------------
 
-   orsopy.slddb.comparators
-   orsopy.slddb.constants
-   orsopy.slddb.converters
-   orsopy.slddb.database
-   orsopy.slddb.dbconfig
-   orsopy.slddb.importers
-   orsopy.slddb.material
-   orsopy.slddb.webapi
+.. automodule:: orsopy.slddb.comparators
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.slddb.constants module
+-----------------------------
+
+.. automodule:: orsopy.slddb.constants
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.slddb.converters module
+------------------------------
+
+.. automodule:: orsopy.slddb.converters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.slddb.database module
+----------------------------
+
+.. automodule:: orsopy.slddb.database
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.slddb.dbconfig module
+----------------------------
+
+.. automodule:: orsopy.slddb.dbconfig
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.slddb.importers module
+-----------------------------
+
+.. automodule:: orsopy.slddb.importers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.slddb.material module
+----------------------------
+
+.. automodule:: orsopy.slddb.material
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.slddb.webapi module
+--------------------------
+
+.. automodule:: orsopy.slddb.webapi
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

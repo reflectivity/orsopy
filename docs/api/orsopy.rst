@@ -14,11 +14,21 @@ Subpackages
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 1
+orsopy.orb2ort module
+---------------------
 
-   orsopy.orb2ort
-   orsopy.ort2orb
+.. automodule:: orsopy.orb2ort
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.ort2orb module
+---------------------
+
+.. automodule:: orsopy.ort2orb
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------

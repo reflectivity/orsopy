@@ -4,12 +4,29 @@ orsopy.utils package
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 1
+orsopy.utils.chemical\_formula module
+-------------------------------------
 
-   orsopy.utils.chemical_formula
-   orsopy.utils.density_resolver
-   orsopy.utils.resolver_slddb
+.. automodule:: orsopy.utils.chemical_formula
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.utils.density\_resolver module
+-------------------------------------
+
+.. automodule:: orsopy.utils.density_resolver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+orsopy.utils.resolver\_slddb module
+-----------------------------------
+
+.. automodule:: orsopy.utils.resolver_slddb
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
