@@ -1,6 +1,11 @@
 orsopy.slddb.element\_table package
 ===================================
 
+.. automodule:: orsopy.slddb.element_table
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -56,14 +61,6 @@ orsopy.slddb.element\_table.xray\_nist module
 ---------------------------------------------
 
 .. automodule:: orsopy.slddb.element_table.xray_nist
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: orsopy.slddb.element_table
    :members:
    :undoc-members:
    :show-inheritance:

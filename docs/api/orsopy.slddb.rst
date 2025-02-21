@@ -1,6 +1,11 @@
 orsopy.slddb package
 ====================
 
+.. automodule:: orsopy.slddb
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -72,14 +77,6 @@ orsopy.slddb.webapi module
 --------------------------
 
 .. automodule:: orsopy.slddb.webapi
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: orsopy.slddb
    :members:
    :undoc-members:
    :show-inheritance:

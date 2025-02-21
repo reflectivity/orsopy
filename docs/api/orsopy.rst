@@ -1,6 +1,11 @@
 orsopy package
 ==============
 
+.. automodule:: orsopy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -26,14 +31,6 @@ orsopy.ort2orb module
 ---------------------
 
 .. automodule:: orsopy.ort2orb
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: orsopy
    :members:
    :undoc-members:
    :show-inheritance:

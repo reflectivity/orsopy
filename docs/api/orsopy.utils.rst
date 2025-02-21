@@ -1,6 +1,11 @@
 orsopy.utils package
 ====================
 
+.. automodule:: orsopy.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -24,14 +29,6 @@ orsopy.utils.resolver\_slddb module
 -----------------------------------
 
 .. automodule:: orsopy.utils.resolver_slddb
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: orsopy.utils
    :members:
    :undoc-members:
    :show-inheritance:
