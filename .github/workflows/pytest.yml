@@ -45,7 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install python version
-        uses: gabrielfalcao/pyenv-action@v18
+        uses: gabrielfalcao/pyenv-action@mai
         with:
           default: "${{ matrix.python-version }}"
           command: pip install -U pip  # upgrade pip after installing python
