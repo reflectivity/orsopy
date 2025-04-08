@@ -36,7 +36,6 @@ class TestCreateDB(unittest.TestCase):
             testing.assert_array_equal(s1._xdata, s2._xdata)
 
     def test_add_field(self):
-        global dbconfig
         # call without changes
         self.db.update_fields()
 
