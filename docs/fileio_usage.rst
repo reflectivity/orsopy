@@ -63,6 +63,7 @@ We now write out the user and sample details, but note that the sample can be al
 We can now wrap together the user, experiment, sample and measurement information into a single object.
 
 .. code-block:: python
+
     data_source_info = DataSource(user, experiment, sample, measurment)
 
 It is not possible to write an `.ort` file without defining the columns present in the dataset, in this example we will have four columns of data, namely q, R, dR and dq (the final column is a description of the resolution function).
