@@ -37,7 +37,7 @@ jobs:
           pytest --pyargs orsopy
 
   backport:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         python-version: [3.6, 3.7]
@@ -55,11 +55,11 @@ jobs:
       - name: Install python build dependencies
         run: |
           sudo apt update
-          sudo apt install build-essential libssl-dev zlib1g-dev  libbz2-dev libreadline-dev libsqlite3-dev curl git  libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
-
+          sudo apt install build-essential libssl-dev zlib1g-dev  libbz2-dev libreadline-dev libsqlite3-dev curl git  libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev -y
+          sudo apt install clang -y
       - name: Setup Python ${{ matrix.python-version }}
         run: |
-          pyenv install ${{ matrix.python-version }}
+          CC=clang pyenv install ${{ matrix.python-version }}
           pyenv global ${{ matrix.python-version }}
           python --version
 
