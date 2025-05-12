@@ -26,7 +26,8 @@ class Formula(list):
         r"\[[1-9][0-9]{0,2}\]"
     )
 
-    def __init__(self, string, sort=True):
+    def __init__(self, string, sort=True, strict=False):
+        self._strict = strict
         if isinstance(string, list):
             list.__init__(self, string)
             if isinstance(string, Formula):
@@ -52,6 +53,8 @@ class Formula(list):
             try:
                 items = self.parse_group(group, case_sensitive=True)
             except ValueError:
+                if self._strict:
+                    raise ValueError("Could not parse formula in case sensitive mode")
                 items = self.parse_group(group, case_sensitive=False)
             items = [(i[0], i[1] * factor) for i in items]
             # noinspection PyMethodFirstArgAssignment

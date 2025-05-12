@@ -1,6 +1,7 @@
 """
 Tests for fileio.model_language module
 """
+
 # pylint: disable=R0201
 
 import unittest
@@ -316,6 +317,15 @@ class TestSampleModel(unittest.TestCase):
                 materials={"a": ml.Material(sld=13.4)},
             )
 
+    def test_space_in_name(self):
+        sm = ml.SampleModel(
+            stack="c|a b|c",
+            layers={"a": ml.Layer(thickness=13.4, material="c")},
+            materials={"a b": ml.Material(sld=13.4)},
+        )
+        res = sm.resolvable_items
+        assert list(res.keys()) == ["a", "a b"]
+
     def test_resolve_stack(self):
         defaults = ml.ModelParameters(
             mass_density_unit="g/cm^3",
@@ -359,6 +369,24 @@ class TestSampleModel(unittest.TestCase):
         assert stack[0] == ml.Layer(
             ml.Value(0.0, "nm"), roughness=defaults.roughness, material=ml.Material(formula="Si")
         )
+
+    def test_resolve_direct_name(self):
+        sm = ml.SampleModel(stack="air | heavy water 12 | silicon")
+        stack = sm.resolve_stack()
+        sm2 = ml.SampleModel(stack="air | heavy water | silicon")
+        stack2 = sm2.resolve_stack()
+        self.assertEqual(len(stack), 3)
+        self.assertEqual(stack[1].material.formula, "D2O")
+        self.assertEqual(stack[1].thickness.magnitude, 12.0)
+        self.assertEqual(stack[2].material.formula, "Si")
+        self.assertEqual(stack2[1].material.formula, "D2O")
+
+    def test_resolve_dbID(self):
+        sm = ml.SampleModel(stack="air | ID=276 12 | Si")
+        stack = sm.resolve_stack()
+        self.assertEqual(len(stack), 3)
+        self.assertEqual(stack[1].material.formula, "D2O")
+        self.assertEqual(stack[1].thickness.magnitude, 12.0)
 
     def test_resolve_to_layers(self):
         defaults = ml.ModelParameters(

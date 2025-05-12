@@ -4,16 +4,17 @@ Implementation of the simplified model language for the ORSO header.
 It includes parsing of models from header or different input information and
 resolving the model to a simple list of slabs.
 """
+
 import warnings
 
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Union
 
 from ..utils.chemical_formula import Formula
-from ..utils.density_resolver import DensityResolver
+from ..utils.density_resolver import MaterialResolver
 from .base import ComplexValue, Header, Value
 
-DENSITY_RESOLVERS: List[DensityResolver] = []
+DENSITY_RESOLVERS: List[MaterialResolver] = []
 
 
 def find_idx(string, start, value):
@@ -312,7 +313,12 @@ class SubStack(Header):
                     items = stack[idx:next_idx].strip().rsplit(None, 1)
                     item = items[0].strip()
                     if len(items) == 2:
-                        thickness = float(items[1])
+                        try:
+                            thickness = float(items[1])
+                        except ValueError:
+                            # if can't be interpreted as umber, assume name has space
+                            thickness = 0.0
+                            item = stack[idx:next_idx].strip()
                     else:
                         thickness = 0.0
 
@@ -419,7 +425,12 @@ class SampleModel(Header):
                 items = stack[idx:next_idx].strip().rsplit(None, 1)
                 item = items[0].strip()
                 if len(items) == 2:
-                    thickness = float(items[1])
+                    try:
+                        thickness = float(items[1])
+                    except ValueError:
+                        # if can't be interpreted as umber, assume name has space
+                        thickness = 0.0
+                        item = stack[idx:next_idx].strip()
                 else:
                     thickness = 0.0
 
@@ -430,8 +441,34 @@ class SampleModel(Header):
                     elif getattr(obj, "thickness", "ignore") is None:
                         obj.thickness = thickness
                 else:
-                    obj = Layer(material=item, thickness=thickness)
-                    obj.original_name = item
+                    try:
+                        Formula(item, strict=True)
+                    except ValueError:
+                        # try to resolve name directly with databse
+                        res = None
+                        for resolver in DENSITY_RESOLVERS:
+                            res = resolver.resolve_item(item)
+                            if res is not None:
+                                break
+                        if res is None:
+                            # assume name is a Formula to resolve within Layer
+                            obj = Layer(material=item, thickness=thickness)
+                            obj.original_name = item
+                        else:
+                            if "material" in res:
+                                obj = Layer.from_dict(res)
+                            elif "composition" in res:
+                                obj = Layer(material=Composit.from_dict(res), thickness=thickness)
+                            elif "formula" in res or "sld" in res:
+                                obj = Layer(material=Material.from_dict(res), thickness=thickness)
+                            else:
+                                obj = Layer(material=item, thickness=thickness)
+                            obj.original_name = item
+                            if getattr(obj, "thickness", "ignore") is None:
+                                obj.thickness = thickness
+                    else:
+                        obj = Layer(material=item, thickness=thickness)
+                        obj.original_name = item
             if hasattr(obj, "resolve_names"):
                 obj.resolve_names(ri)
             if hasattr(obj, "resolve_defaults"):

@@ -7,8 +7,17 @@ from abc import ABC, abstractmethod
 from .chemical_formula import Formula
 
 
-class DensityResolver(ABC):
+class MaterialResolver(ABC):
     comment = None  # comment can be set during a resolve to specify the origin of the data, it can also be constant
+
+    def resolve_item(self, name) -> None | dict:
+        """
+        Optional method for resolving names directly ot Layer or SubStack
+        compatible class.
+
+        Returns such object or None if name cannot be resolved.
+        """
+        return None
 
     @abstractmethod
     def resolve_formula(self, formula: Formula) -> float:
