@@ -1,11 +1,16 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Protocol, Union
+from typing import Dict, List, Optional, Union
 
 from ..utils.chemical_formula import Formula
 from ..utils.density_resolver import MaterialResolver
 from .base import ComplexValue, Header, Value
 
 DENSITY_RESOLVERS: List[MaterialResolver] = []
+
+try:
+    from typing import Protocol
+except ImportError:
+    Protocol = object
 
 
 class SubStackType(Protocol):
