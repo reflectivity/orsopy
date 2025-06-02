@@ -100,14 +100,16 @@ class SubStack(Header):
         return layers * self.repetitions
 
 
-SUBSTACK_TYPES.append(SubStack)
+SUBSTACK_TYPE = SubStack
+for T in SUBSTACK_TYPES:
+    SUBSTACK_TYPE = Union[SUBSTACK_TYPE, T]
 
 
 @dataclass
 class SampleModel(Header):
     stack: str
     origin: Optional[str] = None
-    sub_stacks: Optional[Dict[str, Union[*SUBSTACK_TYPES]]] = None
+    sub_stacks: Optional[Dict[str, SUBSTACK_TYPE]] = None
     layers: Optional[Dict[str, Layer]] = None
     materials: Optional[Dict[str, Material]] = None
     composits: Optional[Dict[str, Composit]] = None
