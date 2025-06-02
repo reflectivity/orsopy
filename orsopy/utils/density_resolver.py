@@ -11,7 +11,7 @@ from .chemical_formula import Formula
 class MaterialResolver(ABC):
     comment = None  # comment can be set during a resolve to specify the origin of the data, it can also be constant
 
-    def resolve_item(self, name) -> Union[None | dict]:
+    def resolve_item(self, name) -> Union[None, dict]:
         """
         Optional method for resolving names directly ot Layer or SubStack
         compatible class.
