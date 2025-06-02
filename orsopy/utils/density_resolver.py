@@ -3,6 +3,7 @@ Specifies the abstract base class for resolving layer densities from formula str
 """
 
 from abc import ABC, abstractmethod
+from typing import Union
 
 from .chemical_formula import Formula
 
@@ -10,7 +11,7 @@ from .chemical_formula import Formula
 class MaterialResolver(ABC):
     comment = None  # comment can be set during a resolve to specify the origin of the data, it can also be constant
 
-    def resolve_item(self, name) -> None | dict:
+    def resolve_item(self, name) -> Union[None | dict]:
         """
         Optional method for resolving names directly ot Layer or SubStack
         compatible class.
