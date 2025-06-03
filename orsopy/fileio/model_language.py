@@ -13,8 +13,7 @@ from typing import Dict, List, Optional, Union
 from ..utils.chemical_formula import Formula
 from . import model_complex
 from .base import Header, Literal
-from .model_building_blocks import (DENSITY_RESOLVERS, SUBSTACK_TYPES, Composit, Layer, Material, ModelParameters,
-                                    SubStackType)
+from .model_building_blocks import DENSITY_RESOLVERS, Composit, Layer, Material, ModelParameters, SubStackType
 
 
 def find_idx(string, start, value):
@@ -103,7 +102,7 @@ class SubStack(Header, SubStackType):
 
 
 SUBSTACK_TYPE = SubStack
-for T in SUBSTACK_TYPES:
+for T in SubStackType.__subclasses__():
     SUBSTACK_TYPE = Union[SUBSTACK_TYPE, T]
 
 

@@ -9,8 +9,7 @@ from dataclasses import dataclass
 from typing import List, Literal, Optional, Union
 
 from .base import ComplexValue, Header, Value
-from .model_building_blocks import (SPECIAL_MATERIALS, SUBSTACK_TYPES, Composit, Layer, Material, ModelParameters,
-                                    SubStackType)
+from .model_building_blocks import SPECIAL_MATERIALS, Composit, Layer, Material, ModelParameters, SubStackType
 
 
 @dataclass
@@ -68,6 +67,3 @@ class FunctionTwoElements(Header, SubStackType):
             composition.resolve_names({self.material1: self._materials[0], self.material2: self._materials[1]})
             output.append(Layer(material=composition, thickness=thickness, roughness=roughness))
         return output
-
-
-SUBSTACK_TYPES.append(FunctionTwoElements)

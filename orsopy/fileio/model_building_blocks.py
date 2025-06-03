@@ -26,9 +26,6 @@ class SubStackType(ABC):
     def resolve_to_layers(self) -> List["Layer"]: ...
 
 
-SUBSTACK_TYPES: List[SubStackType] = []  # keep track of all classes allowed as sub_stack in model
-
-
 @dataclass
 class ModelParameters(Header):
     roughness: Value = field(default_factory=lambda: Value(0.3, "nm"))
