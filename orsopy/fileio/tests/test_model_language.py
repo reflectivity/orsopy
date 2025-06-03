@@ -441,7 +441,7 @@ class TestSampleModel(unittest.TestCase):
             stack="air | gradient | Si",
             sub_stacks={
                 "gradient": mc.FunctionTwoElements(
-                    material1="Cr", material2="Fe", total_thickness=150.0, function="x", slices=10
+                    material1="Cr", material2="Fe", thickness=150.0, function="x", slices=10
                 )
             },
         )
@@ -450,6 +450,9 @@ class TestSampleModel(unittest.TestCase):
         for li in layers:
             li.material.generate_density()
             li.material.get_sld()
+        sm = ml.SampleModel.from_dict(sm.to_dict())
+        layers = sm.resolve_to_layers()
+        self.assertEqual(len(layers), 12)
 
     def test_resolve_to_layers(self):
         defaults = orsopy.fileio.model_building_blocks.ModelParameters(

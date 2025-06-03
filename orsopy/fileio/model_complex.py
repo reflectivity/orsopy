@@ -1,23 +1,26 @@
 """
 Build-in blocks of physical units used in model to describe more complex systems.
 
-All these need to follow the .model_building_blocks.SubStackType protocol.
+All these need to follow the .model_building_blocks.SubStackType protocol and
+have a common "sub_stack_class" attribute that has to be set to the class name.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Literal, Optional, Union
 
 from .base import ComplexValue, Header, Value
-from .model_building_blocks import SPECIAL_MATERIALS, SUBSTACK_TYPES, Composit, Layer, Material, ModelParameters
+from .model_building_blocks import (SPECIAL_MATERIALS, SUBSTACK_TYPES, Composit, Layer, Material, ModelParameters,
+                                    SubStackType)
 
 
 @dataclass
-class FunctionTwoElements(Header):
+class FunctionTwoElements(Header, SubStackType):
     material1: str
     material2: str
-    total_thickness: Union[float, Value]
     function: str
+    thickness: Optional[Union[float, Value]] = None
     slices: Optional[int] = 15
+    sub_stack_class: Literal["FunctionTwoElements"] = "FunctionTwoElements"
 
     def resolve_names(self, resolvable_items):
         self._materials = []
@@ -31,8 +34,12 @@ class FunctionTwoElements(Header):
             self._materials.append(material)
 
     def resolve_defaults(self, defaults: ModelParameters) -> None:
-        if not isinstance(self.total_thickness, Value):
-            self.total_thickness = Value(self.total_thickness, unit=defaults.length_unit)
+        if self.thickness is None:
+            self.thickness = Value(0.0, unit=defaults.length_unit)
+        elif not isinstance(self.thickness, Value):
+            self.thickness = Value(self.thickness, unit=defaults.length_unit)
+        elif self.thickness.unit is None:
+            self.thickness.unit = defaults.length_unit
 
     def resolve_to_layers(self) -> List[Layer]:
         # pre-defined math functions allowed
@@ -50,15 +57,16 @@ class FunctionTwoElements(Header):
             "arccos": acos,
             "arctan": atan,
         }
-        di = self.total_thickness.magnitude / self.slices
-        thickness = Value(magnitude=di, unit=self.total_thickness.unit)
+        di = self.thickness.magnitude / self.slices
+        thickness = Value(magnitude=di, unit=self.thickness.unit)
+        roughness = Value(magnitude=di / 2.0, unit=self.thickness.unit)
         output = []
         for i in range(self.slices):
             loc = {"x": (i + 0.5) / self.slices}
             fraction = max(0.0, min(1.0, eval(self.function, glo, loc)))
             composition = Composit(composition={self.material1: (1.0 - fraction), self.material2: fraction})
             composition.resolve_names({self.material1: self._materials[0], self.material2: self._materials[1]})
-            output.append(Layer(material=composition, thickness=thickness))
+            output.append(Layer(material=composition, thickness=thickness, roughness=roughness))
         return output
 
 

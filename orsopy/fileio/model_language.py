@@ -12,8 +12,9 @@ from typing import Dict, List, Optional, Union
 
 from ..utils.chemical_formula import Formula
 from . import model_complex
-from .base import Header
-from .model_building_blocks import DENSITY_RESOLVERS, SUBSTACK_TYPES, Composit, Layer, Material, ModelParameters
+from .base import Header, Literal
+from .model_building_blocks import (DENSITY_RESOLVERS, SUBSTACK_TYPES, Composit, Layer, Material, ModelParameters,
+                                    SubStackType)
 
 
 def find_idx(string, start, value):
@@ -26,10 +27,11 @@ def find_idx(string, start, value):
 
 
 @dataclass
-class SubStack(Header):
+class SubStack(Header, SubStackType):
     repetitions: int = 1
     stack: Optional[str] = None
     sequence: Optional[List[Layer]] = None
+    sub_stack_class: Literal["SubStack"] = "SubStack"
 
     original_name = None
 
@@ -55,7 +57,7 @@ class SubStack(Header):
                         try:
                             thickness = float(items[1])
                         except ValueError:
-                            # if can't be interpreted as umber, assume name has space
+                            # it can't be interpreted as number, assume name has space
                             thickness = 0.0
                             item = stack[idx:next_idx].strip()
                     else:

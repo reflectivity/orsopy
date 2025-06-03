@@ -1,0 +1,10 @@
+sample:
+    model:
+        comment: Saw tooth sample model
+        stack: air | 5 (gradient 100) | Si
+        sub_stacks:
+          gradient:
+            sub_stack_class: FunctionTwoElements
+            material1: Ni
+            material2: Ti
+            function: x

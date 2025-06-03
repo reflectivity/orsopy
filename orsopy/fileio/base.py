@@ -271,12 +271,23 @@ class Header:
                     # check if the item is in the list of allowed
                     # subtypes
                     return item
+                potential_res = []
                 for subt in subtypes:
                     # if it's not, then try to resolve its type.
-                    res = Header._resolve_type(subt, item)
-                    if res is not None:
-                        # This type conversion worked, return the result.
-                        return res
+                    with warnings.catch_warnings(record=True) as w:
+                        res = Header._resolve_type(subt, item)
+                        if res is not None:
+                            # This type conversion worked, return the result.
+                            if len(w) > 0:
+                                potential_res.append((w, res))
+                            else:
+                                return res
+                if len(potential_res) > 0:
+                    # a potential type was found, but it raised a warning
+                    w, res = potential_res[0]
+                    # make sure the warning is displayed
+                    warnings.warn(w[-1].message, w[-1].category, w[-1].lineno)
+                    return res
             elif hbase is Literal:
                 # Special case of a string Literal, which defines a list of valid strings.
                 # TODO: Should we first convert the value to a string?

@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
@@ -7,18 +8,21 @@ from .base import ComplexValue, Header, Value
 
 DENSITY_RESOLVERS: List[MaterialResolver] = []
 
-try:
-    from typing import Protocol
-except ImportError:
-    Protocol = object
 
-
-class SubStackType(Protocol):
+class SubStackType(ABC):
     # Protocol for all items that can be placed in sub_stack
+
+    @property
+    @abstractmethod
+    def sub_stack_class(self) -> str: ...
+
+    @abstractmethod
     def resolve_names(self, resolvable_items): ...
 
-    def resolve_defaults(self, defaults: "ModelParameters") -> None: ...
+    @abstractmethod
+    def resolve_defaults(self, defaults: "ModelParameters"): ...
 
+    @abstractmethod
     def resolve_to_layers(self) -> List["Layer"]: ...
 
 
@@ -167,7 +171,7 @@ class Composit(Header):
         for mat in self._composition_materials.values():
             mat.resolve_defaults(defaults)
 
-    def generate_density(self):
+    def generate_density(self, xray_energy=None):
         """
         Create a material based on the composition attribute.
         """
@@ -175,16 +179,17 @@ class Composit(Header):
         for key, value in self.composition.items():
             mi = self._composition_materials[key]
             mi.generate_density()
-            sldi = mi.get_sld()
+            sldi = mi.get_sld(xray_energy=xray_energy)
             sld += value * sldi
         mix_str = ";".join([f"{value}x{key}" for key, value in self.composition.items()])
-        self.material = Material(
+        return Material(
             sld=ComplexValue(real=sld.real, imag=sld.imag, unit="1/angstrom^2"),
             comment=f"composition material: {mix_str}",
         )
 
     def get_sld(self, xray_energy=None):
-        return self.material.get_sld(xray_energy=xray_energy)
+        material = self.generate_density(xray_energy=xray_energy)
+        return material.get_sld(xray_energy=xray_energy)
 
 
 SPECIAL_MATERIALS = {
