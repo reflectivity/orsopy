@@ -6,9 +6,9 @@ have a common "sub_stack_class" attribute that has to be set to the class name.
 """
 
 from dataclasses import dataclass
-from typing import List, Literal, Optional, Union
+from typing import List, Optional, Union
 
-from .base import ComplexValue, Header, Value
+from .base import ComplexValue, Header, Value, Literal
 from .model_building_blocks import SPECIAL_MATERIALS, Composit, Layer, Material, ModelParameters, SubStackType
 
 
@@ -57,15 +57,17 @@ class FunctionTwoElements(Header, SubStackType):
 
     def resolve_to_layers(self) -> List[Layer]:
         # pre-defined math functions allowed
-        from math import acos, asin, atan, cos, exp, pi, sin, sqrt, tan
+        from math import acos, asin, atan, cos, exp, pi, sin, sqrt, tan, sinh, cosh, tanh
 
-        loc = {}
         glo = {
             "sqrt": sqrt,
             "exp": exp,
             "sin": sin,
             "cos": cos,
             "tan": tan,
+            "sinh": sinh,
+            "cosh": cosh,
+            "tanh": tanh,
             "pi": pi,
             "arcsin": asin,
             "arccos": acos,
