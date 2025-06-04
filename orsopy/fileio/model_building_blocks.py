@@ -34,6 +34,7 @@ class ModelParameters(Header):
     number_density_unit: str = "1/nm^3"
     sld_unit: str = "1/angstrom^2"
     magnetic_moment_unit: str = "muB"
+    slice_resolution: Value = field(default_factory=lambda: Value(1.0, "nm"))
 
 
 @dataclass

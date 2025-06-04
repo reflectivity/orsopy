@@ -26,7 +26,7 @@ class TestMaterial(unittest.TestCase):
 
     def test_values(self):
         m = orsopy.fileio.model_building_blocks.Material(
-            formula="Fe2O3", mass_density={"magnitude": 7.0, "unit": "g/cm^3"}
+            formula="Fe2O3", mass_density=Value(magnitude=7.0, unit= "g/cm^3")
         )
         assert m.mass_density == Value(7.0, "g/cm^3")
 
@@ -441,7 +441,7 @@ class TestSampleModel(unittest.TestCase):
             stack="air | gradient | Si",
             sub_stacks={
                 "gradient": mc.FunctionTwoElements(
-                    material1="Cr", material2="Fe", thickness=150.0, function="x", slices=10
+                    material1="Cr", material2="Fe", thickness=150.0, function="x", slice_resolution=15.0
                 )
             },
         )
