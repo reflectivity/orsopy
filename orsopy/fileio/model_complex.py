@@ -25,6 +25,7 @@ class FunctionTwoElements(Header, SubStackType):
     The function string is evaluated according to python syntax using only build-in operators
     and a limited set of mathematical functions and constants defined in the class constant **ALLOWED_FUNCTIONS**.
     """
+
     material1: str
     material2: str
     function: str
@@ -33,12 +34,20 @@ class FunctionTwoElements(Header, SubStackType):
     slice_resolution: Optional[Union[float, Value]] = None
     sub_stack_class: Literal["FunctionTwoElements"] = "FunctionTwoElements"
 
-    ALLOWED_FUNCTIONS = ["pi",
-                         "sqrt", "exp",
-                         "sin", "cos", "tan",
-                         "sinh", "cosh", "tanh",
-                         "asin", "acos", "atan",
-                         ]
+    ALLOWED_FUNCTIONS = [
+        "pi",
+        "sqrt",
+        "exp",
+        "sin",
+        "cos",
+        "tan",
+        "sinh",
+        "cosh",
+        "tanh",
+        "asin",
+        "acos",
+        "atan",
+    ]
 
     def resolve_names(self, resolvable_items):
         self._materials = []
@@ -77,9 +86,10 @@ class FunctionTwoElements(Header, SubStackType):
         # pre-defined math functions allowed
         glo = {}
         import math
+
         for name in self.ALLOWED_FUNCTIONS:
-            param  = getattr(math, name)
-            glo[name]=param
+            param = getattr(math, name)
+            glo[name] = param
 
         # use the approximate slice resolution but make sure the total thickness is exact
         length_unit = self.thickness.unit

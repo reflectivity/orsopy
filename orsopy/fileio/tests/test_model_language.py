@@ -4,8 +4,8 @@ Tests for fileio.model_language module
 
 # pylint: disable=R0201
 
-import unittest
 import sys
+import unittest
 
 from datetime import datetime
 from os.path import join as pjoin
@@ -451,7 +451,7 @@ class TestSampleModel(unittest.TestCase):
         for li in layers:
             li.material.generate_density()
             li.material.get_sld()
-        if sys.version_info < (3,8,0):
+        if sys.version_info < (3, 8, 0):
             sm = ml.SampleModel.from_dict(sm.to_dict())
             layers = sm.resolve_to_layers()
             self.assertEqual(len(layers), 12)
