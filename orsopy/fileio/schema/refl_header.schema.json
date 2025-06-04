@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v1.1/orsopy/fileio/schema/refl_header.schema.json",
+  "$id": "https://raw.githubusercontent.com/reflectivity/orsopy/v1.2/orsopy/fileio/schema/refl_header.schema.json",
   "$defs": {
     "AlternatingField": {
       "properties": {
@@ -540,6 +540,112 @@
       "title": "File",
       "type": "object"
     },
+    "FunctionTwoElements": {
+      "properties": {
+        "material1": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "material2": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "function": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "thickness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "roughness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "slice_resolution": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "sub_stack_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "const": "FunctionTwoElements",
+          "default": "FunctionTwoElements"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "material1",
+        "material2",
+        "function"
+      ],
+      "title": "FunctionTwoElements",
+      "type": "object"
+    },
     "InstrumentSettings": {
       "properties": {
         "incident_angle": {
@@ -929,6 +1035,9 @@
           ],
           "default": "muB"
         },
+        "slice_resolution": {
+          "$ref": "#/$defs/Value"
+        },
         "comment": {
           "anyOf": [
             {
@@ -1287,7 +1396,14 @@
           "anyOf": [
             {
               "additionalProperties": {
-                "$ref": "#/$defs/SubStack"
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/SubStack"
+                  },
+                  {
+                    "$ref": "#/$defs/FunctionTwoElements"
+                  }
+                ]
               },
               "type": "object"
             },
@@ -1469,7 +1585,7 @@
           ],
           "default": null
         },
-        "represents": {
+        "sub_stack_class": {
           "anyOf": [
             {
               "type": "string"
@@ -1478,30 +1594,8 @@
               "type": "null"
             }
           ],
-          "default": null
-        },
-        "arguments": {
-          "anyOf": [
-            {
-              "items": {},
-              "type": "array"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "keywords": {
-          "anyOf": [
-            {
-              "type": "object"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
+          "const": "SubStack",
+          "default": "SubStack"
         },
         "comment": {
           "anyOf": [

@@ -8,12 +8,23 @@ have a common "sub_stack_class" attribute that has to be set to the class name.
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
-from .base import ComplexValue, Header, Value, Literal
+from .base import ComplexValue, Header, Literal, Value
 from .model_building_blocks import SPECIAL_MATERIALS, Composit, Layer, Material, ModelParameters, SubStackType
 
 
 @dataclass
 class FunctionTwoElements(Header, SubStackType):
+    """
+    Models a continous variation between two materials/SLDs according to an analytical function.
+
+    The profile rho(z) is defined according to the relative layer thickness as fraction of material 2:
+        rho(z) = (1-f((x-x0)/thickness))*rho_1 + f((x-x0)/thickness)*rho_2
+
+    f is bracketed between 0 and 1 to prevent any artefacts with SLDs that are non-physical.
+
+    The function string is evaluated according to python syntax using only build-in operators
+    and a limited set of mathematical functions and constants defined in the class constant **ALLOWED_FUNCTIONS**.
+    """
     material1: str
     material2: str
     function: str
@@ -21,6 +32,13 @@ class FunctionTwoElements(Header, SubStackType):
     roughness: Optional[Union[float, Value]] = None
     slice_resolution: Optional[Union[float, Value]] = None
     sub_stack_class: Literal["FunctionTwoElements"] = "FunctionTwoElements"
+
+    ALLOWED_FUNCTIONS = ["pi",
+                         "sqrt", "exp",
+                         "sin", "cos", "tan",
+                         "sinh", "cosh", "tanh",
+                         "asin", "acos", "atan",
+                         ]
 
     def resolve_names(self, resolvable_items):
         self._materials = []
@@ -57,22 +75,12 @@ class FunctionTwoElements(Header, SubStackType):
 
     def resolve_to_layers(self) -> List[Layer]:
         # pre-defined math functions allowed
-        from math import acos, asin, atan, cos, exp, pi, sin, sqrt, tan, sinh, cosh, tanh
+        glo = {}
+        import math
+        for name in self.ALLOWED_FUNCTIONS:
+            param  = getattr(math, name)
+            glo[name]=param
 
-        glo = {
-            "sqrt": sqrt,
-            "exp": exp,
-            "sin": sin,
-            "cos": cos,
-            "tan": tan,
-            "sinh": sinh,
-            "cosh": cosh,
-            "tanh": tanh,
-            "pi": pi,
-            "arcsin": asin,
-            "arccos": acos,
-            "arctan": atan,
-        }
         # use the approximate slice resolution but make sure the total thickness is exact
         length_unit = self.thickness.unit
         slices = int(round(self.thickness.magnitude / self.slice_resolution.as_unit(length_unit)))

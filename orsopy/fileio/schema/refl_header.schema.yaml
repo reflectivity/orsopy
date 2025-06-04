@@ -284,6 +284,55 @@ $defs:
     - file
     title: File
     type: object
+  FunctionTwoElements:
+    properties:
+      comment:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+      function:
+        anyOf:
+        - type: string
+        - type: 'null'
+      material1:
+        anyOf:
+        - type: string
+        - type: 'null'
+      material2:
+        anyOf:
+        - type: string
+        - type: 'null'
+      roughness:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+        default: null
+      slice_resolution:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+        default: null
+      sub_stack_class:
+        anyOf:
+        - type: string
+        - type: 'null'
+        const: FunctionTwoElements
+        default: FunctionTwoElements
+      thickness:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+        default: null
+    required:
+    - material1
+    - material2
+    - function
+    title: FunctionTwoElements
+    type: object
   InstrumentSettings:
     properties:
       comment:
@@ -473,6 +522,8 @@ $defs:
         - type: string
         - type: 'null'
         default: 1/angstrom^2
+      slice_resolution:
+        $ref: '#/$defs/Value'
     title: ModelParameters
     type: object
   Person:
@@ -793,7 +844,9 @@ $defs:
       sub_stacks:
         anyOf:
         - additionalProperties:
-            $ref: '#/$defs/SubStack'
+            anyOf:
+            - $ref: '#/$defs/SubStack'
+            - $ref: '#/$defs/FunctionTwoElements'
           type: object
         - type: 'null'
         default: null
@@ -828,20 +881,9 @@ $defs:
     type: object
   SubStack:
     properties:
-      arguments:
-        anyOf:
-        - items: {}
-          type: array
-        - type: 'null'
-        default: null
       comment:
         anyOf:
         - type: string
-        - type: 'null'
-        default: null
-      keywords:
-        anyOf:
-        - type: object
         - type: 'null'
         default: null
       repetitions:
@@ -849,11 +891,6 @@ $defs:
         - type: integer
         - type: 'null'
         default: 1
-      represents:
-        anyOf:
-        - type: string
-        - type: 'null'
-        default: null
       sequence:
         anyOf:
         - items:
@@ -866,6 +903,12 @@ $defs:
         - type: string
         - type: 'null'
         default: null
+      sub_stack_class:
+        anyOf:
+        - type: string
+        - type: 'null'
+        const: SubStack
+        default: SubStack
     title: SubStack
     type: object
   Value:
@@ -1073,7 +1116,7 @@ $defs:
     - error_of
     title: sR
     type: object
-$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.1/orsopy/fileio/schema/refl_header.schema.json
+$id: https://raw.githubusercontent.com/reflectivity/orsopy/v1.2/orsopy/fileio/schema/refl_header.schema.json
 $schema: https://json-schema.org/draft/2020-12/schema
 properties:
   columns:
