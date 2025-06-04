@@ -18,6 +18,7 @@ class FunctionTwoElements(Header, SubStackType):
     material2: str
     function: str
     thickness: Optional[Union[float, Value]] = None
+    roughness: Optional[Union[float, Value]] = None
     slice_resolution: Optional[Union[float, Value]] = None
     sub_stack_class: Literal["FunctionTwoElements"] = "FunctionTwoElements"
 
@@ -39,6 +40,13 @@ class FunctionTwoElements(Header, SubStackType):
             self.thickness = Value(self.thickness, unit=defaults.length_unit)
         elif self.thickness.unit is None:
             self.thickness.unit = defaults.length_unit
+
+        if self.roughness is None:
+            self.roughness = defaults.roughness
+        elif not isinstance(self.roughness, Value):
+            self.roughness = Value(self.roughness, unit=defaults.length_unit)
+        elif self.roughness.unit is None:
+            self.roughness.unit = defaults.length_unit
 
         if self.slice_resolution is None:
             self.slice_resolution = defaults.slice_resolution
@@ -65,7 +73,7 @@ class FunctionTwoElements(Header, SubStackType):
         }
         # use the approximate slice resolution but make sure the total thickness is exact
         length_unit = self.thickness.unit
-        slices = int(round(self.thickness.magnitude/self.slice_resolution.as_unit(length_unit)))
+        slices = int(round(self.thickness.magnitude / self.slice_resolution.as_unit(length_unit)))
         di = self.thickness.magnitude / slices
         thickness = Value(magnitude=di, unit=length_unit)
         roughness = Value(magnitude=di / 2.0, unit=length_unit)
@@ -76,4 +84,5 @@ class FunctionTwoElements(Header, SubStackType):
             composition = Composit(composition={self.material1: (1.0 - fraction), self.material2: fraction})
             composition.resolve_names({self.material1: self._materials[0], self.material2: self._materials[1]})
             output.append(Layer(material=composition, thickness=thickness, roughness=roughness))
+        output[0].roughness = self.roughness
         return output

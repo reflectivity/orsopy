@@ -8,3 +8,7 @@ sample:
             material1: Ni
             material2: Ti
             function: x
+        globals:
+            slice_resolution:
+                magnitude: 10.0
+                unit: nm
