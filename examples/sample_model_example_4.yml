@@ -1,28 +1,38 @@
 sample:
     model:
-        origin: softmatter example
-        stack: Si | LL | rLL | D2O
+        origin: refnx example
+        stack: Si | LL | rLL | solvent
         sub_stacks:
             LL:
-                sequence:
-                - material: {sld: 1.88401254e-06}
-                  thickness: 9.0
-                  roughness: 3.0
-                - material: {sld: -3.73401535e-07}
-                  thickness: 1.4
-                  roughness: 3.0
-                represents:  refnx.reflect.LipidLeaflet
-                arguments: [56, 6.01e-4, 319, 9, -2.92e-4, 782, 14, 3, 3]
+                sub_stack_class: LipidLeaflet
+                apm: 56.0
+                b_heads: 6.01e-4
+                vm_heads: 319.0
+                b_tails: -2.92e-4
+                vm_tails: 782.0
+                thickness_heads: 9.0
+                head_solvent: solvent
+                tail_solvent: solvent
+                thickness: 23.0
+                comment: Shows the equivalence of using Value or float for apm/vm_heads/vm_tails
             rLL:
-                sequence:
-                - material: {sld: -3.73401535e-07}
-                  thickness: 1.4
-                  roughness: 0.0
-                - material: {sld: 1.88401254e-06}
-                  thickness: 9.0
-                  roughness: 3.0
-                represents:  refnx.reflect.LipidLeaflet
-                arguments: [56, 6.01e-4, 319, 9, -2.92e-4, 782, 14, 3, 0]
-                keywords: {reverse_monolayer: true}
+                sub_stack_class: LipidLeaflet
+                apm: {magnitude: 56.0, unit: Angstrom^2}
+                b_heads: 6.01e-4
+                vm_heads: {magnitude: 319.0, unit: Angstrom^3}
+                b_tails: -2.92e-4
+                vm_tails: {magnitude: 782.0, unit: Angstrom^3}
+                thickness_heads: 9.0
+                head_solvent: solvent
+                tail_solvent: solvent
+                thickness: 23.0
+                reverse_monolayer: true
+        composits:
+            solvent:
+                composition:
+                    H2O: 0.3
+                    D2O: 0.7
+
         globals:
-            length_unit: angstrom
+            length_unit: Angstrom
+            roughness: {magnitude: 3.0, unit: Angstrom}

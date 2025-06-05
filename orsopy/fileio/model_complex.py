@@ -106,3 +106,134 @@ class FunctionTwoElements(Header, SubStackType):
             output.append(Layer(material=composition, thickness=thickness, roughness=roughness))
         output[0].roughness = self.roughness
         return output
+
+
+@dataclass
+class LipidLeaflet(Header, SubStackType):
+    """
+    Bilayer based on refnx.reflect.LipidLeaflet
+    To keep consistent with other sample model elements, the thickness of tails is deduced from
+    total thickness and thickness_heads.
+
+    TODO: Review class parameters within ORSO.
+    """
+
+    apm: Union[float, Value]
+    b_heads: Union[float, ComplexValue]
+    vm_heads: Union[float, Value]
+    b_tails: Union[float, ComplexValue]
+    vm_tails: Union[float, Value]
+    thickness_heads: Union[float, Value]
+    roughness_head_tail: Optional[Union[float, Value]] = None
+    head_solvent: Optional[Union[Material, Composit, str]] = None
+    tail_solvent: Optional[Union[Material, Composit, str]] = None
+    thickness: Optional[Union[float, Value]] = None
+    roughness: Optional[Union[float, Value]] = None
+    reverse_monolayer: bool = False
+
+    sub_stack_class: Literal["LipidLeaflet"] = "LipidLeaflet"
+
+    def resolve_names(self, resolvable_items):
+        if isinstance(self.head_solvent, (Material, Composit)):
+            pass
+        elif self.head_solvent in resolvable_items:
+            self.head_solvent = resolvable_items[self.head_solvent]
+        elif self.head_solvent in SPECIAL_MATERIALS:
+            self.head_solvent = SPECIAL_MATERIALS[self.head_solvent]
+        else:
+            self.head_solvent = Material(formula=self.head_solvent)
+
+        if isinstance(self.tail_solvent, (Material, Composit)):
+            pass
+        elif self.tail_solvent in resolvable_items:
+            self.tail_solvent = resolvable_items[self.tail_solvent]
+        elif self.tail_solvent in SPECIAL_MATERIALS:
+            self.tail_solvent = SPECIAL_MATERIALS[self.tail_solvent]
+        else:
+            self.tail_solvent = Material(formula=self.tail_solvent)
+
+    def resolve_defaults(self, defaults: "ModelParameters"):
+        if self.thickness is None:
+            self.thickness = Value(0.0, unit=defaults.length_unit)
+        elif not isinstance(self.thickness, Value):
+            self.thickness = Value(self.thickness, unit=defaults.length_unit)
+        elif self.thickness.unit is None:
+            self.thickness.unit = defaults.length_unit
+
+        if not isinstance(self.thickness_heads, Value):
+            self.thickness_heads = Value(self.thickness_heads, unit=defaults.length_unit)
+        elif self.thickness_heads.unit is None:
+            self.thickness_heads.unit = defaults.length_unit
+
+        if self.roughness is None:
+            self.roughness = defaults.roughness
+        elif not isinstance(self.roughness, Value):
+            self.roughness = Value(self.roughness, unit=defaults.length_unit)
+        elif self.roughness.unit is None:
+            self.roughness.unit = defaults.length_unit
+
+        if self.roughness_head_tail is None:
+            self.roughness_head_tail = defaults.roughness
+        elif not isinstance(self.roughness_head_tail, Value):
+            self.roughness_head_tail = Value(self.roughness_head_tail, unit=defaults.length_unit)
+        elif self.roughness_head_tail.unit is None:
+            self.roughness_head_tail.unit = defaults.length_unit
+
+        if not isinstance(self.b_heads, ComplexValue):
+            self.b_heads = ComplexValue(real=self.b_heads, imag=0.0, unit=defaults.length_unit)
+        if not isinstance(self.b_tails, ComplexValue):
+            self.b_tails = ComplexValue(real=self.b_tails, imag=0.0, unit=defaults.length_unit)
+
+        if not isinstance(self.apm, Value):
+            self.apm = Value(self.apm, unit=defaults.length_unit + "^2")
+        elif self.apm.unit is None:
+            self.apm.unit = defaults.length_unit + "^2"
+
+        if not isinstance(self.vm_heads, Value):
+            self.vm_heads = Value(self.vm_heads, unit=defaults.length_unit + "^3")
+        elif self.vm_heads.unit is None:
+            self.vm_heads.unit = defaults.length_unit + "^3"
+
+        if not isinstance(self.vm_tails, Value):
+            self.vm_tails = Value(self.vm_tails, unit=defaults.length_unit + "^3")
+        elif self.vm_tails.unit is None:
+            self.vm_tails.unit = defaults.length_unit + "^3"
+
+    @property
+    def volfrac_h(self):
+        # Volume fraction of head group in head group region
+        return self.vm_heads.as_unit("Angstrom^3") / (
+            self.apm.as_unit("Angstrom^2") * self.thickness_heads.as_unit("Angstrom")
+        )
+
+    @property
+    def volfrac_t(self):
+        # Volume fraction of head group in head group region
+        return self.vm_tails.as_unit("Angstrom^3") / (
+            self.apm.as_unit("Angstrom^2")
+            * (self.thickness.as_unit("Angstrom") - self.thickness_heads.as_unit("Angstrom"))
+        )
+
+    def resolve_to_layers(self) -> List["Layer"]:
+        sld_value = self.b_heads.as_unit("Angstrom") / self.vm_heads.as_unit("Angstrom^3")
+        sld = ComplexValue(real=sld_value.real, imag=sld_value.imag, unit="1/Angstrom^2")
+        composition_heads = Composit(composition={"sld_heads": self.volfrac_h, "solvent_heads": 1.0 - self.volfrac_h})
+        composition_heads.resolve_names({"sld_heads": Material(sld=sld), "solvent_heads": self.head_solvent})
+        heads = Layer(material=composition_heads, thickness=self.thickness_heads, roughness=self.roughness_head_tail)
+
+        sld_value = self.b_tails.as_unit("Angstrom") / self.vm_tails.as_unit("Angstrom^3")
+        sld = ComplexValue(real=sld_value.real, imag=sld_value.imag, unit="1/Angstrom^2")
+        composition_tails = Composit(composition={"sld_tails": self.volfrac_t, "solvent_tails": 1.0 - self.volfrac_t})
+        composition_tails.resolve_names({"sld_tails": Material(sld=sld), "solvent_tails": self.tail_solvent})
+        thickness_tails = Value(
+            magnitude=self.thickness.as_unit(self.thickness_heads.unit) - self.thickness_heads.magnitude,
+            unit=self.thickness_heads.unit,
+        )
+        tails = Layer(material=composition_tails, thickness=thickness_tails, roughness=self.roughness_head_tail)
+
+        if self.reverse_monolayer:
+            tails.roughness = self.roughness
+            return [tails, heads]
+        else:
+            heads.roughness = self.roughness
+            return [heads, tails]
