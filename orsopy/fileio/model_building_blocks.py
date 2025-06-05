@@ -11,6 +11,7 @@ DENSITY_RESOLVERS: List[MaterialResolver] = []
 
 class SubStackType(ABC):
     # Protocol for all items that can be placed in sub_stack
+    _orso_name_export_priority = ["sub_stack_class"]
 
     @property
     @abstractmethod

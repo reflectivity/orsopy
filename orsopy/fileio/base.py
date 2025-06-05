@@ -58,6 +58,7 @@ class Header:
     """
 
     _orso_optionals: List[str] = []
+    # _orso_name_export_priority: List[str] # an optional list of attribute names to put first in the yaml export
     _subclass_dict_ = {}
 
     def __init_subclass__(cls, **kwargs):
@@ -385,6 +386,9 @@ class Header:
 
     def _to_object_dict(self):
         output = {}
+        # define dictionary entries for attributes to be exported first
+        for fname in getattr(self, "_orso_name_export_priority", []):
+            output[fname] = None
         for i, value in self.__dict__.items():
             if i.startswith("_") or (value is None and i in self._orso_optionals):
                 continue
@@ -524,6 +528,16 @@ class OrsoDumper(yaml.SafeDumper):
 unit_registry = None
 
 
+def get_unit_registry():
+    global unit_registry
+    if unit_registry is None:
+        import pint
+
+        unit_registry = pint.UnitRegistry()
+    unit_registry.define("Angstrom = angstrom")
+    return unit_registry
+
+
 @dataclass
 class ErrorValue(Header):
     """
@@ -608,11 +622,7 @@ class Value(Header):
         if output_unit == self.unit:
             return self.magnitude
 
-        global unit_registry
-        if unit_registry is None:
-            import pint
-
-            unit_registry = pint.UnitRegistry()
+        unit_registry = get_unit_registry()
 
         val = self.magnitude * unit_registry(self.unit)
         return val.to(output_unit).magnitude
@@ -652,11 +662,7 @@ class ComplexValue(Header):
         if output_unit == self.unit:
             return value
 
-        global unit_registry
-        if unit_registry is None:
-            import pint
-
-            unit_registry = pint.UnitRegistry()
+        unit_registry = get_unit_registry()
 
         val = value * unit_registry(self.unit)
         return val.to(output_unit).magnitude
@@ -694,11 +700,7 @@ class ValueRange(Header):
         if output_unit == self.unit:
             return (self.min, self.max)
 
-        global unit_registry
-        if unit_registry is None:
-            import pint
-
-            unit_registry = pint.UnitRegistry()
+        unit_registry = get_unit_registry()
 
         vmin = self.min * unit_registry(self.unit)
         vmax = self.max * unit_registry(self.unit)
@@ -735,11 +737,7 @@ class ValueVector(Header):
         if output_unit == self.unit:
             return (self.x, self.y, self.z)
 
-        global unit_registry
-        if unit_registry is None:
-            import pint
-
-            unit_registry = pint.UnitRegistry()
+        unit_registry = get_unit_registry()
 
         vx = self.x * unit_registry(self.unit)
         vy = self.y * unit_registry(self.unit)
