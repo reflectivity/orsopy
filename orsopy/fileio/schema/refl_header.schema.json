@@ -720,6 +720,48 @@
       "title": "InstrumentSettings",
       "type": "object"
     },
+    "ItemChanger": {
+      "properties": {
+        "like": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "but": {
+          "additionalProperties": true,
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "like",
+        "but"
+      ],
+      "title": "ItemChanger",
+      "type": "object"
+    },
     "Layer": {
       "properties": {
         "thickness": {
@@ -794,6 +836,208 @@
         }
       },
       "title": "Layer",
+      "type": "object"
+    },
+    "LipidLeaflet": {
+      "properties": {
+        "apm": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "b_heads": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/ComplexValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vm_heads": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "b_tails": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/ComplexValue"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vm_tails": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "thickness_heads": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "roughness_head_tail": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "head_solvent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Material"
+            },
+            {
+              "$ref": "#/$defs/Composit"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tail_solvent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Material"
+            },
+            {
+              "$ref": "#/$defs/Composit"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "thickness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "roughness": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/$defs/Value"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reverse_monolayer": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": false
+        },
+        "sub_stack_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "const": "LipidLeaflet",
+          "default": "LipidLeaflet"
+        },
+        "comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "apm",
+        "b_heads",
+        "vm_heads",
+        "b_tails",
+        "vm_tails",
+        "thickness_heads"
+      ],
+      "title": "LipidLeaflet",
       "type": "object"
     },
     "Material": {
@@ -1037,6 +1281,9 @@
         },
         "slice_resolution": {
           "$ref": "#/$defs/Value"
+        },
+        "default_solvent": {
+          "$ref": "#/$defs/Material"
         },
         "comment": {
           "anyOf": [
@@ -1398,10 +1645,16 @@
               "additionalProperties": {
                 "anyOf": [
                   {
+                    "$ref": "#/$defs/ItemChanger"
+                  },
+                  {
                     "$ref": "#/$defs/SubStack"
                   },
                   {
                     "$ref": "#/$defs/FunctionTwoElements"
+                  },
+                  {
+                    "$ref": "#/$defs/LipidLeaflet"
                   }
                 ]
               },
@@ -1596,6 +1849,23 @@
           ],
           "const": "SubStack",
           "default": "SubStack"
+        },
+        "environment": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Material"
+            },
+            {
+              "$ref": "#/$defs/Composit"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "comment": {
           "anyOf": [

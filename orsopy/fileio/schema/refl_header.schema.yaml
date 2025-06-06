@@ -369,6 +369,27 @@ $defs:
     - wavelength
     title: InstrumentSettings
     type: object
+  ItemChanger:
+    properties:
+      but:
+        additionalProperties: true
+        anyOf:
+        - type: object
+        - type: 'null'
+      comment:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+      like:
+        anyOf:
+        - type: string
+        - type: 'null'
+    required:
+    - like
+    - but
+    title: ItemChanger
+    type: object
   Layer:
     properties:
       comment:
@@ -403,6 +424,95 @@ $defs:
         - type: 'null'
         default: null
     title: Layer
+    type: object
+  LipidLeaflet:
+    properties:
+      apm:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+      b_heads:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/ComplexValue'
+        - type: 'null'
+      b_tails:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/ComplexValue'
+        - type: 'null'
+      comment:
+        anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+      head_solvent:
+        anyOf:
+        - $ref: '#/$defs/Material'
+        - $ref: '#/$defs/Composit'
+        - type: string
+        - type: 'null'
+        default: null
+      reverse_monolayer:
+        anyOf:
+        - type: boolean
+        - type: 'null'
+        default: false
+      roughness:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+        default: null
+      roughness_head_tail:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+        default: null
+      sub_stack_class:
+        anyOf:
+        - type: string
+        - type: 'null'
+        const: LipidLeaflet
+        default: LipidLeaflet
+      tail_solvent:
+        anyOf:
+        - $ref: '#/$defs/Material'
+        - $ref: '#/$defs/Composit'
+        - type: string
+        - type: 'null'
+        default: null
+      thickness:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+        default: null
+      thickness_heads:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+      vm_heads:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+      vm_tails:
+        anyOf:
+        - type: number
+        - $ref: '#/$defs/Value'
+        - type: 'null'
+    required:
+    - apm
+    - b_heads
+    - vm_heads
+    - b_tails
+    - vm_tails
+    - thickness_heads
+    title: LipidLeaflet
     type: object
   Material:
     properties:
@@ -495,6 +605,8 @@ $defs:
         - type: string
         - type: 'null'
         default: null
+      default_solvent:
+        $ref: '#/$defs/Material'
       length_unit:
         anyOf:
         - type: string
@@ -845,8 +957,10 @@ $defs:
         anyOf:
         - additionalProperties:
             anyOf:
+            - $ref: '#/$defs/ItemChanger'
             - $ref: '#/$defs/SubStack'
             - $ref: '#/$defs/FunctionTwoElements'
+            - $ref: '#/$defs/LipidLeaflet'
           type: object
         - type: 'null'
         default: null
@@ -883,6 +997,13 @@ $defs:
     properties:
       comment:
         anyOf:
+        - type: string
+        - type: 'null'
+        default: null
+      environment:
+        anyOf:
+        - $ref: '#/$defs/Material'
+        - $ref: '#/$defs/Composit'
         - type: string
         - type: 'null'
         default: null
