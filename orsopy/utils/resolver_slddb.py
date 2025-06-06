@@ -53,6 +53,8 @@ class ResolverSLDDB(MaterialResolver):
         dens = 0.0
         for i in range(len(formula)):
             res = api.search(formula=formula[i][0])
+            if len(res) == 0:
+                raise ValueError(f"Could not find element {formula[i][0]}")
             m = api.material(res[0]["ID"])
             n += formula[i][1]
             dens += 1e3 * m.fu_dens

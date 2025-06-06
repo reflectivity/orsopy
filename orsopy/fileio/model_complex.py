@@ -215,27 +215,27 @@ class LipidLeaflet(Header, SubStackType):
     @property
     def volfrac_h(self):
         # Volume fraction of head group in head group region
-        return self.vm_heads.as_unit("Angstrom^3") / (
-            self.apm.as_unit("Angstrom^2") * self.thickness_heads.as_unit("Angstrom")
+        return self.vm_heads.as_unit("angstrom^3") / (
+            self.apm.as_unit("angstrom^2") * self.thickness_heads.as_unit("angstrom")
         )
 
     @property
     def volfrac_t(self):
         # Volume fraction of head group in head group region
-        return self.vm_tails.as_unit("Angstrom^3") / (
-            self.apm.as_unit("Angstrom^2")
-            * (self.thickness.as_unit("Angstrom") - self.thickness_heads.as_unit("Angstrom"))
+        return self.vm_tails.as_unit("angstrom^3") / (
+            self.apm.as_unit("angstrom^2")
+            * (self.thickness.as_unit("angstrom") - self.thickness_heads.as_unit("angstrom"))
         )
 
     def resolve_to_layers(self) -> List["Layer"]:
-        sld_value = self.b_heads.as_unit("Angstrom") / self.vm_heads.as_unit("Angstrom^3")
-        sld = ComplexValue(real=sld_value.real, imag=sld_value.imag, unit="1/Angstrom^2")
+        sld_value = self.b_heads.as_unit("angstrom") / self.vm_heads.as_unit("angstrom^3")
+        sld = ComplexValue(real=sld_value.real, imag=sld_value.imag, unit="1/angstrom^2")
         composition_heads = Composit(composition={"sld_heads": self.volfrac_h, "solvent_heads": 1.0 - self.volfrac_h})
         composition_heads.resolve_names({"sld_heads": Material(sld=sld), "solvent_heads": self.head_solvent})
         heads = Layer(material=composition_heads, thickness=self.thickness_heads, roughness=self.roughness_head_tail)
 
-        sld_value = self.b_tails.as_unit("Angstrom") / self.vm_tails.as_unit("Angstrom^3")
-        sld = ComplexValue(real=sld_value.real, imag=sld_value.imag, unit="1/Angstrom^2")
+        sld_value = self.b_tails.as_unit("angstrom") / self.vm_tails.as_unit("angstrom^3")
+        sld = ComplexValue(real=sld_value.real, imag=sld_value.imag, unit="1/angstrom^2")
         composition_tails = Composit(composition={"sld_tails": self.volfrac_t, "solvent_tails": 1.0 - self.volfrac_t})
         composition_tails.resolve_names({"sld_tails": Material(sld=sld), "solvent_tails": self.tail_solvent})
         thickness_tails = Value(

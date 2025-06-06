@@ -39,9 +39,9 @@ JSON_MIMETYPE = "application/json"
 yaml.emitter.Emitter.process_tag = _noop
 
 # make sure that datetime strings get loaded as str not datetime instances
-yaml.constructor.SafeConstructor.yaml_constructors[
-    "tag:yaml.org,2002:timestamp"
-] = yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
+yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:timestamp"] = (
+    yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
+)
 
 
 class ORSOResolveError(ValueError):
@@ -296,7 +296,8 @@ class Header:
                     return item
                 else:
                     warnings.warn(
-                        f"Has to be one of {get_args(hint)} got {item}", ORSOSchemaWarning,
+                        f"Has to be one of {get_args(hint)} got {item}",
+                        ORSOSchemaWarning,
                     )
                     return str(item)
         return None
@@ -534,7 +535,7 @@ def get_unit_registry():
         import pint
 
         unit_registry = pint.UnitRegistry()
-    unit_registry.define("Angstrom = angstrom")
+    # unit_registry.define("Angstrom = angstrom") # optional extra units
     return unit_registry
 
 

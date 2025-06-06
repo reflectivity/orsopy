@@ -82,7 +82,13 @@ class Material(Header):
             self.comment = CACHED_MATERIALS[self.formula][1]
             return
 
-        formula = Formula(self.formula)
+        try:
+            formula = Formula(self.formula, strict=True)
+        except ValueError:
+            self.number_density = Value(magnitude=0.0, unit="1/nm^3")
+            self.comment = "could not locate density information for material"
+            return
+
         # first search for formula itself
         for ri in DENSITY_RESOLVERS:
             try:
@@ -118,7 +124,7 @@ class Material(Header):
 
         from orsopy.slddb.material import Material, get_element
 
-        formula = Formula(self.formula)
+        formula = Formula(self.formula, strict=True)
         if self.mass_density is not None:
             material = Material(
                 [(get_element(element), amount) for element, amount in formula],
@@ -170,6 +176,12 @@ class Composit(Header):
                 material = SPECIAL_MATERIALS[key]
             else:
                 material = Material(formula=key)
+
+            if isinstance(material, Layer):
+                # There was a layer that used a formula as name
+                # resolve to the material of that layer
+                material = material.material
+
             self._composition_materials[key] = material
 
     def resolve_defaults(self, defaults: ModelParameters):
@@ -230,11 +242,13 @@ class Layer(Header):
                     self.material = Material(formula=self.material)
                 else:
                     self.material = possible_material
+                    if isinstance(self.material, Composit):
+                        self.material.resolve_names(resolvable_items)
             elif self.material in SPECIAL_MATERIALS:
                 self.material = SPECIAL_MATERIALS[self.material]
             else:
                 self.material = Material(formula=self.material)
-        elif self.composition:
+        elif self.composition is not None:
             self._composition_materials = {}
             for key, value in self.composition.items():
                 if key in resolvable_items:

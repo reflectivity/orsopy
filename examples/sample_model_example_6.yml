@@ -1,14 +1,20 @@
 sample:
     model:
         comment: Saw tooth sample model
-        stack: air | 5 (gradient 100) | Si
+        stack: air | gtop 50 | 5 (rgradient 50 | gradient 50) | Si
         sub_stacks:
           gradient:
             sub_stack_class: FunctionTwoElements
             material1: Ni
             material2: Ti
             function: x
+          rgradient:
+            like: gradient
+            but:
+              function: 1-x
+          gtop:
+            like: gradient
+            but:
+              roughness: 15.0
         globals:
-            slice_resolution:
-                magnitude: 10.0
-                unit: nm
+            slice_resolution: {magnitude: 10.0, unit: nm}
