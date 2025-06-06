@@ -397,7 +397,7 @@ class TestSampleModel(unittest.TestCase):
         )
         stack = sm.resolve_stack()
         subs = ml.SubStack(repetitions=2, stack="a|c 15")
-        subs.resolve_names({"a": sub_stacks["a"], "c": materials["c"]})
+        subs.resolve_names({"a": sub_stacks["a"], "b": layers["b"], "c": materials["c"]})
         subs.resolve_defaults(defaults)
         assert len(stack) == 4
         assert stack[0] == orsopy.fileio.model_building_blocks.Layer(
