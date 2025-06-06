@@ -136,6 +136,9 @@ class LipidLeaflet(Header, SubStackType):
     def resolve_names(self, resolvable_items):
         if isinstance(self.head_solvent, (Material, Composit)):
             pass
+        elif self.head_solvent is None:
+            if "environment" in resolvable_items:
+                self.head_solvent = resolvable_items["environment"]
         elif self.head_solvent in resolvable_items:
             self.head_solvent = resolvable_items[self.head_solvent]
         elif self.head_solvent in SPECIAL_MATERIALS:
@@ -145,6 +148,9 @@ class LipidLeaflet(Header, SubStackType):
 
         if isinstance(self.tail_solvent, (Material, Composit)):
             pass
+        elif self.tail_solvent is None:
+            if "environment" in resolvable_items:
+                self.tail_solvent = resolvable_items["environment"]
         elif self.tail_solvent in resolvable_items:
             self.tail_solvent = resolvable_items[self.tail_solvent]
         elif self.tail_solvent in SPECIAL_MATERIALS:
@@ -198,6 +204,11 @@ class LipidLeaflet(Header, SubStackType):
             self.vm_tails = Value(self.vm_tails, unit=defaults.length_unit + "^3")
         elif self.vm_tails.unit is None:
             self.vm_tails.unit = defaults.length_unit + "^3"
+
+        if self.head_solvent is None:
+            self.head_solvent = defaults.default_solvent
+        if self.tail_solvent is None:
+            self.tail_solvent = defaults.default_solvent
 
     @property
     def volfrac_h(self):

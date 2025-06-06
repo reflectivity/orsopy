@@ -15,31 +15,16 @@ class SubStackType(ABC):
 
     @property
     @abstractmethod
-    def sub_stack_class(self) -> str:
-        ...
+    def sub_stack_class(self) -> str: ...
 
     @abstractmethod
-    def resolve_names(self, resolvable_items):
-        ...
+    def resolve_names(self, resolvable_items): ...
 
     @abstractmethod
-    def resolve_defaults(self, defaults: "ModelParameters"):
-        ...
+    def resolve_defaults(self, defaults: "ModelParameters"): ...
 
     @abstractmethod
-    def resolve_to_layers(self) -> List["Layer"]:
-        ...
-
-
-@dataclass
-class ModelParameters(Header):
-    roughness: Value = field(default_factory=lambda: Value(0.3, "nm"))
-    length_unit: str = "nm"
-    mass_density_unit: str = "g/cm^3"
-    number_density_unit: str = "1/nm^3"
-    sld_unit: str = "1/angstrom^2"
-    magnetic_moment_unit: str = "muB"
-    slice_resolution: Value = field(default_factory=lambda: Value(1.0, "nm"))
+    def resolve_to_layers(self) -> List["Layer"]: ...
 
 
 @dataclass
@@ -53,7 +38,7 @@ class Material(Header):
 
     original_name = None
 
-    def resolve_defaults(self, defaults: ModelParameters):
+    def resolve_defaults(self, defaults: "ModelParameters"):
         if self.formula is None and self.sld is None:
             if self.original_name is None:
                 raise ValueError("Material has to either define sld or formula")
@@ -151,6 +136,20 @@ class Material(Header):
                 return rel * material.rho_of_E(xray_energy)
         else:
             return 0.0j
+
+
+@dataclass
+class ModelParameters(Header):
+    roughness: Value = field(default_factory=lambda: Value(0.3, "nm"))
+    length_unit: str = "nm"
+    mass_density_unit: str = "g/cm^3"
+    number_density_unit: str = "1/nm^3"
+    sld_unit: str = "1/angstrom^2"
+    magnetic_moment_unit: str = "muB"
+    slice_resolution: Value = field(default_factory=lambda: Value(1.0, "nm"))
+    default_solvent: Material = field(
+        default_factory=lambda: Material(formula="H2O", mass_density=Value(1.0, "g/cm^3"))
+    )
 
 
 @dataclass

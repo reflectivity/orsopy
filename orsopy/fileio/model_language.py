@@ -13,7 +13,8 @@ from typing import Dict, List, Optional, Union
 from ..utils.chemical_formula import Formula
 from . import model_complex
 from .base import Header, Literal
-from .model_building_blocks import DENSITY_RESOLVERS, Composit, Layer, Material, ModelParameters, SubStackType
+from .model_building_blocks import (DENSITY_RESOLVERS, SPECIAL_MATERIALS, Composit, Layer, Material, ModelParameters,
+                                    SubStackType)
 
 
 def find_idx(string, start, value):
@@ -31,10 +32,21 @@ class SubStack(Header, SubStackType):
     stack: Optional[str] = None
     sequence: Optional[List[Layer]] = None
     sub_stack_class: Literal["SubStack"] = "SubStack"
+    environment: Optional[Union[str, Material, Composit]] = None
 
     original_name = None
 
     def resolve_names(self, resolvable_items):
+        if isinstance(self.environment, str):
+            if self.environment in resolvable_items:
+                self.environment = resolvable_items[self.environment]
+            elif self.environment in SPECIAL_MATERIALS:
+                self.environment = SPECIAL_MATERIALS[self.environment]
+            else:
+                self.environment = Material(formula=self.environment)
+        if self.environment is not None:
+            resolvable_items = {"environment": self.environment, **resolvable_items}
+
         if self.stack is None and self.sequence is None:
             raise ValueError("SubStack has to either define stack or sequence")
         if self.sequence is None:
@@ -47,8 +59,17 @@ class SubStack(Header, SubStackType):
                     close_idx = find_idx(stack, idx, ")")
                     next_idx = find_idx(stack, close_idx, "|")
                     rep, sub_stack = stack[idx:close_idx].split("(", 1)
-                    rep = int(rep)
-                    obj = SubStack(repetitions=rep, stack=sub_stack.strip())
+                    if rep.strip() == "":
+                        rep = 1
+                    else:
+                        rep = int(rep)
+                    rest = stack[close_idx + 1 : next_idx]
+                    if rest.strip().startswith("in "):
+                        # the Stack has elements within a matrix material
+                        environment = rest.strip()[3:]
+                    else:
+                        environment = None
+                    obj = SubStack(repetitions=rep, stack=sub_stack.strip(), environment=environment)
                 else:
                     items = stack[idx:next_idx].strip().rsplit(None, 1)
                     item = items[0].strip()
@@ -64,6 +85,9 @@ class SubStack(Header, SubStackType):
 
                     if item in resolvable_items:
                         obj = resolvable_items[item]
+                        if isinstance(obj, SubStackType):
+                            # create a copy of the object to allow different environments for same key
+                            obj = obj.__class__.from_dict(obj.to_dict())
                         if isinstance(obj, Material) or isinstance(obj, Composit):
                             obj = Layer(material=obj, thickness=thickness)
                         elif getattr(obj, "thickness", "ignore") is None:
@@ -107,10 +131,22 @@ for T in SubStackType.__subclasses__():
 
 
 @dataclass
+class ItemChanger(Header):
+    """
+    Allows to define a simple change in SubStackType item by
+    just updating a selected set of parameters.
+    """
+
+    like: str
+    but: dict
+    original_name = None
+
+
+@dataclass
 class SampleModel(Header):
     stack: str
     origin: Optional[str] = None
-    sub_stacks: Optional[Dict[str, SUBSTACK_TYPE]] = None
+    sub_stacks: Optional[Dict[str, Union[ItemChanger, SUBSTACK_TYPE]]] = None
     layers: Optional[Dict[str, Layer]] = None
     materials: Optional[Dict[str, Material]] = None
     composits: Optional[Dict[str, Composit]] = None
@@ -133,6 +169,12 @@ class SampleModel(Header):
         output = {}
         if self.sub_stacks:
             for key, ssi in self.sub_stacks.items():
+                if isinstance(ssi, ItemChanger):
+                    ssi_ref = self.sub_stacks[ssi.like]
+                    ssi_ref_data = ssi_ref.to_dict()
+                    ssi_ref_data.update(ssi.but)
+                    ssi = ssi_ref.__class__.from_dict(ssi_ref_data)
+                    self.sub_stacks[key] = ssi
                 ssi.original_name = key
             output.update(self.sub_stacks)
         if self.layers:
@@ -164,8 +206,17 @@ class SampleModel(Header):
                 close_idx = find_idx(stack, idx, ")")
                 next_idx = find_idx(stack, close_idx, "|")
                 rep, sub_stack = stack[idx:close_idx].split("(", 1)
-                rep = int(rep)
-                obj = SubStack(repetitions=rep, stack=sub_stack.strip())
+                if rep.strip() == "":
+                    rep = 1
+                else:
+                    rep = int(rep)
+                rest = stack[close_idx + 1 : next_idx]
+                if rest.strip().startswith("in "):
+                    # the Stack has elements within a matrix material
+                    environment = rest.strip()[3:]
+                else:
+                    environment = None
+                obj = SubStack(repetitions=rep, stack=sub_stack.strip(), environment=environment)
             else:
                 items = stack[idx:next_idx].strip().rsplit(None, 1)
                 item = items[0].strip()
