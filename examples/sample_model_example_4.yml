@@ -20,4 +20,4 @@ sample:
         globals:
             length_unit: angstrom
             roughness: {magnitude: 3.0, unit: angstrom}
-            default_solvent: {formula: '(HO)1H', mass_density: {magnitude: 1.0, unit: g/cm^3}}
+            default_solvent: {formula: 'H2O', mass_density: {magnitude: 1.0, unit: g/cm^3}}

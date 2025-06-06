@@ -94,8 +94,31 @@ class SubStack(Header, SubStackType):
                         elif getattr(obj, "thickness", "ignore") is None:
                             obj.thickness = thickness
                     else:
-                        obj = Layer(material=item, thickness=thickness)
-                        obj.original_name = item
+                        try:
+                            Formula(item, strict=True)
+                        except ValueError:
+                            # try to resolve name directly with databse
+                            res = None
+                            for resolver in DENSITY_RESOLVERS:
+                                res = resolver.resolve_item(item)
+                                if res is not None:
+                                    break
+                            if res is None:
+                                # assume name is a Formula to resolve within Layer
+                                obj = Layer(material=item, thickness=thickness)
+                                obj.original_name = item
+                            else:
+                                if "material" in res:
+                                    obj = Layer.from_dict(res)
+                                elif "composition" in res:
+                                    obj = Layer(material=Composit.from_dict(res), thickness=thickness)
+                                elif "formula" in res or "sld" in res:
+                                    obj = Layer(material=Material.from_dict(res), thickness=thickness)
+                                else:
+                                    obj = Layer(material=item, thickness=thickness)
+                                obj.original_name = item
+                                if getattr(obj, "thickness", "ignore") is None:
+                                    obj.thickness = thickness
                 if hasattr(obj, "resolve_names"):
                     obj.resolve_names(resolvable_items)
                 output.append(obj)
@@ -117,6 +140,7 @@ class SubStack(Header, SubStackType):
         for i in range(len(blocks)):
             if isinstance(blocks[i + added], Layer):
                 if blocks[i + added].material is None:
+                    # TODO: verify this case actually exists
                     blocks[i + added].generate_material()
                 blocks[i + added].material.generate_density()
             else:

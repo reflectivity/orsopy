@@ -277,44 +277,73 @@ class TestSubStack(unittest.TestCase):
             empty.resolve_names({})
 
     def test_resolution(self):
-        s = ml.SubStack(stack="air | b 13 |c|d")
-        resolvable_items = {
-            "d": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
-            "b": ml.Material(formula="Co"),
-            "c": ml.Composit({"b": 1.0}),
-        }
-        s.resolve_names(resolvable_items)
-        assert len(s.sequence) == 4
-        assert s.sequence[0] == ml.Layer(thickness=0.0, material=ml.SPECIAL_MATERIALS["air"])
-        assert s.sequence[1] == ml.Layer(thickness=13.0, material=ml.Material(formula="Co"))
-        assert s.sequence[2] == ml.Layer(thickness=0.0, material=ml.Composit({"b": 1.0}))
-        assert s.sequence[3] == resolvable_items["d"]
+        with self.subTest("names in stack string"):
+            s = ml.SubStack(stack="air | b 13 |c|d")
+            resolvable_items = {
+                "d": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
+                "b": ml.Material(formula="Co"),
+                "c": ml.Composit({"b": 1.0}),
+            }
+            s.resolve_names(resolvable_items)
+            assert len(s.sequence) == 4
+            assert s.sequence[0] == ml.Layer(thickness=0.0, material=ml.SPECIAL_MATERIALS["air"])
+            assert s.sequence[1] == ml.Layer(thickness=13.0, material=ml.Material(formula="Co"))
+            assert s.sequence[2] == ml.Layer(thickness=0.0, material=ml.Composit({"b": 1.0}))
+            assert s.sequence[3] == resolvable_items["d"]
 
-        s = ml.SubStack(stack="air | 2( b 13 | c 5)|d")
-        s.resolve_names(resolvable_items)
-        assert len(s.sequence) == 3
-        assert s.sequence[0] == ml.Layer(thickness=0.0, material=ml.SPECIAL_MATERIALS["air"])
-        assert s.sequence[1] == ml.SubStack(
-            repetitions=2,
-            stack="b 13 | c 5",
-            sequence=[
+        with self.subTest("stack in substack"):
+            s = ml.SubStack(stack="air | 2( b 13 | c 5)|d")
+            s.resolve_names(resolvable_items)
+            assert len(s.sequence) == 3
+            assert s.sequence[0] == ml.Layer(thickness=0.0, material=ml.SPECIAL_MATERIALS["air"])
+            assert s.sequence[1] == ml.SubStack(
+                repetitions=2,
+                stack="b 13 | c 5",
+                sequence=[
+                    ml.Layer(thickness=13.0, material=ml.Material(formula="Co")),
+                    ml.Layer(thickness=5.0, material=ml.Composit(composition={"b": 1.0})),
+                ],
+            )
+            assert s.sequence[2] == resolvable_items["d"]
+
+        with self.subTest("direct from sequence"):
+            s = ml.SubStack(
+                sequence=[
+                    ml.Layer(thickness=13.0, material="b"),
+                    ml.Layer(thickness=5.0, material="c"),
+                ]
+            )
+            s.resolve_names(resolvable_items)
+            assert s.sequence == [
                 ml.Layer(thickness=13.0, material=ml.Material(formula="Co")),
                 ml.Layer(thickness=5.0, material=ml.Composit(composition={"b": 1.0})),
-            ],
-        )
-        assert s.sequence[2] == resolvable_items["d"]
-
-        s = ml.SubStack(
-            sequence=[
-                ml.Layer(thickness=13.0, material="b"),
-                ml.Layer(thickness=5.0, material="c"),
             ]
-        )
-        s.resolve_names(resolvable_items)
-        assert s.sequence == [
-            ml.Layer(thickness=13.0, material=ml.Material(formula="Co")),
-            ml.Layer(thickness=5.0, material=ml.Composit(composition={"b": 1.0})),
-        ]
+
+        with self.subTest("environment from names"):
+            s = ml.SubStack(stack="L1", environment="L1")
+            resolvable_items = {
+                "L1": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
+            }
+            s.resolve_names(resolvable_items)
+            assert s.environment == resolvable_items["L1"]
+            s = ml.SubStack(stack="L1", environment="air")
+            resolvable_items = {
+                "L1": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
+            }
+            s.resolve_names(resolvable_items)
+            assert s.environment == ml.SPECIAL_MATERIALS["air"]
+            s = ml.SubStack(stack="L1", environment="Fe")
+            resolvable_items = {
+                "L1": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
+            }
+            s.resolve_names(resolvable_items)
+            assert s.environment.formula == "Fe"
+            s = ml.SubStack(stack="(L1) in air")
+            resolvable_items = {
+                "L1": ml.Layer(material=ml.Material(sld=Value(2e-6, "1/angstrom^2"))),
+            }
+            s.resolve_names(resolvable_items)
+            assert s.sequence[0].environment == ml.SPECIAL_MATERIALS["air"]
 
     def test_defaults(self):
         defaults = ml.ModelParameters(
@@ -395,7 +424,7 @@ class TestSampleModel(unittest.TestCase):
         materials = {"c": ml.Material(sld=13.4)}
         composits = {"d": ml.Composit({"c": 1.0})}
         sm = ml.SampleModel(
-            stack="c|2(a|c 15)|d 14|c",
+            stack="c|2(a|c 15) in b|d 14|c",
             sub_stacks=sub_stacks,
             layers=layers,
             materials=materials,
@@ -403,7 +432,7 @@ class TestSampleModel(unittest.TestCase):
             globals=defaults,
         )
         stack = sm.resolve_stack()
-        subs = ml.SubStack(repetitions=2, stack="a|c 15")
+        subs = ml.SubStack(repetitions=2, stack="a|c 15", environment="b")
         subs.resolve_names({"a": sub_stacks["a"], "b": layers["b"], "c": materials["c"]})
         subs.resolve_defaults(defaults)
         assert len(stack) == 4
@@ -425,11 +454,14 @@ class TestSampleModel(unittest.TestCase):
         stack = sm.resolve_stack()
         sm2 = ml.SampleModel(stack="air | heavy water | silicon")
         stack2 = sm2.resolve_stack()
+        sm3 = ml.SampleModel(stack="air | (heavy water) | silicon")
+        stack3 = sm3.resolve_stack()
         self.assertEqual(len(stack), 3)
         self.assertEqual(stack[1].material.formula, "D2O")
         self.assertEqual(stack[1].thickness.magnitude, 12.0)
         self.assertEqual(stack[2].material.formula, "Si")
         self.assertEqual(stack2[1].material.formula, "D2O")
+        self.assertEqual(stack3[1].sequence[0].material.formula, "D2O")
 
     def test_resolve_dbID(self):
         sm = ml.SampleModel(stack="air | ID=276 12 | Si")
@@ -438,7 +470,7 @@ class TestSampleModel(unittest.TestCase):
         self.assertEqual(stack[1].material.formula, "D2O")
         self.assertEqual(stack[1].thickness.magnitude, 12.0)
 
-    def test_resovle_function2e(self):
+    def test_resolve_function2e(self):
         sm = ml.SampleModel(
             stack="air | gradient | Si",
             sub_stacks={
@@ -457,6 +489,56 @@ class TestSampleModel(unittest.TestCase):
             layers = sm.resolve_to_layers()
             self.assertEqual(len(layers), 12)
 
+    def test_resolve_lipid_leaflet(self):
+        sm = ml.SampleModel(
+            stack="air | LL | Si",
+            sub_stacks={
+                "LL": mc.LipidLeaflet(
+                    apm=56.0,
+                    b_heads=6.01e-4,
+                    vm_heads=319.0,
+                    b_tails=-2.92e-4,
+                    vm_tails=782.0,
+                    thickness_heads=9.0,
+                    thickness=23.0,
+                )
+            },
+        )
+        layers = sm.resolve_to_layers()
+        self.assertEqual(len(layers), 4)
+        for li in layers:
+            li.material.generate_density()
+            li.material.get_sld()
+        if sys.version_info >= (3, 8, 0):
+            sm = ml.SampleModel.from_dict(sm.to_dict())
+            layers = sm.resolve_to_layers()
+            self.assertEqual(len(layers), 4)
+
+    def test_resolve_item_changer(self):
+        sm = ml.SampleModel(
+            stack="air | LL | rLL | Si",
+            sub_stacks={
+                "LL": mc.LipidLeaflet(
+                    apm=56.0,
+                    b_heads=6.01e-4,
+                    vm_heads=319.0,
+                    b_tails=-2.92e-4,
+                    vm_tails=782.0,
+                    thickness_heads=9.0,
+                    thickness=23.0,
+                ),
+                "rLL": ml.ItemChanger(like="LL", but={"reverse_monolayer": True}),
+            },
+        )
+        layers = sm.resolve_stack()
+        self.assertEqual(len(layers), 4)
+        # check that the ItemChanger results in the correctly resolved class
+        l1 = layers[1]
+        l2 = layers[2]
+        self.assertEqual(l1.__class__, l2.__class__)
+        l1.reverse_monolayer = True
+        self.assertEqual(l1, l2)
+
     def test_resolve_element_material_name(self):
         sm = ml.SampleModel(
             stack="air | Fe | Si",
@@ -467,7 +549,7 @@ class TestSampleModel(unittest.TestCase):
 
     def test_resolve_to_blocks(self):
         sm = ml.SampleModel(
-            stack="air | ( gradient ) | Si",
+            stack="air | ( gradient | Co ) | Cr | Si",
             sub_stacks={
                 "gradient": mc.FunctionTwoElements(
                     material1="Cr", material2="Fe", thickness=150.0, function="x", slice_resolution=15.0
