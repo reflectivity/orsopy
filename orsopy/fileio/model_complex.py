@@ -15,7 +15,7 @@ from .model_building_blocks import SPECIAL_MATERIALS, Composit, Layer, Material,
 @dataclass
 class FunctionTwoElements(Header, SubStackType):
     """
-    Models a continous variation between two materials/SLDs according to an analytical function.
+    Models a continuous variation between two materials/SLDs according to an analytical function.
 
     The profile rho(z) is defined according to the relative layer thickness as fraction of material 2:
         rho(z) = (1-f((x-x0)/thickness))*rho_1 + f((x-x0)/thickness)*rho_2
@@ -24,6 +24,8 @@ class FunctionTwoElements(Header, SubStackType):
 
     The function string is evaluated according to python syntax using only build-in operators
     and a limited set of mathematical functions and constants defined in the class constant **ALLOWED_FUNCTIONS**.
+
+    TODO: Review class parameters within ORSO.
     """
 
     material1: str

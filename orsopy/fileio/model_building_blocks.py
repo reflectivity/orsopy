@@ -26,6 +26,9 @@ class SubStackType(ABC):
     @abstractmethod
     def resolve_to_layers(self) -> List["Layer"]: ...
 
+    def resolve_to_blocks(self) -> List[Union["Layer", "SubStackType"]]:
+        return [self]
+
 
 @dataclass
 class Material(Header):

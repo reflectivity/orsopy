@@ -68,7 +68,8 @@ class SubStack(Header, SubStackType):
                         # the Stack has elements within a matrix material
                         environment = rest.strip()[3:]
                     else:
-                        environment = None
+                        # if there is a higher level envirnment, it is kept if not overwritten
+                        environment = self.environment
                     obj = SubStack(repetitions=rep, stack=sub_stack.strip(), environment=environment)
                 else:
                     items = stack[idx:next_idx].strip().rsplit(None, 1)
@@ -108,6 +109,22 @@ class SubStack(Header, SubStackType):
         for li in self.sequence:
             if hasattr(li, "resolve_defaults"):
                 li.resolve_defaults(defaults)
+
+    def resolve_to_blocks(self) -> List[Union[Layer, SubStackType]]:
+        # like resovle_to_layers but keeping SubStackType classes in tact
+        blocks = list(self.sequence)
+        added = 0
+        for i in range(len(blocks)):
+            if isinstance(blocks[i + added], Layer):
+                if blocks[i + added].material is None:
+                    blocks[i + added].generate_material()
+                blocks[i + added].material.generate_density()
+            else:
+                obj = blocks.pop(i + added)
+                sub_blocks = obj.resolve_to_blocks()
+                blocks = blocks[: i + added] + sub_blocks + blocks[i + added :]
+                added += len(sub_blocks) - 1
+        return blocks
 
     def resolve_to_layers(self) -> List[Layer]:
         layers = list(self.sequence)
@@ -272,6 +289,22 @@ class SampleModel(Header):
             output.append(obj)
             idx = next_idx + 1
         return output
+
+    def resolve_to_blocks(self) -> List[Union[Layer, SubStackType]]:
+        # like resovle_to_layers but keeping SubStackType classes in tact
+        blocks = self.resolve_stack()
+        added = 0
+        for i in range(len(blocks)):
+            if isinstance(blocks[i + added], Layer):
+                if blocks[i + added].material is None:
+                    blocks[i + added].generate_material()
+                blocks[i + added].material.generate_density()
+            else:
+                obj = blocks.pop(i + added)
+                sub_blocks = obj.resolve_to_blocks()
+                blocks = blocks[: i + added] + sub_blocks + blocks[i + added :]
+                added += len(sub_blocks) - 1
+        return blocks
 
     def resolve_to_layers(self) -> List[Layer]:
         layers = self.resolve_stack()
