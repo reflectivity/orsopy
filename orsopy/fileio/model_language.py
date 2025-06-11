@@ -26,6 +26,20 @@ def find_idx(string, start, value):
     return next_idx
 
 
+def find_closing(string, start):
+    open_brackets = 1
+    idx = start
+    while idx < len(string):
+        if string[idx] == "(":
+            open_brackets += 1
+        if string[idx] == ")":
+            open_brackets -= 1
+            if open_brackets == 0:
+                return idx
+        idx += 1
+    return -1
+
+
 @dataclass
 class SubStack(Header, SubStackType):
     repetitions: int = 1
@@ -38,12 +52,14 @@ class SubStack(Header, SubStackType):
 
     def resolve_names(self, resolvable_items):
         if isinstance(self.environment, str):
+            env_orig = self.environment
             if self.environment in resolvable_items:
                 self.environment = resolvable_items[self.environment]
             elif self.environment in SPECIAL_MATERIALS:
                 self.environment = SPECIAL_MATERIALS[self.environment]
             else:
                 self.environment = Material(formula=self.environment)
+            self.environment.original_name = env_orig
         if self.environment is not None:
             resolvable_items = {"environment": self.environment, **resolvable_items}
 
@@ -56,7 +72,7 @@ class SubStack(Header, SubStackType):
             while idx < len(stack):
                 next_idx = find_idx(stack, idx, "|")
                 if "(" in stack[idx:next_idx]:
-                    close_idx = find_idx(stack, idx, ")")
+                    close_idx = find_closing(stack, find_idx(stack, idx, "(") + 1)
                     next_idx = find_idx(stack, close_idx, "|")
                     rep, sub_stack = stack[idx:close_idx].split("(", 1)
                     if rep.strip() == "":
@@ -119,6 +135,9 @@ class SubStack(Header, SubStackType):
                                 obj.original_name = item
                                 if getattr(obj, "thickness", "ignore") is None:
                                     obj.thickness = thickness
+                        else:
+                            obj = Layer(material=item, thickness=thickness)
+                            obj.original_name = item
                 if hasattr(obj, "resolve_names"):
                     obj.resolve_names(resolvable_items)
                 output.append(obj)
@@ -132,6 +151,8 @@ class SubStack(Header, SubStackType):
         for li in self.sequence:
             if hasattr(li, "resolve_defaults"):
                 li.resolve_defaults(defaults)
+        if self.environment is not None:
+            self.environment.resolve_defaults(defaults)
 
     def resolve_to_blocks(self) -> List[Union[Layer, SubStackType]]:
         # like resovle_to_layers but keeping SubStackType classes in tact
@@ -244,7 +265,7 @@ class SampleModel(Header):
         while idx < len(stack):
             next_idx = find_idx(stack, idx, "|")
             if "(" in stack[idx:next_idx]:
-                close_idx = find_idx(stack, idx, ")")
+                close_idx = find_closing(stack, find_idx(stack, idx, "(") + 1)
                 next_idx = find_idx(stack, close_idx, "|")
                 rep, sub_stack = stack[idx:close_idx].split("(", 1)
                 if rep.strip() == "":
