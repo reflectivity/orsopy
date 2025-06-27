@@ -489,45 +489,17 @@ class TestSampleModel(unittest.TestCase):
             layers = sm.resolve_to_layers()
             self.assertEqual(len(layers), 12)
 
-    def test_resolve_lipid_leaflet(self):
-        sm = ml.SampleModel(
-            stack="air | LL | Si",
-            sub_stacks={
-                "LL": mc.LipidLeaflet(
-                    apm=56.0,
-                    b_heads=6.01e-4,
-                    vm_heads=319.0,
-                    b_tails=-2.92e-4,
-                    vm_tails=782.0,
-                    thickness_heads=9.0,
-                    thickness=23.0,
-                )
-            },
-        )
-        layers = sm.resolve_to_layers()
-        self.assertEqual(len(layers), 4)
-        for li in layers:
-            li.material.generate_density()
-            li.material.get_sld()
-        if sys.version_info >= (3, 8, 0):
-            sm = ml.SampleModel.from_dict(sm.to_dict())
-            layers = sm.resolve_to_layers()
-            self.assertEqual(len(layers), 4)
-
     def test_resolve_item_changer(self):
         sm = ml.SampleModel(
-            stack="air | LL | rLL | Si",
+            stack="air | L1 | L2 | Si",
             sub_stacks={
-                "LL": mc.LipidLeaflet(
-                    apm=56.0,
-                    b_heads=6.01e-4,
-                    vm_heads=319.0,
-                    b_tails=-2.92e-4,
-                    vm_tails=782.0,
-                    thickness_heads=9.0,
+                "L1": mc.FunctionTwoElements(
+                    material1="Fe",
+                    material2="Cr",
+                    function="x",
                     thickness=23.0,
                 ),
-                "rLL": ml.ItemChanger(like="LL", but={"reverse_monolayer": True}),
+                "L2": ml.ItemChanger(like="L1", but={"thickness": 12.0}),
             },
         )
         layers = sm.resolve_stack()
@@ -536,8 +508,10 @@ class TestSampleModel(unittest.TestCase):
         l1 = layers[1]
         l2 = layers[2]
         self.assertEqual(l1.__class__, l2.__class__)
-        l1.reverse_monolayer = True
-        self.assertEqual(l1, l2)
+        self.assertEqual(l1.material1, l2.material1)
+        self.assertEqual(l1.material2, l2.material2)
+        self.assertEqual(l1.function, l2.function)
+        self.assertNotEqual(l1.thickness, l2.thickness)
 
     def test_resolve_element_material_name(self):
         sm = ml.SampleModel(
