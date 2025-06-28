@@ -2,6 +2,13 @@
 History
 =======
 
+1.2.2 (2025-06-27)
+------------------
+
+* Expansion of the sample model language, see #140 for details.
+* Improve documentation (#132, #135)
+* Some bug fixes
+
 1.2.1 (2024-07-01)
 ------------------
 
