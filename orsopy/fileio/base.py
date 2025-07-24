@@ -61,6 +61,7 @@ class ORSOValidationResult:
     """
 
     valid: bool
+    header_class: str
     missing_attributes: List[str]
     invalid_attributes: List[str]
     missing_optionals: List[str]
@@ -138,7 +139,7 @@ class Header:
         Analyze input data to see if it is valid for this class and provide
         additional information to a user of the API to improve export filters.
 
-        By default user parameters are treated as invalid, as these could be
+        By default, user parameters are treated as invalid, as these could be
         unintentional like typos.
         """
         is_valid = True
@@ -154,6 +155,7 @@ class Header:
             # is the supplied value a valid attribute for this class
             if key in field_keys:
                 ftype = construct_fields[field_keys.index(key)].type
+                hbase = get_origin(ftype)
                 type_value = type(value)
                 if value is None:
                     # value is supplied but interpreted as empty, should only happen for optionals
@@ -164,8 +166,34 @@ class Header:
                 elif type(ftype) is type and type_value is dict and issubclass(ftype, Header):
                     # the field requires a ORSO Header type
                     result = ftype.check_valid(value, user_is_valid=user_is_valid)
-                    is_valid &= result
+                    is_valid &= bool(result)
                     attribute_validations[key] = result
+                elif hbase in [Union, Optional] and type_value is dict:
+                    # Case of combined type hints.
+                    # Look for given value type first,
+                    # otherwise try to convert to each type and return the first that fits.
+                    subtypes = get_args(ftype)
+                    if type(value) not in subtypes:
+                        # item is not exactly in the subtypes
+                        failed_results = []
+                        for subt in subtypes:
+                            if type(subt) is type and issubclass(subt, Header):
+                                result = subt.check_valid(value, user_is_valid=user_is_valid)
+                                if result:
+                                    break
+                                else:
+                                    failed_results.append(result)
+                        if len(failed_results) > 0:
+                            # select best fitting of results, in case there are multiple Header in a Union
+                            best_match = failed_results[0]
+                            for failed_result in failed_results:
+                                if (len(failed_result.missing_attributes) + len(failed_result.invalid_attributes)) < (
+                                    len(best_match.missing_attributes) + len(best_match.invalid_attributes)
+                                ):
+                                    best_match = failed_result
+                            is_valid = False
+                            attribute_validations[key] = best_match
+                            invalid_attributes.append(key)
                 else:
                     # try to resolve the type of this value
                     with warnings.catch_warnings(record=True) as w:
@@ -176,10 +204,9 @@ class Header:
                             invalid_attributes.append(key)
                     if len(w) > 0:
                         # tried to resolve a type but failed with warning
-                        print(w[0])
                         if type_value is dict:
                             result = Header._last_failed_type.check_valid(value, user_is_valid=user_is_valid)
-                            is_valid &= result
+                            is_valid &= bool(result)
                             attribute_validations[key] = result
                         else:
                             invalid_attributes.append(key)
@@ -197,9 +224,15 @@ class Header:
                 missing_attributes.append(key)
         is_valid &= len(missing_attributes) == 0
         is_valid &= len(invalid_attributes) == 0
-        is_valid &= user_is_valid or len(user_keys) == 0
+        is_valid &= user_is_valid or (len(user_keys) == 0)
         return ORSOValidationResult(
-            is_valid, missing_attributes, invalid_attributes, missing_optionals, user_keys, attribute_validations
+            is_valid,
+            cls.__name__,
+            missing_attributes,
+            invalid_attributes,
+            missing_optionals,
+            user_keys,
+            attribute_validations,
         )
 
     def __post_init__(self):
