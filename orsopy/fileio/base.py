@@ -39,9 +39,9 @@ JSON_MIMETYPE = "application/json"
 yaml.emitter.Emitter.process_tag = _noop
 
 # make sure that datetime strings get loaded as str not datetime instances
-yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:timestamp"] = (
-    yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
-)
+yaml.constructor.SafeConstructor.yaml_constructors[
+    "tag:yaml.org,2002:timestamp"
+] = yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
 
 
 class ORSOResolveError(ValueError):
@@ -52,6 +52,25 @@ class ORSOSchemaWarning(RuntimeWarning):
     pass
 
 
+@dataclass(frozen=True)
+class ORSOValidationResult:
+    """
+    The result of a validation of ORSO header data as reaturned from Header.check_valid.
+
+    Includes additional information about the parameters that are missing/additional to a valid format.
+    """
+
+    valid: bool
+    missing_attributes: List[str]
+    invalid_attributes: List[str]
+    missing_optionals: List[str]
+    user_parameters: List[str]
+    attribute_validations: Dict[str, "ORSOValidationResult"]
+
+    def __bool__(self):
+        return self.valid
+
+
 class Header:
     """
     The super class for all the items in the orso module.
@@ -60,6 +79,8 @@ class Header:
     _orso_optionals: List[str] = []
     # _orso_name_export_priority: List[str] # an optional list of attribute names to put first in the yaml export
     _subclass_dict_ = {}
+
+    _last_failed_type = None
 
     def __init_subclass__(cls, **kwargs):
         """
@@ -102,7 +123,7 @@ class Header:
                 # convert dictionary to Header derived class if possible
                 if type(ftype) is type and type(value) is dict and issubclass(ftype, Header):
                     # the field requires a ORSO Header type
-                    value = construct_fields[field_keys.index(key)].type.from_dict(value)
+                    value = ftype.from_dict(value)
                 construct_dict[key] = value
             else:
                 user_dict[key] = value
@@ -110,6 +131,76 @@ class Header:
         for key, value in user_dict.items():
             setattr(output, key, value)
         return output
+
+    @classmethod
+    def check_valid(cls, data_dict, user_is_valid=False) -> ORSOValidationResult:
+        """
+        Analyze input data to see if it is valid for this class and provide
+        additional information to a user of the API to improve export filters.
+
+        By default user parameters are treated as invalid, as these could be
+        unintentional like typos.
+        """
+        is_valid = True
+        construct_fields = list(fields(cls))
+        field_keys = [fi.name for fi in construct_fields]
+        missing_attributes = []
+        invalid_attributes = []
+        missing_optionals = []
+        user_keys = []
+        attribute_validations = {}
+
+        for key, value in data_dict.items():
+            # is the supplied value a valid attribute for this class
+            if key in field_keys:
+                ftype = construct_fields[field_keys.index(key)].type
+                type_value = type(value)
+                if value is None:
+                    # value is supplied but interpreted as empty, should only happen for optionals
+                    if key in cls._orso_optionals:
+                        missing_optionals.append(key)
+                    else:
+                        missing_attributes.append(key)
+                elif type(ftype) is type and type_value is dict and issubclass(ftype, Header):
+                    # the field requires a ORSO Header type
+                    result = ftype.check_valid(value, user_is_valid=user_is_valid)
+                    is_valid &= result
+                    attribute_validations[key] = result
+                else:
+                    # try to resolve the type of this value
+                    with warnings.catch_warnings(record=True) as w:
+                        try:
+                            updt = cls._resolve_type(ftype, value)
+                        except Exception as e:
+                            print(e)
+                            invalid_attributes.append(key)
+                    if len(w) > 0:
+                        # tried to resolve a type but failed with warning
+                        print(w[0])
+                        if type_value is dict:
+                            result = Header._last_failed_type.check_valid(value, user_is_valid=user_is_valid)
+                            is_valid &= result
+                            attribute_validations[key] = result
+                        else:
+                            invalid_attributes.append(key)
+                    if updt is None:
+                        invalid_attributes.append(key)
+                construct_fields.pop(field_keys.index(key))
+                field_keys.pop(field_keys.index(key))
+            else:
+                user_keys.append(key)
+        # collect missing key names
+        for key in field_keys:
+            if key in cls._orso_optionals:
+                missing_optionals.append(key)
+            else:
+                missing_attributes.append(key)
+        is_valid &= len(missing_attributes) == 0
+        is_valid &= len(invalid_attributes) == 0
+        is_valid &= user_is_valid or len(user_keys) == 0
+        return ORSOValidationResult(
+            is_valid, missing_attributes, invalid_attributes, missing_optionals, user_keys, attribute_validations
+        )
 
     def __post_init__(self):
         """Make sure Header types are correct."""
@@ -280,13 +371,16 @@ class Header:
                         if res is not None:
                             # This type conversion worked, return the result.
                             if len(w) > 0:
-                                potential_res.append((w, res))
+                                potential_res.append((w, res, subt))
                             else:
                                 return res
                 if len(potential_res) > 0:
                     # a potential type was found, but it raised a warning
-                    w, res = potential_res[0]
+                    w, res, subt = potential_res[0]
                     # make sure the warning is displayed
+                    if w[-1].category is ORSOSchemaWarning:
+                        # for validation, store the failed last failed type
+                        Header._last_failed_type = subt
                     warnings.warn(w[-1].message, w[-1].category, w[-1].lineno)
                     return res
             elif hbase is Literal:
@@ -296,8 +390,7 @@ class Header:
                     return item
                 else:
                     warnings.warn(
-                        f"Has to be one of {get_args(hint)} got {item}",
-                        ORSOSchemaWarning,
+                        f"Has to be one of {get_args(hint)} got {item}", ORSOSchemaWarning,
                     )
                     return str(item)
         return None
