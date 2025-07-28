@@ -166,7 +166,9 @@ class Header:
                 elif type(ftype) is type and type_value is dict and issubclass(ftype, Header):
                     # the field requires a ORSO Header type
                     result = ftype.check_valid(value, user_is_valid=user_is_valid)
-                    is_valid &= bool(result)
+                    if not result:
+                        invalid_attributes.append(key)
+                        is_valid = False
                     attribute_validations[key] = result
                 elif hbase in [Union, Optional] and type_value is dict:
                     # Case of combined type hints.
@@ -206,7 +208,9 @@ class Header:
                         # tried to resolve a type but failed with warning
                         if type_value is dict:
                             result = Header._last_failed_type.check_valid(value, user_is_valid=user_is_valid)
-                            is_valid &= bool(result)
+                            if not result:
+                                invalid_attributes.append(key)
+                                is_valid = False
                             attribute_validations[key] = result
                         else:
                             invalid_attributes.append(key)
@@ -225,6 +229,7 @@ class Header:
         is_valid &= len(missing_attributes) == 0
         is_valid &= len(invalid_attributes) == 0
         is_valid &= user_is_valid or (len(user_keys) == 0)
+        missing_optionals.remove("comment")
         return ORSOValidationResult(
             is_valid,
             cls.__name__,
@@ -996,7 +1001,7 @@ class File(Header):
         Assigns a timestamp for file creation if not defined.
         """
         Header.__post_init__(self)
-        if self.timestamp is None:
+        if self.timestamp is None and self.file is not None:
             fname = pathlib.Path(self.file)
             if fname.exists():
                 self.timestamp = datetime.datetime.fromtimestamp(fname.stat().st_mtime)
