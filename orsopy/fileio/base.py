@@ -39,9 +39,9 @@ JSON_MIMETYPE = "application/json"
 yaml.emitter.Emitter.process_tag = _noop
 
 # make sure that datetime strings get loaded as str not datetime instances
-yaml.constructor.SafeConstructor.yaml_constructors[
-    "tag:yaml.org,2002:timestamp"
-] = yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
+yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:timestamp"] = (
+    yaml.constructor.SafeConstructor.yaml_constructors["tag:yaml.org,2002:str"]
+)
 
 
 class ORSOResolveError(ValueError):
@@ -61,7 +61,7 @@ class ORSOValidationResult:
     """
 
     valid: bool
-    header_class: str
+    header_class: "Header"
     missing_attributes: List[str]
     invalid_attributes: List[str]
     missing_optionals: List[str]
@@ -201,8 +201,7 @@ class Header:
                     with warnings.catch_warnings(record=True) as w:
                         try:
                             updt = cls._resolve_type(ftype, value)
-                        except Exception as e:
-                            print(e)
+                        except Exception:
                             invalid_attributes.append(key)
                     if len(w) > 0:
                         # tried to resolve a type but failed with warning
@@ -215,6 +214,8 @@ class Header:
                         else:
                             invalid_attributes.append(key)
                     if updt is None:
+                        invalid_attributes.append(key)
+                    elif type_value is not dict and type(updt) is not type_value:
                         invalid_attributes.append(key)
                 construct_fields.pop(field_keys.index(key))
                 field_keys.pop(field_keys.index(key))
@@ -232,7 +233,7 @@ class Header:
         missing_optionals.remove("comment")
         return ORSOValidationResult(
             is_valid,
-            cls.__name__,
+            cls,
             missing_attributes,
             invalid_attributes,
             missing_optionals,
@@ -428,7 +429,8 @@ class Header:
                     return item
                 else:
                     warnings.warn(
-                        f"Has to be one of {get_args(hint)} got {item}", ORSOSchemaWarning,
+                        f"Has to be one of {get_args(hint)} got {item}",
+                        ORSOSchemaWarning,
                     )
                     return str(item)
         return None

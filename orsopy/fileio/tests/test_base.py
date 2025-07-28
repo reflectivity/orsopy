@@ -1,6 +1,7 @@
 """
 Tests for fileio.base module
 """
+
 # pylint: disable=R0201
 
 import datetime as datetime_module
@@ -73,6 +74,79 @@ class TestHeaderClass(unittest.TestCase):
             assert type(res.test) is str
         finally:
             datetime_module.datetime = datetime
+
+    def test_simple_validate(self):
+        @dataclass
+        class TestClass(base.Header):
+            test: str
+            test2: int
+            test3: float
+
+        # check valid entry is returned correctly
+        assert TestClass.check_valid(dict(test="abc", test2=1, test3=2.0))
+        # missing value
+        res = TestClass.check_valid(dict(test="abc", test3=2.0))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.missing_attributes, ["test2"])
+        # empty required value
+        res = TestClass.check_valid(dict(test="abc", test2=None, test3=2.0))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.missing_attributes, ["test2"])
+        # invalid value
+        res = TestClass.check_valid(dict(test="abc", test2=1.0, test3="test"))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.invalid_attributes, ["test2", "test3"])
+        # user value
+        assert TestClass.check_valid(dict(test="abc", test2=1, test3=1.0, peter=123), user_is_valid=True)
+        res = TestClass.check_valid(dict(test="abc", test2=1, test3=1.0, peter=123))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.user_parameters, ["peter"])
+
+    def test_deep_validate(self):
+        @dataclass
+        class TestClass1(base.Header):
+            test: str
+            test2: int
+            test3: float
+
+        @dataclass
+        class TestClass2(base.Header):
+            test: TestClass1
+            test2: float = 2.5
+            test3: Optional[TestClass1] = None
+            test4: Optional[Union[TestClass1, str]] = None
+
+        # check valid entry is returned correctly
+        assert TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23))
+        assert TestClass2.check_valid(
+            dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4=dict(test="abc", test2=1, test3=2.0))
+        )
+        assert TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4="peter"))
+        # missing value
+        res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test3=None))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.missing_attributes, ["test2"])
+        self.assertEqual(res.missing_optionals, ["test3", "test4"])
+        # missing sub-value
+        res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1), test2=1.23))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.invalid_attributes, ["test"])
+        self.assertEqual(res.attribute_validations["test"].missing_attributes, ["test3"])
+        # invalid value
+        res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2="1.23"))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.invalid_attributes, ["test2"])
+        # invalid sub-value
+        res = TestClass2.check_valid(dict(test=dict(test="abc", test2="1", test3=2.0), test2=1.23))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.invalid_attributes, ["test"])
+        self.assertEqual(res.attribute_validations["test"].invalid_attributes, ["test2"])
+        res = TestClass2.check_valid(
+            dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4=dict(test=13.3, test2=1, test3=2.0))
+        )
+        self.assertFalse(res.valid)
+        self.assertEqual(res.invalid_attributes, ["test4"])
+        self.assertEqual(res.attribute_validations["test4"].invalid_attributes, ["test"])
 
     def test_resolve_dictof(self):
         if sys.version_info < (3, 8):
