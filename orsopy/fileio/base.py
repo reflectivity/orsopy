@@ -71,6 +71,37 @@ class ORSOValidationResult:
     def __bool__(self):
         return self.valid
 
+    @staticmethod
+    def _pprint_list(items, title):
+        output = ""
+        if len(items) > 0:
+            output += f"  {title}\n    "
+            for i in items:
+                output += f"{i}, "
+            output = output[:-2] + "\n"
+        return output
+
+    def get_report(self):
+        """
+        Returns a summary report of the validation result helping to analyze issues with the data..
+        """
+        if self.valid:
+            output = f"Dictionary was a valid {self.header_class.__name__} dataset\n"
+            output += self._pprint_list(self.missing_optionals, "Optional extra parameters that could be provided")
+            output += self._pprint_list(self.user_parameters, "User parameters not part of specification")
+            return output
+        else:
+            output = f"Dictionary was invalid for {self.header_class.__name__}!\n  Reasons for classification:\n"
+            output += self._pprint_list(self.user_parameters, "User parameters not part of specification")
+            output += self._pprint_list(self.missing_attributes, "Required parameters not provided")
+            output += self._pprint_list(self.invalid_attributes, "Parameters with invalid type or attributes")
+            for ia in self.invalid_attributes:
+                if ia in self.attribute_validations:
+                    output += f"    ORSO parameter {ia} extra information:\n      "
+                    output += self.attribute_validations[ia].get_report().replace("\n", "\n      ")
+                    output += "\n"
+            return output
+
 
 class Header:
     """
