@@ -213,11 +213,12 @@ class Header:
                             if type(subt) is type and issubclass(subt, Header):
                                 result = subt.check_valid(value, user_is_valid=user_is_valid)
                                 if result:
+                                    failed_results = []
                                     break
                                 else:
                                     failed_results.append(result)
                         if len(failed_results) > 0:
-                            # select best fitting of results, in case there are multiple Header in a Union
+                            # select best fitting of failed results, in case there are multiple Header in a Union
                             best_match = failed_results[0]
                             for failed_result in failed_results:
                                 if (len(failed_result.missing_attributes) + len(failed_result.invalid_attributes)) < (

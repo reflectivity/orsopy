@@ -110,32 +110,41 @@ class TestHeaderClass(unittest.TestCase):
             test3: float
 
         @dataclass
+        class TestClass1a(base.Header):
+            beer: str
+
+        @dataclass
         class TestClass2(base.Header):
             test: TestClass1
             test2: float = 2.5
             test3: Optional[TestClass1] = None
-            test4: Optional[Union[TestClass1, str]] = None
+            test4: Optional[Union[TestClass1, TestClass1a, str]] = None
 
         # check valid entry is returned correctly
         assert TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23))
         assert TestClass2.check_valid(
             dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4=dict(test="abc", test2=1, test3=2.0))
         )
-        assert TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4="peter"))
+        res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4="peter"))
+        assert res
+        res.get_report()  # check no error condition
         # missing value
         res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test3=None))
         self.assertFalse(res.valid)
         self.assertEqual(res.missing_attributes, ["test2"])
         self.assertEqual(res.missing_optionals, ["test3", "test4"])
+        res.get_report()  # check no error condition
         # missing sub-value
         res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1), test2=1.23))
         self.assertFalse(res.valid)
         self.assertEqual(res.invalid_attributes, ["test"])
         self.assertEqual(res.attribute_validations["test"].missing_attributes, ["test3"])
+        res.get_report()  # check no error condition
         # invalid value
         res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2="1.23"))
         self.assertFalse(res.valid)
         self.assertEqual(res.invalid_attributes, ["test2"])
+        res.get_report()  # check no error condition
         # invalid sub-value
         res = TestClass2.check_valid(dict(test=dict(test="abc", test2="1", test3=2.0), test2=1.23))
         self.assertFalse(res.valid)
@@ -147,6 +156,15 @@ class TestHeaderClass(unittest.TestCase):
         self.assertFalse(res.valid)
         self.assertEqual(res.invalid_attributes, ["test4"])
         self.assertEqual(res.attribute_validations["test4"].invalid_attributes, ["test"])
+        res.get_report()  # check no error condition
+        res = TestClass2.check_valid(
+            dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4=dict(beer="beer"))
+        )
+        assert res
+        res = TestClass2.check_valid(dict(test=dict(test="abc", test2=1, test3=2.0), test2=1.23, test4=dict(beer=3.5)))
+        self.assertFalse(res.valid)
+        self.assertEqual(res.invalid_attributes, ["test4"])
+        self.assertEqual(res.attribute_validations["test4"].invalid_attributes, ["beer"])
 
     def test_resolve_dictof(self):
         if sys.version_info < (3, 8):
