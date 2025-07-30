@@ -247,7 +247,7 @@ class Header:
                             invalid_attributes.append(key)
                     if updt is None:
                         invalid_attributes.append(key)
-                    elif type_value is not dict and type(updt) is not type_value:
+                    elif type_value is not dict and not isinstance(updt, type_value):
                         invalid_attributes.append(key)
                 construct_fields.pop(field_keys.index(key))
                 field_keys.pop(field_keys.index(key))

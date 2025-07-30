@@ -34,19 +34,27 @@ class TestOrso(unittest.TestCase):
         Creation of Orso object.
         """
         e = Experiment("Experiment 1", "ESTIA", datetime(2021, 7, 7, 16, 31, 10), "neutron")
+        assert Experiment.check_valid(e.to_dict())
         s = Sample("The sample")
-        inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"))
+        assert Sample.check_valid(s.to_dict())
+        inst = InstrumentSettings(Value(4.0, "deg"), ValueRange(2.0, 12.0, "angstrom"), Polarization.unpolarized)
+        assert InstrumentSettings.check_valid(inst.to_dict())
         df = [File("README.rst", None)]
         m = Measurement(inst, df, scheme="angle-dispersive")
+        assert Measurement.check_valid(m.to_dict())
         p = Person("A Person", "Some Uni")
+        assert Person.check_valid(p.to_dict())
         ds = DataSource(p, e, s, m)
+        assert DataSource.check_valid(ds.to_dict())
 
         soft = Software("orsopy", "0.0.1", "macOS-10.15")
         p2 = Person("Andrew McCluskey", "European Spallation Source")
         redn = Reduction(soft, datetime(2021, 7, 14, 10, 10, 10), p2, ["footprint", "background"])
+        assert Reduction.check_valid(redn.to_dict())
 
         cols = [Column("Qz", unit="1/angstrom"), Column("R")]
         value = Orso(ds, redn, cols, 0)
+        assert Orso.check_valid(value.to_dict())
 
         ds = value.data_source
         dsm = ds.measurement
@@ -87,6 +95,11 @@ class TestOrso(unittest.TestCase):
 
         cols = [Column("Qz", unit="1/angstrom"), Column("R")]
         value = Orso(ds, redn, cols, 1)
+        assert Orso.check_valid(value.to_dict())
+        # add a user parameter, which is invalid by default
+        value.data_source.test_user = "abc"
+        self.assertFalse(Orso.check_valid(value.to_dict()).valid)
+        assert Orso.check_valid(value.to_dict(), user_is_valid=True)
 
         dsm = value.data_source.measurement
         assert value.data_source.owner.name == "A Person"
@@ -132,14 +145,22 @@ class TestOrso(unittest.TestCase):
 
         info3 = fileio.Orso(
             data_source=fileio.DataSource(
-                sample=fileio.Sample(name="My Sample", category="solid", description="Something descriptive",),
+                sample=fileio.Sample(
+                    name="My Sample",
+                    category="solid",
+                    description="Something descriptive",
+                ),
                 experiment=fileio.Experiment(
-                    title="Main experiment", instrument="Reflectometer", start_date=datetime.now(), probe="x-ray",
+                    title="Main experiment",
+                    instrument="Reflectometer",
+                    start_date=datetime.now(),
+                    probe="x-ray",
                 ),
                 owner=fileio.Person("someone", "important"),
                 measurement=fileio.Measurement(
                     instrument_settings=fileio.InstrumentSettings(
-                        incident_angle=fileio.Value(13.4, "deg"), wavelength=fileio.Value(5.34, "A"),
+                        incident_angle=fileio.Value(13.4, "deg"),
+                        wavelength=fileio.Value(5.34, "A"),
                     ),
                     data_files=["abc", "def", "ghi"],
                     scheme="angle-dispersive",
