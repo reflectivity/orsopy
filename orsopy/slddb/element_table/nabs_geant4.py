@@ -2,7 +2,7 @@
 Neutron cross sections extracted from Geant4 by the ESS dgcode framework (doi:10.1016/j.physb.2018.03.025).
 """
 
-DATA_DIR = "nabs_geant4"
+DATA_DIR = "nabs_geant4_data"
 NEUTRON_ABSORPTIONS = {
     "Li": "nabs_Li.npz",
     (3, 6): "nabs_Li6.npz",
