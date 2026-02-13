@@ -149,14 +149,14 @@ class Material(Header):
 
 @dataclass
 class ModelParameters(Header):
-    roughness: Value = field(default_factory=lambda: Value(0.3, "nm"))
-    length_unit: str = "nm"
-    mass_density_unit: str = "g/cm^3"
-    number_density_unit: str = "1/nm^3"
-    sld_unit: str = "1/angstrom^2"
-    magnetic_moment_unit: str = "muB"
-    slice_resolution: Value = field(default_factory=lambda: Value(1.0, "nm"))
-    default_solvent: Material = field(
+    roughness: Optional[Value] = field(default_factory=lambda: Value(0.3, "nm"))
+    length_unit: Optional[str] = "nm"
+    mass_density_unit: Optional[str] = "g/cm^3"
+    number_density_unit: Optional[str] = "1/nm^3"
+    sld_unit: Optional[str] = "1/angstrom^2"
+    magnetic_moment_unit: Optional[str] = "muB"
+    slice_resolution: Optional[Value] = field(default_factory=lambda: Value(1.0, "nm"))
+    default_solvent: Optional[Material] = field(
         default_factory=lambda: Material(formula="H2O", mass_density=Value(1.0, "g/cm^3"))
     )
 

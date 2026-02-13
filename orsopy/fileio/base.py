@@ -352,15 +352,28 @@ class Header:
     def to_dict(self) -> dict:
         """
         Produces a clean dictionary of the Header object, removing
-        any optional attributes with the value :code:`None`.
+        any optional attributes with the value :code:`None` or default value.
 
         :return: Cleaned dictionary.
         """
         out_dict = {}
         for i, value in self.__dict__.items():
-            if i.startswith("_") or (value is None and i in self._orso_optionals):
+            if i.startswith("_"):
                 continue
-
+            if i in self._orso_optionals:
+                # missing optionals are removed from output for cleanliness
+                if value is None:
+                    continue
+                # get value default to check against, if it exists
+                field = [fi for fi in fields(self) if fi.name == i][0]
+                if field.default is not MISSING:
+                    default = field.default
+                elif field.default_factory is not MISSING:
+                    default = field.default_factory()
+                else:
+                    default = None
+                if default == value:
+                    continue
             if hasattr(value, "to_dict"):
                 out_dict[i] = value.to_dict()
             elif isinstance(value, (list, tuple)):

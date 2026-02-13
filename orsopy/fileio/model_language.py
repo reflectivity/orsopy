@@ -45,7 +45,7 @@ class SubStack(Header, SubStackType):
     repetitions: int = 1
     stack: Optional[str] = None
     sequence: Optional[List[Layer]] = None
-    sub_stack_class: Literal["SubStack"] = "SubStack"
+    sub_stack_class: Optional[Literal["SubStack"]] = "SubStack"
     environment: Optional[Union[str, Material, Composit]] = None
 
     original_name = None
