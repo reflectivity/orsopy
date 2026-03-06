@@ -37,17 +37,16 @@ jobs:
           pytest --pyargs orsopy
 
   backport:
-    runs-on: macos-13
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.6, 3.7]
+        python-version: ["3.6-slim-buster", "3.7-slim-buster"]
+
+    container:
+      image: python:${{ matrix.python-version }}
 
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: |
