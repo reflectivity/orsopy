@@ -32,7 +32,7 @@ carray = CArray()
 curl = CUrl()
 cmail = CMail()
 
-WEBAPI_URL = "https://slddb.esss.dk/slddb/"
+WEBAPI_URL = "https://slddb.reflectometry.org/"
 DB_FILE = os.path.join(configpath, "local_database.db")
 
 DB_MATERIALS_NAME = "materials"

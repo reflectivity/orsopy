@@ -8,6 +8,8 @@ import zipfile
 from importlib import reload
 from urllib import request
 
+from orsopy.slddb.dbconfig import WEBAPI_URL
+
 
 class TestWebAPI(unittest.TestCase):
     server_available = True
@@ -25,15 +27,16 @@ class TestWebAPI(unittest.TestCase):
             res = request.urlopen("http://127.0.0.1:5000/download_api", timeout=500)
         except Exception:
             try:
-                res = request.urlopen("https://slddb.esss.dk/slddb/download_api", timeout=500)
+                res = request.urlopen(f"{WEBAPI_URL}download_api", timeout=500)
             except Exception:
                 cls.server_available = False
                 print("Server unreachable to download python api")
                 return
             else:
-                server_url = "https://slddb.esss.dk/slddb/"
+                server_url = WEBAPI_URL
         else:
             server_url = "http://127.0.0.1:5000/"
+
         with open(os.path.join(cls.path, "slddb.zip"), "wb") as f:
             try:
                 f.write(res.read())
