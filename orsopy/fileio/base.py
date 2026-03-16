@@ -881,26 +881,44 @@ class ContentHash(Header):
     digest: str
     algorithm: Literal["sha1", "sha256", "sha384", "sha512", "sha3_256", "sha3_512"]
 
+    @staticmethod
+    def _get_digest_function():
+        import hashlib
+
+        if hasattr(hashlib, "file_digest"):
+            return hashlib.file_digest
+        else:
+            # pre python 3.11 this function did not exist
+            BUF_SIZE = 65536
+
+            def file_digest(f, algorithm):
+                digest = getattr(hashlib, algorithm)()
+                while True:
+                    data = f.read(BUF_SIZE)
+                    if not data:
+                        return digest
+                    digest.update(data)
+
+            return file_digest
+
     @classmethod
     def from_file(
         cls,
         fname: Union[TextIO, str],
         algorithm: Literal["sha1", "sha256", "sha384", "sha512", "sha3_256", "sha3_512"] = "sha1",
     ):
-        import hashlib
-
+        file_digest = cls._get_digest_function()
         with _possibly_open_file(fname, "rb") as f:
-            digest = hashlib.file_digest(f, algorithm)
+            digest = file_digest(f, algorithm)
         return ContentHash(digest=digest.hexdigest(), algorithm=algorithm)
 
     def check_file(self, fname: Union[TextIO, str]):
         """
         Check that a file has the same content hash.
         """
-        import hashlib
-
+        file_digest = self._get_digest_function()
         with _possibly_open_file(fname, "rb") as f:
-            digest = hashlib.file_digest(f, self.algorithm)
+            digest = file_digest(f, self.algorithm)
         return self.digest == digest.hexdigest()
 
 
