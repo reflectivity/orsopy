@@ -32,3 +32,7 @@ sample:
         composition:
           copper: 0.5
           Si: 0.5
+    test:
+      stacks: 7
+      blocks: 54
+      layers: 253

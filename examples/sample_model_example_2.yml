@@ -15,3 +15,7 @@ sample:
           roughness: {magnitude: 5.0, unit: angstrom}
           sld_unit: 1/angstrom^2
         reference: ORSO model language | 1.0 | http://bla.bli
+        test:
+          stacks: 3
+          blocks: 22
+          layers: 22

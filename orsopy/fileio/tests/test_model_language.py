@@ -8,9 +8,12 @@ import sys
 import unittest
 
 from datetime import datetime
+from glob import glob
+from os.path import basename, dirname
 from os.path import join as pjoin
 
 import pytest
+import yaml
 
 from orsopy.fileio import ComplexValue, Value
 from orsopy.fileio import model_complex as mc
@@ -470,6 +473,33 @@ class TestSampleModel(unittest.TestCase):
         self.assertEqual(stack[1].material.formula, "D2O")
         self.assertEqual(stack[1].thickness.magnitude, 12.0)
 
+    def test_resolve_dbDNA(self):
+        sm = ml.SampleModel(stack="air | dna1 50 | DNA=GATTA 100 | Si", layers={"dna1": ml.Layer(material="DNA=ATTAG")})
+        stack = sm.resolve_stack()
+        self.assertEqual(len(stack), 4)
+        self.assertEqual(stack[1].material.formula, "C50H48Hx11N19O31P5")
+        self.assertEqual(stack[1].thickness.magnitude, 50.0)
+        self.assertEqual(stack[2].material.formula, "C50H48Hx11N19O31P5")
+        self.assertEqual(stack[2].thickness.magnitude, 100.0)
+
+    def test_resolve_dbRNA(self):
+        sm = ml.SampleModel(
+            stack="air | rna1 50 | RNA=AUGUUUAGUUAA 100 | Si", layers={"rna1": ml.Layer(material="RNA=AUGUUUAGUUAA")}
+        )
+        stack = sm.resolve_stack()
+        self.assertEqual(len(stack), 4)
+        self.assertEqual(stack[1].material.formula, "C114H94Hx34N42O87P12")
+        self.assertEqual(stack[1].thickness.magnitude, 50.0)
+        self.assertEqual(stack[2].material.formula, "C114H94Hx34N42O87P12")
+        self.assertEqual(stack[2].thickness.magnitude, 100.0)
+
+    def test_resolve_db_protein(self):
+        sm = ml.SampleModel(stack="air | protein=ardbwt 100 | Si")
+        stack = sm.resolve_stack()
+        self.assertEqual(len(stack), 3)
+        self.assertEqual(stack[1].material.formula, "C32H30Hx15N10O12")
+        self.assertEqual(stack[1].thickness.magnitude, 100.0)
+
     def test_resolve_function2e(self):
         sm = ml.SampleModel(
             stack="air | gradient | Si",
@@ -574,3 +604,28 @@ class TestSampleModel(unittest.TestCase):
         )
         assert ls[7] == ml.Layer(thickness=Value(14.0, "nm"), roughness=defaults.roughness, material=composits["d"])
         assert ls[8] == ml.Layer(thickness=Value(0.0, "nm"), roughness=defaults.roughness, material=mSi)
+
+    def test_examples(self):
+        fls = glob(pjoin(dirname(__file__), "..", "..", "..", "examples", "*.yml"))
+        for fi in fls:
+            with self.subTest(basename(fi)):
+                with open(fi) as f:
+                    data = yaml.safe_load(f)
+                if "data_source" in data:
+                    data = data["data_source"]
+                if "sample" in data:
+                    data = data["sample"]
+                if "model" in data:
+                    data = data["model"]
+                sm = ml.SampleModel.from_dict(data)
+                stacks = sm.resolve_stack()
+                blocks = sm.resolve_to_blocks()
+                layers = sm.resolve_to_layers()
+                if hasattr(sm, "test"):
+                    # models include test data to check against
+                    if "stacks" in sm.test:
+                        self.assertEqual(len(stacks), sm.test["stacks"])
+                    if "blocks" in sm.test:
+                        self.assertEqual(len(blocks), sm.test["blocks"])
+                    if "layers" in sm.test:
+                        self.assertEqual(len(layers), sm.test["layers"])

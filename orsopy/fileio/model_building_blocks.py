@@ -247,7 +247,29 @@ class Layer(Header):
             elif self.material in SPECIAL_MATERIALS:
                 self.material = SPECIAL_MATERIALS[self.material]
             else:
-                self.material = Material(formula=self.material)
+                try:
+                    Formula(self.material, strict=True)
+                except ValueError:
+                    # try to resolve name directly with databse
+                    res = None
+                    if len(DENSITY_RESOLVERS) == 0:
+                        from ..utils.resolver_slddb import ResolverSLDDB
+
+                        DENSITY_RESOLVERS.append(ResolverSLDDB())
+                    for resolver in DENSITY_RESOLVERS:
+                        res = resolver.resolve_item(self.material)
+                        if res is not None:
+                            break
+                    if res:
+                        # could resolve the string to an actual material
+                        self.material = Material(
+                            formula=res["formula"], number_density=res["number_density"], comment=res["comment"]
+                        )
+                    else:
+                        # will lead to errors later but keep string as formula
+                        self.material = Material(formula=self.material)
+                else:
+                    self.material = Material(formula=self.material)
         elif self.composition is not None:
             self._composition_materials = {}
             for key, value in self.composition.items():

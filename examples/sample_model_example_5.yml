@@ -7,3 +7,7 @@ sample:
             magnetic_moment: 2.5
           Si:
             relative_density: 0.9
+        test:
+          stacks: 3
+          blocks: 22
+          layers: 22

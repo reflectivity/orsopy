@@ -2,3 +2,7 @@ sample:
     model:
         origin: guess based on preparation
         stack: air | 10 ( Si 7 | Fe 7 ) | Si
+        test:
+          stacks: 3
+          blocks: 22
+          layers: 22
