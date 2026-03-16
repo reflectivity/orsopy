@@ -18,6 +18,11 @@ import yaml
 from orsopy.fileio import ComplexValue, Value
 from orsopy.fileio import model_complex as mc
 from orsopy.fileio import model_language as ml
+from orsopy.slddb import api, webapi
+
+webapi.DB_FILE = pjoin(dirname(__file__), "slddb.db")
+api.use_webquery = False
+api.check()
 
 
 class TestMaterial(unittest.TestCase):
