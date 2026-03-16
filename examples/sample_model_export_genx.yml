@@ -1,4 +1,4 @@
-stack: ambient | top | ML | buffer | substrate
+stack: Amb | top | ML | buffer | Sub
 origin: GenX model "X-ray_Reflectivity.hgx"
 sub_stacks:
   top:
@@ -11,45 +11,53 @@ sub_stacks:
     repetitions: 1
     stack: bufPt | bufFe
 layers:
+  Amb:
+    material:
+      sld: {real: 1.0e-25, imag: 1.0e-25, unit: 1/angstrom^2}
   topPt:
     thickness: 11.0
     roughness: 3.0
     material:
-      sld: {real: 4.864311704082625e-06, imag: -4.533346598101179e-07}
+      formula: Pt
+      number_density: 0.06640515431495381
   TopFe:
     thickness: 11.0
     roughness: 2.0
     material:
-      sld: {real: 2.1041406836134337e-06, imag: -2.7004929545359514e-07}
+      formula: Fe
+      number_density: 0.08495744391749196
   Pt:
-    thickness: 11.0
+    thickness: 18.0
     roughness: 2.0
     material:
-      sld: {real: 4.864311704082625e-06, imag: -4.533346598101179e-07}
+      formula: Pt
+      number_density: 0.06640515431495381
   Fe:
     thickness: 11.0
     roughness: 2.0
     material:
-      sld: {real: 2.1041406836134337e-06, imag: -2.7004929545359514e-07}
+      formula: Fe
+      number_density: 0.08495744391749196
   bufPt:
     thickness: 45.0
     roughness: 2.0
     material:
-      sld: {real: 4.864311704082625e-06, imag: -4.533346598101179e-07}
+      formula: Pt
+      number_density: 0.06640515431495381
   bufFe:
     thickness: 2.0
     roughness: 2.0
     material:
-      sld: {real: 2.1041406836134337e-06, imag: -2.7004929545359514e-07}
-materials:
-  ambient:
-    sld: {real: 9.999999999999999e-27, imag: 9.999999999999999e-27}
-  substrate:
-    sld: {real: 5.456591989186995e-07, imag: -5.636808187886301e-09}
+      formula: Fe
+      number_density: 0.08495744391749196
+  Sub:
+    roughness: 4.0
+    material:
+      formula: MgO
+      number_density: 0.026994924954108625
 globals:
   roughness: {magnitude: 0.3, unit: nm}
   length_unit: angstrom
-  mass_density_unit: g/cm^3
-  number_density_unit: 1/nm^3
+  number_density_unit: 1/angstrom^3
   sld_unit: 1/angstrom^2
   magnetic_moment_unit: muB
