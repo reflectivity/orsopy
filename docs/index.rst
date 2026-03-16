@@ -6,7 +6,7 @@
 
    installation
    usage
-   modules
+   Reference <api/orsopy>
    contributing
    authors
    history
