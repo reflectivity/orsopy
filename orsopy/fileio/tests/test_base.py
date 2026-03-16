@@ -1,6 +1,7 @@
 """
 Tests for fileio.base module
 """
+
 # pylint: disable=R0201
 
 import datetime as datetime_module
@@ -204,6 +205,36 @@ class TestHeaderClass(unittest.TestCase):
 
         res = base._todict(Test2(13, 12.4, "1234"), classkey="TestClassKey")
         assert res == {"test": 13, "test2": 12.4, "test3": "1234", "TestClassKey": "Test2"}
+
+    def test_empty_optional(self):
+        @dataclass
+        class TestOptional(base.Header):
+            test1: str
+            test2: Optional[float] = None
+
+        t1 = TestOptional(test1="abc", test2=13.4)
+        t2 = TestOptional(test1="abc")
+        # Make sure the empty optional is not present in export
+        self.assertEqual(t1.to_dict(), {"test1": "abc", "test2": 13.4})
+        self.assertEqual(t2.to_dict(), {"test1": "abc"})
+        self.assertEqual(t1.to_yaml().strip(), "test1: abc\ntest2: 13.4")
+        self.assertEqual(t2.to_yaml().strip(), "test1: abc")
+
+    def test_default_optional(self):
+        @dataclass
+        class TestOptional(base.Header):
+            test1: str
+            test2: Optional[float] = 14.5
+
+        t1 = TestOptional(test1="abc", test2=13.4)
+        t2 = TestOptional(test1="abc")
+        # test that default value actually is set on object
+        self.assertEqual(t2.test2, 14.5)
+        # Make sure the default optional is not present in export
+        self.assertEqual(t1.to_dict(), {"test1": "abc", "test2": 13.4})
+        self.assertEqual(t2.to_dict(), {"test1": "abc"})
+        self.assertEqual(t1.to_yaml().strip(), "test1: abc\ntest2: 13.4")
+        self.assertEqual(t2.to_yaml().strip(), "test1: abc")
 
 
 class TestErrorValue(unittest.TestCase):
