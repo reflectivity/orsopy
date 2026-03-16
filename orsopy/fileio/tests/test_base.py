@@ -785,3 +785,12 @@ class TestFile(unittest.TestCase):
         with pytest.raises(base.NotOrsoCompatibleFileError, match="First line does not appear"):
             with open(pth / "not_orso.ort", "r") as f:
                 orso.load_orso(f)
+
+    def test_hashdigest(self):
+        """
+        Test creation of ContentHash from this python file and test if re-creating from dictionary works.
+        """
+        file = base.File(__file__, datetime.now())
+        file.hash = base.ContentHash.from_file(__file__)
+        refile = base.File.from_dict(file.to_dict())
+        assert refile.hash.check_file(__file__)

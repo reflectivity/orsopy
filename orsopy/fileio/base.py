@@ -872,7 +872,7 @@ class ErrorColumn(Header):
             return 1.0
 
 
-@orsodataclass
+@dataclass
 class ContentHash(Header):
     """
     A hash of some content, using standard algorithms
@@ -881,8 +881,30 @@ class ContentHash(Header):
     digest: str
     algorithm: Literal["sha1", "sha256", "sha384", "sha512", "sha3_256", "sha3_512"]
 
+    @classmethod
+    def from_file(
+        cls,
+        fname: Union[TextIO, str],
+        algorithm: Literal["sha1", "sha256", "sha384", "sha512", "sha3_256", "sha3_512"] = "sha1",
+    ):
+        import hashlib
 
-@orsodataclass
+        with _possibly_open_file(fname, "rb") as f:
+            digest = hashlib.file_digest(f, algorithm)
+        return ContentHash(digest=digest.hexdigest(), algorithm=algorithm)
+
+    def check_file(self, fname: Union[TextIO, str]):
+        """
+        Check that a file has the same content hash.
+        """
+        import hashlib
+
+        with _possibly_open_file(fname, "rb") as f:
+            digest = hashlib.file_digest(f, self.algorithm)
+        return self.digest == digest.hexdigest()
+
+
+@dataclass
 class File(Header):
     """
     A file with file path and a last modified timestamp.
