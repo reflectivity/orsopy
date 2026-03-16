@@ -1,0 +1,14 @@
+sample:
+    model:
+        comment: Material from SLD db Bio Blender mixture
+        stack: air | dna1 50 | RNA=AUGUUUAGUUAA 50 | protein1 100 | Si
+        layers:
+            dna1:
+                material: DNA=ATTAG
+            protein1:
+                material: Protein=MAHAGRTGYDNREIVMKYIHYKLSQRGYEWDAGDVGAAPPGAAPAPGIFSSQPGHTPHPAASRDPVARTSPLQTPAAPGAAAGPALSPVPPVVHLTLRQAGDDFSRRYRRDFAEMSSQLHLTPFTARGRFATVVEELFRDGVNWGRIVAFFEFGGVMCVESVNREMSPLVDNIALWMTEYLNRHLHTWIQDNGGWDAFVELYGPSMRPLFDFSWLSLKTLLSLALVGACITLGAYLGHK
+                comment: Bcl-2
+        test:
+          stacks: 5
+          blocks: 5
+          layers: 5

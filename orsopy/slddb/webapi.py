@@ -179,7 +179,14 @@ class SLD_API:
         """
         Get material for protein, DNA or RNA. Provide a letter sequence and molecule type ('protein', 'dna', 'rna').
         """
-        opts = {molecule: sequence, "sldcalc": "true"}
+        opts = {molecule.lower(): sequence, "sldcalc": "true"}
         res = self.webquery(opts)
-        out = Material(Formula(res["formula"]), fu_volume=res["fu_volume"])
+        mat_data = dict(fu_volume=float(res["fu_volume"]), name=f"BioBlender-{molecule.lower()}", extra_data={})
+        for key in [
+            "description",
+        ]:
+            if key in res:
+                mat_data["extra_data"][key] = res[key]
+
+        out = Material(Formula(res["formula"]), **mat_data)
         return out

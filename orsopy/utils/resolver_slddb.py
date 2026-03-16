@@ -11,14 +11,27 @@ class ResolverSLDDB(MaterialResolver):
     comment = ""
 
     def resolve_item(self, name):
-        if name.startswith("ID="):
-            try:
-                ID = int(name[3:])
-            except ValueError:
-                pass
-            else:
-                m = api.material(ID)
-                self.comment = f"material from ORSO SLD db ID={ID}"
+        if "=" in name:
+            prefix, *_ = name.split("=")
+            if prefix == "ID":
+                try:
+                    ID = int(name[3:])
+                except ValueError:
+                    pass
+                else:
+                    m = api.material(ID)
+                    self.comment = f"material from ORSO SLD db ID={ID}"
+                    out = {
+                        "formula": m.formula,
+                        "number_density": 1e3 * m.fu_dens,
+                        "comment": self.comment,
+                    }
+                    return out
+            if prefix.lower() in ("protein", "dna", "rna"):
+                m = api.bio_blender(name.split("=")[1], prefix)
+                self.comment = (
+                    f"macro-molecule from ORSO SLD db Bio Blender: " f"{m.extra_data.get('description', m.name)}"
+                )
                 out = {
                     "formula": m.formula,
                     "number_density": 1e3 * m.fu_dens,
