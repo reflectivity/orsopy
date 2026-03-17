@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Union
 
-from ..utils.chemical_formula import Formula
+from slddb.chemical_formula import Formula
 from ..utils.density_resolver import MaterialResolver
 from .base import ComplexValue, Header, Value
 
@@ -122,7 +122,7 @@ class Material(Header):
         if self.sld is not None:
             return rel * self.sld.as_unit("1/angstrom^2") + 0j
 
-        from orsopy.slddb.material import Material, get_element
+        from slddb.material import Material, get_element
 
         formula = Formula(self.formula, strict=True)
         if self.mass_density is not None:
