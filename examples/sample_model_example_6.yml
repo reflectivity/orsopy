@@ -18,6 +18,8 @@ sample:
               roughness: 15.0
         globals:
             slice_resolution: {magnitude: 10.0, unit: nm}
+
+        # below is just used for orsopy testing and not part of this model
         test:
           stacks: 4
           blocks: 13

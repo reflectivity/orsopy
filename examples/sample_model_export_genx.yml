@@ -61,6 +61,8 @@ globals:
   number_density_unit: 1/angstrom^3
   sld_unit: 1/angstrom^2
   magnetic_moment_unit: muB
+
+# below is just used for orsopy testing and not part of this model
 test:
   stacks: 5
   # 1 + 2 + 19*2 + 2 + 1 = 44

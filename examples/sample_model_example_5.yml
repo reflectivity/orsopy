@@ -7,6 +7,8 @@ sample:
             magnetic_moment: 2.5
           Si:
             relative_density: 0.9
+
+        # below is just used for orsopy testing and not part of this model
         test:
           stacks: 3
           blocks: 22
