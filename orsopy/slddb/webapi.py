@@ -96,11 +96,7 @@ class SLD_API:
         return json.loads(webdata.read())  # return decoded data
 
     def localquery(self, qdict):
-        return self.db.search_material(**qdict)
-
-    def localmaterial(self, ID):
-        res = self.db.search_material(ID=ID)
-        return self.db.select_material(res[0])
+        return query_api(qdict)
 
     def search(self, **opts):
         """
@@ -131,29 +127,22 @@ class SLD_API:
             material=api.material(res[0]['ID'])
             print(material.dens, material.rho_n, material.f_of_E(8.0))
         """
-        if not self.use_webquery:
-            return self.localmaterial(ID)
 
-        self.check()
-        try:
-            res = self.webquery({"ID": int(ID)})
-        except URLError:
-            self.use_webquery = False
-            return self.localmaterial(ID)
-        else:
-            f = Formula(res["formula"], sort=False)
-            mat_data = dict(dens=float(res["density"]), ID=ID, extra_data={})
-            if res.get("name", None):
-                mat_data["name"] = res["name"]
-            if res.get("mu", 0.0):
-                mat_data["mu"] = res["mu"]
-            elif res.get("M", 0.0):
-                mat_data["M"] = res["M"]
-            for key in ["ORSO_validated", "description", "doi", "reference"]:
-                if key in res:
-                    mat_data["extra_data"][key] = res[key]
-            out = Material([(get_element(element), amount) for element, amount in f], **mat_data)
-            return out
+        res = self.search(ID=int(ID))
+
+        f = Formula(res["formula"], sort=False)
+        mat_data = dict(dens=float(res["density"]), ID=ID, extra_data={})
+        if res.get("name", None):
+            mat_data["name"] = res["name"]
+        if res.get("mu", 0.0):
+            mat_data["mu"] = res["mu"]
+        elif res.get("M", 0.0):
+            mat_data["M"] = res["M"]
+        for key in ["ORSO_validated", "description", "doi", "reference"]:
+            if key in res:
+                mat_data["extra_data"][key] = res[key]
+        out = Material([(get_element(element), amount) for element, amount in f], **mat_data)
+        return out
 
     @staticmethod
     def custom(formula, dens=None, fu_volume=None, rho_n=None, mu=0.0, xsld=None, xE=None):
@@ -181,7 +170,7 @@ class SLD_API:
         Get material for protein, DNA or RNA. Provide a letter sequence and molecule type ('protein', 'dna', 'rna').
         """
         opts = {molecule.lower(): sequence, "sldcalc": "true"}
-        res = self.webquery(opts)
+        res = self.search(**opts)
         mat_data = dict(fu_volume=float(res["fu_volume"]), name=f"BioBlender-{molecule.lower()}", extra_data={})
         for key in [
             "description",
