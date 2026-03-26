@@ -46,13 +46,13 @@ class SLD_API:
     max_age = 1
     db: SLDDB = None
 
-    def __init__(self):
-        self.first_access = True
-        self.use_webquery = True  # only try webquery once, if error occurs switch to local database
+    def __init__(self, update_db=True):
+        self.db_needs_update = update_db
+        self.use_webquery = False  # default to using local database, which is updated regularly
 
     def check(self):
         # make sure the local database file is up to date, if not try to download newest version
-        if self.first_access:
+        if self.db_needs_update:
             now = datetime.datetime.now()
             try:
                 stat = pathlib.Path(DB_FILE).stat()
@@ -70,7 +70,7 @@ class SLD_API:
                     except URLError as err:
                         warnings.warn("Can't download new version of database; " + str(err))
             self.db = SLDDB(DB_FILE)  # after potential update, make connection with local database
-            self.first_access = False
+            self.db_needs_update = False
         else:
             return
 
