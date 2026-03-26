@@ -26,6 +26,8 @@ class ResolverSLDDB(MaterialResolver):
                         "number_density": 1e3 * m.fu_dens,
                         "comment": self.comment,
                     }
+                    if m.mu > 0:
+                        out["mu"] = m.mu
                     return out
             if prefix.lower() in ("protein", "dna", "rna"):
                 m = api.bio_blender(name.split("=")[1], prefix)
@@ -49,6 +51,8 @@ class ResolverSLDDB(MaterialResolver):
                     "number_density": 1e3 * m.fu_dens,
                     "comment": self.comment,
                 }
+                if m.mu > 0:
+                    out["mu"] = m.mu
                 return out
         return None
 

@@ -262,9 +262,7 @@ class Layer(Header):
                             break
                     if res:
                         # could resolve the string to an actual material
-                        self.material = Material(
-                            formula=res["formula"], number_density=res["number_density"], comment=res["comment"]
-                        )
+                        self.material = Material.from_dict(res)
                     else:
                         # will lead to errors later but keep string as formula
                         self.material = Material(formula=self.material)
