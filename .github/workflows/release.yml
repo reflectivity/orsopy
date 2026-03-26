@@ -96,4 +96,4 @@ jobs:
         password: ${{ secrets.PYPI_TOKEN }}
         skip-existing: true
         attestations: false
-        verbose: true
+        #verbose: true
