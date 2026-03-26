@@ -18,7 +18,7 @@ import yaml
 from orsopy.fileio import ComplexValue, Value
 from orsopy.fileio import model_complex as mc
 from orsopy.fileio import model_language as ml
-from orsopy.slddb import api
+from slddb import api
 
 # disable calling the website API for each search
 api.use_webquery = False

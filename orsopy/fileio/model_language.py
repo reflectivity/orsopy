@@ -10,7 +10,7 @@ import warnings
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Union
 
-from ..utils.chemical_formula import Formula
+from slddb.chemical_formula import Formula
 from . import model_complex
 from .base import Header, Literal
 from .model_building_blocks import (DENSITY_RESOLVERS, SPECIAL_MATERIALS, Composit, Layer, Material, ModelParameters,
