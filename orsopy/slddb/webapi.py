@@ -245,6 +245,7 @@ def select_api(args):
     out = material.export(xray_units=args.get('xray_unit', 'edens'))
     return out
 
+
 def search_api(args):
     """Search the database with the given field values.
 

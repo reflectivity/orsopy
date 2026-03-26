@@ -65,7 +65,7 @@ def collect_combination(ids, name_dict):
     elements: list[Material] = []
     loaded_ids: dict[str, Material] = {}
     for id in ids:
-        if not id in loaded_ids:
+        if id not in loaded_ids:
             try:
                 entry = db.search_material(name=ExactString(name_dict[id]))[0]
             except KeyError:
@@ -114,7 +114,7 @@ def collect_blendIDs(formula):
         ID = int(pre.split('*', 1)[1].strip())
         items.append((number, ID))
     for number, ID in items:
-        if not ID in loaded_ids:
+        if ID not in loaded_ids:
             entry = db.search_material(ID=ID)[0]
             m = db.select_material(entry)
             loaded_ids[ID] = m
