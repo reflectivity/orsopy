@@ -40,3 +40,9 @@ sample:
           mass_density_unit: g/cm^3
           sld_unit: 1/angstrom^2
         reference: ORSO model language | 1.0 | https://www.reflectometry.org/projects/simple_model
+
+        # below is just used for orsopy testing and not part of this model
+        test:
+          stacks: 3
+          blocks: 23
+          layers: 23

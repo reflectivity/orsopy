@@ -169,7 +169,7 @@ class SubStack(Header, SubStackType):
                 sub_blocks = obj.resolve_to_blocks()
                 blocks = blocks[: i + added] + sub_blocks + blocks[i + added :]
                 added += len(sub_blocks) - 1
-        return blocks
+        return blocks * self.repetitions
 
     def resolve_to_layers(self) -> List[Layer]:
         layers = list(self.sequence)
@@ -304,6 +304,10 @@ class SampleModel(Header):
                     except ValueError:
                         # try to resolve name directly with databse
                         res = None
+                        if len(DENSITY_RESOLVERS) == 0:
+                            from ..utils.resolver_slddb import ResolverSLDDB
+
+                            DENSITY_RESOLVERS.append(ResolverSLDDB())
                         for resolver in DENSITY_RESOLVERS:
                             res = resolver.resolve_item(item)
                             if res is not None:
@@ -336,7 +340,7 @@ class SampleModel(Header):
         return output
 
     def resolve_to_blocks(self) -> List[Union[Layer, SubStackType]]:
-        # like resovle_to_layers but keeping SubStackType classes in tact
+        # like resovle_to_layers but keeping SubStackType classes intact
         blocks = self.resolve_stack()
         added = 0
         for i in range(len(blocks)):

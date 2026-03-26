@@ -2,6 +2,14 @@
 History
 =======
 
+1.2.3 (2026-03-16)
+------------------
+* Add ContentHash class for file consistencey validation option in header
+* Improve the documentation, thanks to alexhroom (#133)
+* Switch SLDdb webapi url to new website https://slddb.reflectometry.org
+* Fix export of classes with default parameters to not write the default values to YAML (#149)
+* Fix some issues with build and tests on github
+
 1.2.2 (2025-06-27)
 ------------------
 

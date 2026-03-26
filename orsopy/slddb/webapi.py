@@ -16,30 +16,30 @@ from .material import Formula, Material
 
 class SLD_API:
     """
-      Python API for users of the SLDDB data.
+    Python API for users of the SLDDB data.
 
-      Allows to query the online database for materials, calculate SLDs and add new materials.
-      If connection to the server fails, a local copy of the database is used, instead.
+    Allows to query the online database for materials, calculate SLDs and add new materials.
+    If connection to the server fails, a local copy of the database is used, instead.
 
-      Usage:
-        from orsopy.slddb import api
-        res=api.search(formula="Fe2O3")
-        res[0]['density'] => ....
+    Usage:
+      from orsopy.slddb import api
+      res=api.search(formula="Fe2O3")
+      res[0]['density'] => ....
 
-        m=api.material(res[0]['ID']) # retrieve all data for the given material, see Material class.
-        sldn=m.rho_n # get nuclear neutron SLD (complex number)
-        sldm=m.rho_m # get magnetic neutron SLD (real number)
-        sldx=m.f_of_E(E=8.047823) # get x-ray SLD (complex number) for given energy, default is Cu-Kalpha
+      m=api.material(res[0]['ID']) # retrieve all data for the given material, see Material class.
+      sldn=m.rho_n # get nuclear neutron SLD (complex number)
+      sldm=m.rho_m # get magnetic neutron SLD (real number)
+      sldx=m.f_of_E(E=8.047823) # get x-ray SLD (complex number) for given energy, default is Cu-Kalpha
 
-        # custom material just for SLD calculation, requires either dens, fu_volume, rho_n or xsld+xE
-        m=api.custom(formula='Au', dens=19.3)
+      # custom material just for SLD calculation, requires either dens, fu_volume, rho_n or xsld+xE
+      m=api.custom(formula='Au', dens=19.3)
 
-      Units of results/queries:
-        density: g/cm³
-        roh_n: Å^{-2}
-        roh_m: Å^{-2}
-        sldx: Å^{-2}
-        fu_volume: Å³
+    Units of results/queries:
+      density: g/cm³
+      roh_n: Å^{-2}
+      roh_m: Å^{-2}
+      sldx: Å^{-2}
+      fu_volume: Å³
     """
 
     db_suburl = "download_db"
@@ -141,7 +141,17 @@ class SLD_API:
             return self.localmaterial(ID)
         else:
             f = Formula(res["formula"], sort=False)
-            out = Material([(get_element(element), amount) for element, amount in f], dens=float(res["density"]))
+            mat_data = dict(dens=float(res["density"]), ID=ID, extra_data={})
+            if res.get("name", None):
+                mat_data["name"] = res["name"]
+            if res.get("mu", 0.0):
+                mat_data["mu"] = res["mu"]
+            elif res.get("M", 0.0):
+                mat_data["M"] = res["M"]
+            for key in ["ORSO_validated", "description", "doi", "reference"]:
+                if key in res:
+                    mat_data["extra_data"][key] = res[key]
+            out = Material([(get_element(element), amount) for element, amount in f], **mat_data)
             return out
 
     @staticmethod
@@ -169,7 +179,14 @@ class SLD_API:
         """
         Get material for protein, DNA or RNA. Provide a letter sequence and molecule type ('protein', 'dna', 'rna').
         """
-        opts = {molecule: sequence, "sldcalc": "true"}
+        opts = {molecule.lower(): sequence, "sldcalc": "true"}
         res = self.webquery(opts)
-        out = Material(Formula(res["formula"]), fu_volume=res["fu_volume"])
+        mat_data = dict(fu_volume=float(res["fu_volume"]), name=f"BioBlender-{molecule.lower()}", extra_data={})
+        for key in [
+            "description",
+        ]:
+            if key in res:
+                mat_data["extra_data"][key] = res[key]
+
+        out = Material(Formula(res["formula"]), **mat_data)
         return out

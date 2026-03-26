@@ -32,3 +32,9 @@ sample:
         composition:
           copper: 0.5
           Si: 0.5
+
+    # below is just used for orsopy testing and not part of this model
+    test:
+      stacks: 7
+      blocks: 54
+      layers: 253
