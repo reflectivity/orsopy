@@ -27,7 +27,7 @@ class ResolverSLDDB(MaterialResolver):
                         "comment": self.comment,
                     }
                     if m.mu > 0:
-                        out["mu"] = m.mu
+                        out["magnetic_moment"] = m.mu
                     return out
             if prefix.lower() in ("protein", "dna", "rna"):
                 m = api.bio_blender(name.split("=")[1], prefix)
@@ -52,7 +52,7 @@ class ResolverSLDDB(MaterialResolver):
                     "comment": self.comment,
                 }
                 if m.mu > 0:
-                    out["mu"] = m.mu
+                    out["magnetic_moment"] = m.mu
                 return out
         return None
 
