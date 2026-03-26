@@ -9,7 +9,8 @@ from urllib import parse, request
 from urllib.error import URLError
 
 from . import DB_FILE, SLDDB
-from .dbconfig import WEBAPI_URL
+from .dbconfig import WEBAPI_URL, DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
+from .blender import collect_protein, collect_dna, collect_rna
 from .element_table import get_element
 from .material import Formula, Material
 
