@@ -86,7 +86,7 @@ class TestWebAPI(unittest.TestCase):
         if not self.server_available:
             return
         # make sure the path of the module is correct and that the database has not been downloaded
-        self.assertTrue(api.first_access)
+        self.assertTrue(api.db_needs_update)
         # self.assertEqual(slddb.__file__, os.path.join(self.path, 'slddb', '__init__.py'))
         self.assertFalse(os.path.exists(slddb.DB_FILE))
         # test of database download
@@ -115,26 +115,26 @@ class TestWebAPI(unittest.TestCase):
     def test_b_check(self):
         if not self.server_available:
             return
-        api.first_access = True
+        api.db_needs_update = True
         if os.path.isfile(slddb.DB_FILE):
             os.remove(slddb.DB_FILE)
         api.check()
-        self.assertFalse(api.first_access)
-        api.first_access = True
+        self.assertFalse(api.db_needs_update)
+        api.db_needs_update = True
         api.check()
-        self.assertFalse(api.first_access)
+        self.assertFalse(api.db_needs_update)
         api.check()
         # check the update case
         api.db.db.close()
         del api.db
-        api.first_access = True
+        api.db_needs_update = True
         api.max_age = -1
         api.check()
         api.max_age = 1
         # check warning if download url doesn't work during update
         api.db.db.close()
         del api.db
-        api.first_access = True
+        api.db_needs_update = True
         api.max_age = -1
 
         from orsopy.slddb import dbconfig, webapi
