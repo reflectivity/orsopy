@@ -251,14 +251,14 @@ def save_orso(
             np.savetxt(f, dsi.data, header=hi, fmt="%-22.16e")
 
 
-def load_orso(fname: Union[TextIO, str]) -> List[OrsoDataset]:
+def load_orso(fname: Union[TextIO, str], validate=False) -> List[OrsoDataset]:
     """
     :param fname: The Orso file to load.
 
     :return: :py:class:`OrsoDataset` objects for each dataset contained
         within the ORT file.
     """
-    dct_list, datas, version = _read_header_data(fname)
+    dct_list, datas, version = _read_header_data(fname, validate=validate)
     ods = []
 
     for dct, data in zip(dct_list, datas):
