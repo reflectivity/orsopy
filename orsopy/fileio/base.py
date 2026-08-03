@@ -1090,9 +1090,11 @@ def _possibly_open_file(f: Union[TextIO, str], mode: str = "wb") -> Generator[Te
     else:
         g = open(f, mode)
         close_file = True
-    yield g
-    if close_file:
-        g.close()
+    try:
+        yield g
+    finally:
+        if close_file:
+            g.close()
 
 
 def _todict(obj: Any, classkey: Any = None) -> dict:
