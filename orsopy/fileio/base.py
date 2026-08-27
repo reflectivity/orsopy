@@ -1071,30 +1071,32 @@ def _validate_header_data(dct_list: List[dict]):
 
 
 @contextmanager
-def _possibly_open_file(f: Union[TextIO, str], mode: str = "wb") -> Generator[TextIO, None, None]:
+def possibly_open_file(f, mode="r"):
     """
     Context manager for files.
 
-    :param f: If `f` is a file, then yield the file. If `f` is a str then
-        open the file and yield the newly opened file. On leaving this
-        context manager the file is closed, if it was opened by this
-        context manager (i.e. `f` was a string).
-    :param modes: An optional string that specifies the mode in which
-        the file is opened.
-    :yields: On leaving the context manager the file is closed, if it
-        was opened by this context manager.
+    Parameters
+    ----------
+    f : {file-like, Path, str}
+        If `f` is a file, then yield the file. If `f` is a str or Path then
+        open the file and yield the newly opened file.
+        On leaving this context manager the file is closed, if it was opened
+        by this context manager (i.e. `f` was a str or Path).
+    mode : str, optional
+        mode is an optional string that specifies the mode in which the file
+        is opened.
+
+    Yields
+    ------
+    g : file-like
+        On leaving the context manager the file is closed, if it was opened by
+        this context manager.
     """
-    close_file = False
     if (hasattr(f, "read") and hasattr(f, "write")) or f is None:
-        g = f
+        yield f
     else:
-        g = open(f, mode)
-        close_file = True
-    try:
-        yield g
-    finally:
-        if close_file:
-            g.close()
+        with open(f, mode) as g:
+            yield g
 
 
 def _todict(obj: Any, classkey: Any = None) -> dict:
