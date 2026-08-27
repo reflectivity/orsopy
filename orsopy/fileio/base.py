@@ -1071,7 +1071,7 @@ def _validate_header_data(dct_list: List[dict]):
 
 
 @contextmanager
-def possibly_open_file(f, mode="r"):
+def _possibly_open_file(f, mode="r"):
     """
     Context manager for files.
 
