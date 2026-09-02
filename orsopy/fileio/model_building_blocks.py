@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Type, Union
 
 from ..utils.chemical_formula import Formula
 from ..utils.density_resolver import MaterialResolver
@@ -9,28 +9,96 @@ from .base import ComplexValue, Header, Value
 DENSITY_RESOLVERS: List[MaterialResolver] = []
 
 
+class LateResolver:
+    """
+    Placeholder object for later resolved named SubStackType classes.
+    Stores the name and potential resolution information for later
+    evaluation, so no resolution is needed for SampleModel.resolve_stack call.
+    """
+
+    name: str
+    sub_stack_class: Type["SubStackType"]
+    _resolved_object: Optional["SubStackType"] = None
+
+    def __init__(self, name, sub_stack_class: Type["SubStackType"]):
+        self.name = name
+        self.sub_stack_class = sub_stack_class
+        if hasattr(sub_stack_class, "thickness"):
+            self.thickness = None
+
+    def resolve_names(self, resolvable_items):
+        self.resolvable_items = resolvable_items
+
+    def resolve_defaults(self, defaults: "ModelParameters"):
+        self.defaults = defaults
+
+    def resolve_object(self):
+        self._resolved_object = self.sub_stack_class.resolve_name(self.name)
+        self._resolved_object.original_name = self.name
+        if getattr(self._resolved_object, "thickness", "ignore") is None:
+            self._resolved_object.thickness = self.thickness
+        self._resolved_object.resolve_names(self.resolvable_items)
+        self._resolved_object.resolve_defaults(self.defaults)
+
+    def resolve_to_blocks(self) -> List[Union["Layer", "SubStackType"]]:
+        if self._resolved_object is None:
+            self.resolve_object()
+        return self._resolved_object.resolve_to_blocks()
+
+    def resolve_to_layers(self) -> List["Layer"]:
+        if self._resolved_object is None:
+            self.resolve_object()
+        return self._resolved_object.resolve_to_layers()
+
+    def __repr__(self):
+        if self._resolved_object is None:
+            return "LateResolver('" + self.sub_stack_class.__name__ + "{" + self.name + "}'" + ")"
+        else:
+            return "LateResolver(" + repr(self._resolved_object) + ")"
+
+
 class SubStackType(ABC):
     # Protocol for all items that can be placed in sub_stack
     _orso_name_export_priority = ["sub_stack_class"]
 
     @property
     @abstractmethod
-    def sub_stack_class(self) -> str: ...
+    def sub_stack_class(self) -> str:
+        ...
 
     @abstractmethod
-    def resolve_names(self, resolvable_items): ...
+    def resolve_names(self, resolvable_items):
+        ...
 
     @abstractmethod
-    def resolve_defaults(self, defaults: "ModelParameters"): ...
+    def resolve_defaults(self, defaults: "ModelParameters"):
+        ...
 
     @abstractmethod
-    def resolve_to_layers(self) -> List["Layer"]: ...
+    def resolve_to_layers(self) -> List["Layer"]:
+        ...
 
     def resolve_to_blocks(self) -> List[Union["Layer", "SubStackType"]]:
         return [self]
 
+    @classmethod
+    def resolve_name(cls, name):
+        """
+        Actually perform resolution of object by name.
+        """
+        raise NotImplementedError(f"{cls.__name__} does not implement name based resolution")
 
-@dataclass
+    @classmethod
+    def from_name(cls, name):
+        """
+        This is called if a SubStackType class shall be created from a name at a later stage.
+        Stores the name and potential parameters in a LateResolver object that is replaced
+        with the actual instance on resolve_to_blocks or resolve_to_layers calls.
+        """
+        return LateResolver(name, cls)
+
+
+@dataclass(repr=False)
 class Material(Header):
     formula: Optional[str] = None
     mass_density: Optional[Union[float, Value]] = None
@@ -68,9 +136,21 @@ class Material(Header):
             elif not isinstance(self.magnetic_moment, Value):
                 self.magnetic_moment = Value(self.magnetic_moment, unit=defaults.magnetic_moment_unit)
 
+    def _number_from_mass_density(self):
+        """
+        Use chamical formula and mass density to define number density.
+        """
+        mass_density = self.mass_density.as_unit("g/cm^3")
+        from ..slddb.material import Material
+
+        material = Material(self.formula, dens=mass_density)
+        self.number_density = Value(magnitude=material.fu_dens * 1000.0, unit="1/nm^3")
+
     def generate_density(self):
         if self.sld is not None or self.mass_density is not None or self.number_density is not None:
             # this material already contains density information
+            if self.number_density is None and self.mass_density is not None:
+                self._number_from_mass_density()
             return
         if len(DENSITY_RESOLVERS) == 0:
             from ..utils.resolver_slddb import ResolverSLDDB
@@ -114,6 +194,19 @@ class Material(Header):
         self.number_density = Value(magnitude=0.0, unit="1/nm^3")
         self.comment = "could not locate density information for material"
 
+    @property
+    def volume(self):
+        # returns the FU volume from the density information
+        self.generate_density()
+        if self.number_density is None:
+            return None
+        else:
+            from .base import get_unit_registry
+
+            unit_registry = get_unit_registry()
+            val = 1.0 / (self.number_density.magnitude * unit_registry(self.number_density.unit))
+            return Value(magnitude=val.magnitude, unit=f"{val.units:~}")
+
     def get_sld(self, xray_energy=None) -> complex:
         if self.relative_density is None:
             rel = 1.0
@@ -147,21 +240,7 @@ class Material(Header):
             return 0.0j
 
 
-@dataclass
-class ModelParameters(Header):
-    roughness: Optional[Value] = field(default_factory=lambda: Value(0.3, "nm"))
-    length_unit: Optional[str] = "nm"
-    mass_density_unit: Optional[str] = "g/cm^3"
-    number_density_unit: Optional[str] = "1/nm^3"
-    sld_unit: Optional[str] = "1/angstrom^2"
-    magnetic_moment_unit: Optional[str] = "muB"
-    slice_resolution: Optional[Value] = field(default_factory=lambda: Value(1.0, "nm"))
-    default_solvent: Optional[Material] = field(
-        default_factory=lambda: Material(formula="H2O", mass_density=Value(1.0, "g/cm^3"))
-    )
-
-
-@dataclass
+@dataclass(repr=False)
 class Composit(Header):
     composition: Dict[str, float]
 
@@ -184,29 +263,69 @@ class Composit(Header):
 
             self._composition_materials[key] = material
 
-    def resolve_defaults(self, defaults: ModelParameters):
+    def resolve_defaults(self, defaults: "ModelParameters"):
         for mat in self._composition_materials.values():
             mat.resolve_defaults(defaults)
 
     def generate_density(self, xray_energy=None):
         """
         Create a material based on the composition attribute.
+
+        If all items define a formula, return radiation agnostic Material.
         """
         sld = 0.0
+        use_formula = True
         for key, value in self.composition.items():
             mi = self._composition_materials[key]
             mi.generate_density()
-            sldi = mi.get_sld(xray_energy=xray_energy)
-            sld += value * sldi
+            use_formula &= mi.formula is not None
+
         mix_str = ";".join([f"{value}x{key}" for key, value in self.composition.items()])
-        return Material(
-            sld=ComplexValue(real=sld.real, imag=sld.imag, unit="1/angstrom^2"),
-            comment=f"composition material: {mix_str}",
-        )
+
+        if use_formula:
+            reference_density = self._composition_materials[list(self.composition.keys())[0]].number_density
+            rd_unit = reference_density.unit
+            rd = reference_density.magnitude
+            FU = Formula([])
+            for key, value in self.composition.items():
+                mi = self._composition_materials[key]
+                fi = Formula(mi.formula, strict=False)
+                FU += fi * (mi.number_density.as_unit(rd_unit) / rd * value)
+            return Material(
+                formula=str(FU), number_density=reference_density, comment=f"composition material: {mix_str}"
+            )
+        else:
+            for key, value in self.composition.items():
+                mi = self._composition_materials[key]
+                sldi = mi.get_sld(xray_energy=xray_energy)
+                sld += value * sldi
+            return Material(
+                sld=ComplexValue(real=sld.real, imag=sld.imag, unit="1/angstrom^2"),
+                comment=f"composition material: {mix_str}",
+            )
 
     def get_sld(self, xray_energy=None):
         material = self.generate_density(xray_energy=xray_energy)
         return material.get_sld(xray_energy=xray_energy)
+
+
+@dataclass(repr=False)
+class ModelParameters(Header):
+    roughness: Optional[Value] = field(default_factory=lambda: Value(0.3, "nm"))
+    length_unit: Optional[str] = "nm"
+    mass_density_unit: Optional[str] = "g/cm^3"
+    number_density_unit: Optional[str] = "1/nm^3"
+    sld_unit: Optional[str] = "1/angstrom^2"
+    magnetic_moment_unit: Optional[str] = "muB"
+    slice_resolution: Optional[Value] = field(default_factory=lambda: Value(1.0, "nm"))
+    default_solvent: Optional[Union[Material, Composit, str]] = field(
+        default_factory=lambda: Material(formula="H2O", mass_density=Value(1.0, "g/cm^3"))
+    )
+
+    def __post_init__(self):
+        super().__post_init__()
+        if isinstance(self.default_solvent, str):
+            self.default_solvent = Material(formula=self.default_solvent)
 
 
 SPECIAL_MATERIALS = {
@@ -217,7 +336,7 @@ SPECIAL_MATERIALS = {
 CACHED_MATERIALS = {}
 
 
-@dataclass
+@dataclass(repr=False)
 class Layer(Header):
     thickness: Optional[Union[float, Value]] = None
     roughness: Optional[Union[float, Value]] = None
