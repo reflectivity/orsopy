@@ -68,7 +68,7 @@ Ready to contribute? Here's how to set up `orsopy` for local development.
 
     $ mkvirtualenv orsopy
     $ cd orsopy/
-    $ python setup.py develop
+    $ pip install -e .
 
 4. Create a branch for local development::
 

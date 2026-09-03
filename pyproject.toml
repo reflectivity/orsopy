@@ -1,0 +1,45 @@
+########################
+### Project Metadata ###
+########################
+
+[project]
+name = "orsopy"
+dynamic = ["version"]
+description = "Support library of the Open Reflectometry Standards Organization (ORSO)"
+readme = "README.rst"
+license = {file = "LICENSE"}
+requires-python = ">=3.10"
+authors = [
+    {name = "ORSO contributors (see AUTHORS.rst)", email = "andrew.mccluskey@ess.eu"},
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering",
+    "Development Status :: 5 - Production/Stable",
+]
+dependencies = [
+    "numpy>=2.5.1",
+    "pyyaml>=6.0.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/reflectivity/orsopy"
+
+[build-system]
+requires = ["setuptools>=83.0.0"]
+build-backend = "setuptools.build_meta"
+
+
+[tool.setuptools.dynamic]
+version = {attr = "orsopy.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["orsopy*"]
+
+[tool.setuptools.package-data]
+"orsopy.slddb.element_table" = ["nabs_geant4_data/*.npz"]
+"orsopy.fileio" = ["schema/*.*"]
+"orsopy.fileio.tests" = ["*.ort"]

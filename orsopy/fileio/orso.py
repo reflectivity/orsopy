@@ -2,14 +2,25 @@
 Implementation of the top level class for the ORSO header.
 """
 
+import json
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
+from typing import BinaryIO, TextIO
 
 import numpy as np
 import yaml
 
-from .base import (JSON_MIMETYPE, Column, ErrorColumn, Header, OrsoDumper, _dict_diff, _nested_update,
-                   _possibly_open_file, _read_header_data)
+from .base import (
+    JSON_MIMETYPE,
+    Column,
+    ErrorColumn,
+    Header,
+    OrsoDumper,
+    _dict_diff,
+    _nested_update,
+    _possibly_open_file,
+    _read_header_data,
+)
 from .data_source import DataSource
 from .reduction import Reduction
 
@@ -37,8 +48,8 @@ class Orso(Header):
 
     data_source: DataSource
     reduction: Reduction
-    columns: List[Union[Column, ErrorColumn]]
-    data_set: Optional[Union[int, str]] = None
+    columns: list[Column | ErrorColumn]
+    data_set: int | str | None = None
 
     __repr__ = Header._staggered_repr
 
@@ -46,8 +57,8 @@ class Orso(Header):
         self,
         data_source: DataSource,
         reduction: Reduction,
-        columns: List[Union[Column, ErrorColumn]],
-        data_set: Optional[Union[int, str]] = None,
+        columns: list[Column | ErrorColumn],
+        data_set: int | str | None = None,
         **user_data,
     ):
         self.data_source = data_source
@@ -67,7 +78,7 @@ class Orso(Header):
 
         :return: Empty Orso class, within minimum required columns
         """
-        res = super(Orso, cls).empty()
+        res = super().empty()
         res.columns = [Column("Qz", "1/angstrom"), Column("R")]
         return res
 
@@ -238,6 +249,8 @@ def save_orso(
     with _possibly_open_file(fname, "w") as f:
         header = f"{ORSO_DESIGNATE}\n"
         if comment is not None:
+            if isinstance(comment, dict):
+                comment = json.dumps(comment)
             header += f"# {comment}\n"
 
         ds1 = datasets[0]
