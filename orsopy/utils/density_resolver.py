@@ -5,7 +5,7 @@ Specifies the abstract base class for resolving layer densities from formula str
 from abc import ABC, abstractmethod
 from typing import Union
 
-from .chemical_formula import Formula
+from slddb.chemical_formula import Formula
 
 
 class MaterialResolver(ABC):

@@ -2,8 +2,8 @@
 Implementation of DensityResolver using SLD DB queries.
 """
 
-from ..slddb import api
-from .chemical_formula import Formula
+from slddb import api
+from slddb.chemical_formula import Formula
 from .density_resolver import MaterialResolver
 
 
