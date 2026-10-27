@@ -2,6 +2,8 @@
 Implementation of the top level class for the ORSO header.
 """
 
+import re
+
 from dataclasses import dataclass
 from typing import BinaryIO, List, Optional, Sequence, TextIO, Union
 
@@ -154,7 +156,8 @@ class OrsoDataset:
     data: Union[np.ndarray, Sequence[np.ndarray], Sequence[Sequence]]
 
     def __post_init__(self):
-        if self.data.shape[1] != len(self.info.columns):
+        data = np.array(self.data)
+        if data.shape[1] != len(self.info.columns):
             raise ValueError("Data has to have the same number of columns as header")
 
     @classmethod
@@ -275,8 +278,8 @@ def _from_nexus_group(group):
     else:
         dct = dict()
         for name, value in group.items():
-            if value.attrs.get("NX_class", None) == "NXdata":
-                # remove NXdata folder, which exists only for NeXus plotting
+            if name.startswith("_"):
+                # ignore extra items added just for nexus
                 continue
             dct[name] = _get_nexus_item(value)
 
@@ -311,7 +314,27 @@ def _get_nexus_item(value):
             # it is a bytes object, should be string
             return v.decode()
         else:
-            return v
+            container = value.attrs.get("container", None)
+            if container is None:
+                return v
+            elif container == "list":
+                return v.tolist()
+            elif container == "tuple":
+                return tuple(v)
+            else:
+                raise ValueError(f"Unknown container type: {container}")
+
+
+def _load_nexus_dataset(group):
+    """
+    Load only ORSO info data from NeXus file, ignore any links.
+    """
+    data = np.array(_get_nexus_item(group["data"]), dtype=float).T
+    output = OrsoDataset(
+        info=_get_nexus_item(group["info"]),
+        data=data,
+    )
+    return output
 
 
 def load_nexus(fname: Union[str, BinaryIO]) -> List[OrsoDataset]:
@@ -320,11 +343,17 @@ def load_nexus(fname: Union[str, BinaryIO]) -> List[OrsoDataset]:
     f = h5py.File(fname, "r")
     # Use '/' because order is not tracked on the File object, but is on the '/' group!
     root = f["/"]
-    return [_from_nexus_group(g) for g in root.values() if g.attrs.get("ORSO_class", None) == "OrsoDataset"]
+    return [_load_nexus_dataset(g) for g in root.values() if g.attrs.get("ORSO_class", None) == "OrsoDataset"]
+
+
+def to_nx_name(string: str):
+    return re.sub(r"[^a-zA-Z0-9_]+", "", str(string).replace(" ", "_"))
 
 
 def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment: Optional[str] = None) -> BinaryIO:
     import h5py
+
+    from .nexus_mappings import NXMAPPINGS
 
     h5py.get_config().track_order = True
 
@@ -346,34 +375,32 @@ def save_nexus(datasets: List[OrsoDataset], fname: Union[str, BinaryIO], comment
 
         for dsi in datasets:
             info = dsi.info
-            entry = f.create_group(str(info.data_set))
+            entry = f.create_group("entry_" + to_nx_name(info.data_set))
             entry.attrs["ORSO_class"] = "OrsoDataset"
             entry.attrs["ORSO_VERSION"] = ORSO_VERSION
             entry.attrs["NX_class"] = "NXentry"
-            entry.attrs["default"] = "plottable_data"
+            entry.attrs["default"] = "data"
             info.to_nexus(root=entry, name="info")
+            entry["info"].attrs["NX_class"] = "NXcollection"
             data_group = entry.create_group("data")
             data_group.attrs["sequence"] = 1
-            plottable_data_group = entry.create_group("plottable_data", track_order=True)
-            plottable_data_group.attrs["NX_class"] = "NXdata"
-            plottable_data_group.attrs["sequence"] = 1
-            plottable_data_group.attrs["axes"] = [info.columns[0].name]
-            plottable_data_group.attrs["signal"] = info.columns[1].name
-            plottable_data_group.attrs[f"{info.columns[0].name}_indices"] = [0]
+            data_group.attrs["NX_class"] = "NXdata"
+            data_group.attrs["axes"] = [info.columns[0].name]
+            data_group.attrs["signal"] = info.columns[1].name
+            data_group.attrs[f"{info.columns[0].name}_indices"] = [0]
             for column_index, column in enumerate(info.columns):
                 # assume that dataset.data has dimension == ncolumns along first dimension
                 # (note that this is not how data would be loaded from e.g. load_orso, which is row-first)
-                col_data = data_group.create_dataset(column.name, data=dsi.data[:, column_index])
+                nexus_colname = to_nx_name(column.name)
+                col_data = data_group.create_dataset(nexus_colname, data=dsi.data[:, column_index])
                 col_data.attrs["sequence_index"] = column_index
                 col_data.attrs["target"] = col_data.name
                 physical_quantity = getattr(column, "physical_quantity", None)
                 if physical_quantity is not None:
                     col_data.attrs["physical_quantity"] = physical_quantity
-                if isinstance(column, ErrorColumn):
-                    nexus_colname = column.error_of + "_errors"
-                else:
-                    nexus_colname = column.name
-                    if column.unit is not None:
-                        col_data.attrs["units"] = column.unit
+                if not isinstance(column, ErrorColumn) and column.unit is not None:
+                    col_data.attrs["units"] = column.unit
 
-                plottable_data_group[nexus_colname] = col_data
+            entry.create_dataset("program_name", data="orsopy")
+            for m in NXMAPPINGS:
+                m(entry)
